@@ -160,7 +160,7 @@ INSERT INTO public.m_items (item_code, item_name, category_group, base_uom)
 VALUES ('ITM-TMP-001', 'Temporary Item', 'DRY_GOODS', 'kg');
 
 INSERT INTO public.m_reorder_rules (rule_id, store_id, warehouse_id, item_code, par_level, reorder_point, min_order_qty)
-VALUES ('rr-tmp-001', 'IND-DEL-99', 'WH-DEL99-DRY', 'ITM-TMP-001', 50, 10, 5);
+VALUES ('rr-tmp-001', 'IND-DEL-01', 'WH-DEL01-DRY', 'ITM-TMP-001', 50, 10, 5);
 
 INSERT INTO public.m_uom_conversions (conversion_id, item_code, base_uom, secondary_uom, conversion_factor)
 VALUES ('uom-tmp-001', 'ITM-TMP-001', 'kg', 'pcs', 2.0);
