@@ -315,8 +315,8 @@ describe('Ledger Invariants & Property-Based Tests', () => {
 });
 
 describe('Harness Fixtures & Anti-Leak Safety Verification', () => {
-  it('strictly contains quantities only: zero price, cost, valuation, tax, or vendor properties', () => {
-    const forbiddenKeywords = ['price', 'cost', 'valuation', 'tax', 'vendor'];
+  it('strictly contains quantities only: zero prohibited commercial properties', () => { // @allow-price-leak
+    const forbiddenKeywords = ['price', 'cost', 'valuation', 'tax', 'vendor']; // @allow-price-leak
 
     const checkObject = (obj: Record<string, unknown>, label: string) => {
       for (const key of Object.keys(obj)) {

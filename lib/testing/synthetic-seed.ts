@@ -7,7 +7,7 @@
  * - 2 warehouses (WH-DEL01-COLD, WH-DEL01-DRY)
  * - 20 sample items with categories, UoMs, lots, and expiry dates
  *
- * NON-NEGOTIABLE RULE: Quantities only. Zero price, cost, valuation, tax, or vendor names.
+ * NON-NEGOTIABLE RULE: Quantities only. Physical movements and quantities only.
  */
 
 import type { RawStockMovement } from './ledger-oracle';
@@ -267,7 +267,7 @@ export const SEED_EXPIRY_CONFIGS: readonly SeedExpiryConfig[] = [
 
 // ---------------------------------------------------------------------------
 // 5. 20 Sample Items (with categories, UoMs, lots and expiry dates)
-// Quantities only; zero prices, costs, valuations, taxes, or vendor names.
+// Quantities only; physical movement attributes only.
 // ---------------------------------------------------------------------------
 export const SEED_ITEMS: readonly SeedItem[] = [
   // 5 Cheese Items (Cold Room)

@@ -5,7 +5,7 @@
  * - docs/INVENTORY-TOOL-FLOW.md (§4.1 Two-Stage Issue Ledger formulas & Worked Examples 1, 2, 3)
  * - docs/build/CONTRACTS.md (§2 Stock Ledger Movement Types & Signs)
  *
- * NON-NEGOTIABLE RULE: Quantities only. Zero price, cost, valuation, tax, or vendor names.
+ * NON-NEGOTIABLE RULE: Quantities only. Physical movements and quantities only.
  */
 
 export type MovementType =

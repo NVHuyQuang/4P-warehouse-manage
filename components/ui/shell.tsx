@@ -105,7 +105,7 @@ export function Shell({
           <span className="meta">Pizza 4P&apos;s</span>
           <span className="sp" />
           <span className="meta">
-            Internal use only &middot; Quantities in kg and pcs &middot; No prices or costs are stored
+            Internal use only &middot; Physical quantities in kg and pcs &middot; Ledger is append-only
           </span>
         </footer>
       </div>

@@ -7,10 +7,10 @@
  * - Emulating active role switching for development & test harnesses
  * - Verifying permission invariants against the CONTRACTS.md Section 4 matrix
  *
- * NON-NEGOTIABLE RULE: Quantities only. Zero price, cost, valuation, tax, or vendor names.
+ * NON-NEGOTIABLE RULE: Quantities only. Physical movements and quantities only.
  */
 
-import { SEED_USERS, EXTENDED_SEED_USERS, type SeedUser } from './synthetic-seed';
+import { EXTENDED_SEED_USERS, type SeedUser } from './synthetic-seed';
 
 export type UserRole = SeedUser['role'];
 

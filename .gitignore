@@ -3,6 +3,7 @@ node_modules/
 dist/
 out/
 .worktrees/
+*.tsbuildinfo
 .env
 .env.local
 .env.development.local
