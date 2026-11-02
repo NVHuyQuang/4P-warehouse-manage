@@ -1,0 +1,24 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+
+  subgraph Admin["Admin / Warehouse Keeper"]
+    A21((Start)):::startNode --> A22[A22: Admin enters accepted lines into SAP GRPO today]:::actionNode
+    A22 --> A23[A23: Admin exports GRPO file from SAP and uploads to App]:::actionNode
+  end
+
+  subgraph System["Node Ingestion Server"]
+    A23 --> A24[A24: Server detects header row & maps columns to target schema]:::actionNode
+    A24 --> A25{A25: Is file upload free of duplicate file hash?}:::decisionNode
+    A25 -- "No" --> A26[A26: Reject duplicate upload; log error in upload history]:::actionNode
+    A25 -- "Yes" --> A27{A27: All data rows have valid item codes & quantities?}:::decisionNode
+    A27 -- "No" --> A28[A28: Quarantine bad lines in staging errors; alert Admin]:::actionNode
+    A27 -- "Yes" --> A29[A29: Ingest valid rows directly into database]:::actionNode
+    A28 --> A29
+    A29 --> A30[App: Append GRPO movements to ledger; derive book stock]:::recordNode
+    A26 --> A31((End)):::endNode
+    A30 --> A31
+  end

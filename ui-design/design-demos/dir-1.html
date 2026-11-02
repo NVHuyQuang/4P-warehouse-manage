@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Counter, inventory phone app</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --field:#E3E2DD; --panel:#ECEBE7; --raise:#F6F5F2; --board:#CFCEC8; --ink:#1A1A18; --ink2:#55544F; --line:#C2C1BA;
+  --sig:#F26A1B; --sig-ink:#B03C00;
+  --amber-bg:#F1DFA6; --amber-ink:#5F3F00; --red-bg:#F0CBC6; --red-ink:#8A1912;
+  --bezel:#262624;
+  --sans:'Hanken Grotesk','Helvetica Neue',Arial,sans-serif; --mono:'DM Mono','Consolas',monospace;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--board)}
+body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:500;letter-spacing:-.02em}
+
+/* ---------- board ---------- */
+.board{position:relative;width:2400px;height:2620px;margin:0 auto;background:var(--board);overflow:hidden;
+  background-image:repeating-linear-gradient(90deg,#9d9c95 0 2px,transparent 2px 20px),repeating-linear-gradient(90deg,#9d9c95 0 2px,transparent 2px 100px);
+  background-size:100% 14px,100% 28px;background-repeat:no-repeat}
+.board svg.lines{position:absolute;inset:0;width:2400px;height:2620px;z-index:0}
+.title{position:absolute;left:240px;top:70px;width:1920px;display:flex;justify-content:space-between;align-items:flex-end;z-index:1}
+.title h1{font-size:150px;line-height:.9;font-weight:700;letter-spacing:-.045em}
+.title h1 span{color:var(--sig-ink)}
+.title p{width:640px;font-size:26px;line-height:1.35;color:var(--ink2);padding-bottom:10px}
+.slot{position:absolute;z-index:1}
+.cap{margin-bottom:14px;font-size:24px;font-weight:700;letter-spacing:-.01em}
+.cap small{display:block;font-size:19px;font-weight:500;color:var(--ink2);margin-top:2px}
+.foot{position:absolute;left:240px;right:240px;bottom:34px;font-size:20px;color:var(--ink2);display:flex;justify-content:space-between;z-index:1}
+
+/* ---------- phone ---------- */
+.phone{width:410px;height:864px;padding:10px;background:var(--bezel);border-radius:52px;box-shadow:0 30px 60px -20px rgba(0,0,0,.45),0 2px 0 #4b4b48 inset}
+.phone.hub{zoom:1.25}
+.screen{position:relative;width:390px;height:844px;background:var(--field);border-radius:42px;overflow:hidden;display:flex;flex-direction:column;font-size:16px;line-height:1.3}
+.top{padding:14px 16px 10px;background:var(--field);border-bottom:1px solid var(--line)}
+.top .r1{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.brand{font-weight:700;font-size:17px;letter-spacing:-.01em}
+.role{font-size:14px;color:var(--ink2);font-weight:500}
+.top .r2{display:flex;gap:8px}
+.body{flex:1;overflow-y:auto;padding:14px 16px 18px;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+.bar{padding:10px 16px 12px;background:var(--field);border-top:1px solid var(--line)}
+.nav{display:flex;background:var(--panel);border-top:1px solid var(--line);padding:6px 6px 14px;gap:6px}
+.nav button{flex:1;min-height:52px;border:0;border-radius:10px;background:transparent;font:600 13px var(--sans);color:var(--ink2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+.nav button .num{font-size:15px;color:inherit}
+.nav button[aria-selected=true]{background:var(--raise);color:var(--ink);box-shadow:inset 0 2px 3px rgba(0,0,0,.2),0 1px 0 #fff}
+.nav button .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--sig);margin-left:4px}
+
+/* physical keys */
+.key{min-height:48px;padding:0 16px;border:0;border-radius:10px;background:linear-gradient(#F8F7F4,#E0DFD9);box-shadow:0 1px 0 #fff inset,0 2px 0 #A9A8A0,0 4px 5px rgba(0,0,0,.14);font:600 16px var(--sans);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center;line-height:1.15}
+.key:active,.key[aria-pressed=true]{transform:translateY(2px);box-shadow:inset 0 2px 4px rgba(0,0,0,.28);background:#D6D5CF}
+.key.sig{background:linear-gradient(#FF8040,#EE5E14);box-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 2px 0 #A8420A,0 4px 5px rgba(0,0,0,.18)}
+.key.sig:active{box-shadow:inset 0 2px 4px rgba(0,0,0,.3)}
+.key.wide{width:100%;min-height:52px}
+.key:disabled{background:#DAD9D3;box-shadow:inset 0 1px 2px rgba(0,0,0,.12);color:#6B6A65;cursor:not-allowed;transform:none}
+.key.sm{min-height:48px;padding:0 12px;font-size:15px}
+.chev{width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px)}
+.seg{display:flex;background:#D3D2CB;border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;min-height:48px;border:0;border-radius:9px;background:transparent;font:600 15px var(--sans);color:var(--ink2);cursor:pointer;line-height:1.15;padding:4px}
+.seg button small{display:block;font:400 12px var(--mono);margin-top:1px}
+.seg button[aria-pressed=true]{background:var(--raise);color:var(--ink);box-shadow:0 1px 0 #fff inset,0 1px 3px rgba(0,0,0,.25)}
+
+/* rows and type */
+.h{font-size:13px;font-weight:600;color:var(--ink2);margin:18px 0 6px}
+.h:first-child{margin-top:2px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);min-height:64px}
+.row:last-child{border-bottom:0}
+.row .nm{font-size:18px;font-weight:600}
+.row .sub{font-size:14px;color:var(--ink2);margin-top:2px}
+.qty{font-size:34px;line-height:1;text-align:right;white-space:nowrap}
+.qty small{font:500 15px var(--sans);color:var(--ink2);margin-left:3px;letter-spacing:0}
+.tag{display:inline-block;font-size:13px;font-weight:700;padding:3px 8px;border-radius:5px;background:#D3D2CB;color:var(--ink);margin-right:4px;line-height:1.2}
+.tag.amber{background:var(--amber-bg);color:var(--amber-ink)}
+.tag.red{background:var(--red-bg);color:var(--red-ink)}
+.tag.urgent{background:var(--sig);color:var(--ink)}
+.tag.dark{background:var(--ink);color:#fff}
+.panel{background:var(--panel);border-radius:12px;padding:12px 14px;margin:10px 0;box-shadow:0 1px 0 #fff inset}
+.strip{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--panel);border-radius:12px;font-size:16px;font-weight:500}
+.strip b{font-family:var(--mono);font-weight:500}
+.strip small{font-size:12px;color:var(--ink2);margin-left:6px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px}
+.tile{min-height:104px;text-align:left;padding:12px 14px;border:0;border-radius:12px;background:var(--panel);box-shadow:0 1px 0 #fff inset,0 2px 0 #B3B2AB;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;justify-content:space-between}
+.tile:active{transform:translateY(2px);box-shadow:inset 0 2px 4px rgba(0,0,0,.25)}
+.tile .num{font-size:48px;line-height:1}
+.tile span.l{font-size:15px;font-weight:600}
+.tile.hot{background:var(--sig)}
+.tile.hot span.l{color:var(--ink)}
+.banner{margin:0 0 12px;padding:12px 14px;border-radius:12px;background:var(--ink);color:#fff;font-size:15px;line-height:1.35}
+.banner b{color:#FFB98F}
+.banner .key{margin-top:10px;width:100%}
+.banner .msg{display:block;margin-top:8px;font-size:14px;color:#D8D7D1}
+.chip{min-height:48px;padding:0 12px;border:0;border-radius:10px;background:var(--panel);font:600 14px var(--sans);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 1px 0 #fff inset,0 2px 0 #B3B2AB}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--ink)}
+.chip.off i{background:var(--sig)}
+.chip.off{color:var(--sig-ink)}
+.grow{flex:1}
+
+/* stepper */
+.step{display:inline-flex;align-items:center;gap:4px;background:#D3D2CB;border-radius:12px;padding:3px}
+.step button{width:48px;height:48px;border:0;border-radius:9px;background:linear-gradient(#F8F7F4,#E0DFD9);box-shadow:0 1px 0 #fff inset,0 2px 0 #A9A8A0;font:500 26px var(--mono);cursor:pointer;color:var(--ink)}
+.step button:active{transform:translateY(2px);box-shadow:inset 0 2px 4px rgba(0,0,0,.28)}
+.step button:disabled{opacity:.4;cursor:not-allowed}
+.step .v{min-width:64px;text-align:center;font-size:24px}
+.step .v small{font:500 14px var(--sans);color:var(--ink2);margin-left:2px}
+
+input.f,textarea.f,select.f{width:100%;min-height:48px;border:0;border-radius:10px;padding:10px 12px;font:500 16px var(--sans);background:var(--raise);color:var(--ink);box-shadow:inset 0 2px 3px rgba(0,0,0,.2)}
+textarea.f{min-height:76px;resize:none;line-height:1.35}
+label.lb{display:block;font-size:13px;font-weight:600;color:var(--ink2);margin:14px 0 6px}
+.sug{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.led{font-family:var(--mono);font-size:14px;line-height:1.5;background:var(--ink);color:#F2F1EC;border-radius:10px;padding:10px 12px}
+.led div{display:flex;justify-content:space-between;gap:8px}
+.led .p{color:#FFB98F}
+.led .m{color:#BDBCB5;font-size:12px}
+.lot{display:flex;width:100%;min-height:56px;align-items:center;gap:10px;text-align:left;padding:8px 10px;margin-bottom:6px;border:0;border-radius:10px;background:var(--raise);font:inherit;color:var(--ink);cursor:pointer;box-shadow:0 1px 0 #fff inset,0 2px 0 #B3B2AB}
+.lot[aria-checked=true]{background:#D6D5CF;box-shadow:inset 0 2px 4px rgba(0,0,0,.28);outline:2px solid var(--ink)}
+.lot .rb{width:20px;height:20px;border-radius:50%;border:2px solid var(--ink);flex:none;position:relative}
+.lot[aria-checked=true] .rb::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--ink)}
+.lot .t{flex:1;font-size:14px;color:var(--ink2);line-height:1.35}
+.lot .t b{font:500 16px var(--mono);color:var(--ink)}
+.lot .q{font-size:18px}
+.lot.lock{background:repeating-linear-gradient(135deg,#E0C3BF 0 8px,#EBD5D2 8px 16px);cursor:not-allowed;box-shadow:none}
+.lot.lock .rb{border-color:var(--red-ink);background:var(--red-ink)}
+.lot.lock .rb::after{content:"";position:absolute;left:3px;right:3px;top:7px;height:2px;background:#fff}
+.lot.lock .t,.lot.lock .q{color:var(--red-ink)}
+.lot.lock .t b{color:var(--red-ink)}
+.lineh{display:flex;justify-content:space-between;align-items:flex-end;margin:16px 0 8px}
+.lineh .nm{font-size:20px;font-weight:700}
+.lineh .rq{font-size:14px;color:var(--ink2)}
+.empty{padding:36px 8px;text-align:center;color:var(--ink2);font-size:16px;line-height:1.4}
+.empty b{display:block;color:var(--ink);font-size:18px;margin-bottom:4px}
+.fig{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:8px 0}
+.fig div{font-size:12px;color:var(--ink2);font-weight:600}
+.fig .num{display:block;font-size:18px;color:var(--ink);margin-top:2px}
+.fig .ex .num{font-weight:500;border-bottom:2px solid var(--ink);display:inline-block}
+.diff{font-size:44px;line-height:1}
+.diff.bad{color:var(--sig-ink)}
+.steps .s{display:flex;gap:10px;align-items:center;padding:8px 0}
+.steps .n{width:28px;height:28px;border-radius:50%;background:#D3D2CB;font:500 14px var(--mono);display:flex;align-items:center;justify-content:center;flex:none}
+.steps .s.done .n{background:var(--ink);color:#fff}
+.sheetbg{position:absolute;inset:0;background:rgba(26,26,24,.45);display:flex;align-items:flex-end;z-index:5}
+.sheet{width:100%;background:var(--field);border-radius:22px 22px 0 0;padding:18px 16px 24px}
+.sheet h3{font-size:20px;margin-bottom:10px}
+.note{font-size:14px;color:var(--ink2);margin-top:6px;line-height:1.4}
+.who{font-size:13px;color:var(--ink2);line-height:1.4}
+.btnrow{display:flex;gap:8px}
+.btnrow .key{flex:1}
+@media (prefers-reduced-motion:no-preference){.key,.tile,.step button{transition:transform .06s}}
+</style>
+</head>
+<body>
+<div class="board" id="board">
+  <svg class="lines" viewBox="0 0 2400 2620" aria-hidden="true">
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#1A1A18" stroke-width="1.6"/></marker></defs>
+    <g stroke="#A5A49C" stroke-width="1.5" stroke-dasharray="3 7" fill="none">
+      <line x1="1200" y1="1372" x2="445" y2="832"/><line x1="1200" y1="1372" x2="1955" y2="832"/>
+      <line x1="1200" y1="1372" x2="445" y2="1912"/><line x1="1200" y1="1372" x2="1955" y2="1912"/>
+    </g>
+    <g stroke="#1A1A18" stroke-width="2" fill="none" marker-end="url(#ah)">
+      <path d="M445 322 V282 H1955 V322"/>
+      <path d="M1955 1340 V1462"/>
+      <path d="M1955 2412 V2462 H445 V2412"/>
+    </g>
+    <g font-family="Hanken Grotesk,Arial,sans-serif" font-size="24" font-weight="600" fill="#1A1A18" text-anchor="middle">
+      <text x="1200" y="268">Requester sends, Keeper picks</text>
+      <text x="1935" y="1410" text-anchor="end" font-size="22">Keeper hands to Runner</text>
+      <text x="1200" y="2500">Runner signs at the door, Custodian balances the day</text>
+    </g>
+  </svg>
+
+  <div class="title">
+    <h1>Count<span>er</span></h1>
+    <p>A storekeeper's scale for the ledger. The quantity is the biggest thing on every screen, the chrome steps back, and the one orange is kept for what needs a person now.</p>
+  </div>
+
+  <div class="slot" style="left:240px;top:400px"><div class="cap">New request<small>Kitchen Requester</small></div><div class="phone" id="p2"><div class="screen"></div></div></div>
+  <div class="slot" style="left:1750px;top:400px"><div class="cap">Pick queue<small>Warehouse Keeper</small></div><div class="phone" id="p3"><div class="screen"></div></div></div>
+  <div class="slot" style="left:944px;top:832px"><div class="cap" style="zoom:1.25">Home and stock<small>Warehouse Keeper, hub of every hand-off</small></div><div class="phone hub" id="p1"><div class="screen"></div></div></div>
+  <div class="slot" style="left:240px;top:1480px"><div class="cap">Daily balance<small>Custodian</small></div><div class="phone" id="p5"><div class="screen"></div></div></div>
+  <div class="slot" style="left:1750px;top:1480px"><div class="cap">Door confirm<small>Kitchen Runner</small></div><div class="phone" id="p4"><div class="screen"></div></div></div>
+
+  <div class="foot"><span>Pizza 4P's wordmark is a text placeholder. Store, lot ids, window times and dates are sample values; owner sets the real ones.</span><span>Stock is never edited: every action appends a ledger row.</span></div>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const UN={kg:{step:5,f:v=>(v/10).toFixed(1)},pcs:{step:1,f:v=>String(v)}};
+const fq=(v,u)=>UN[u].f(v);
+const sg=(v,u)=>(v>0?'+':v<0?'−':'')+UN[u].f(Math.abs(v));
+const un=u=>`<small>${u}</small>`;
+const ITEMS=[
+ {n:'Mozzarella block',u:'kg',q:425,st:''},
+ {n:'Fresh basil',u:'kg',q:32,st:'reorder'},
+ {n:'Burrata',u:'pcs',q:18,st:'amber'},
+ {n:'Chicken breast',u:'kg',q:260,st:''},
+ {n:'Pizza dough ball',u:'pcs',q:140,st:''},
+ {n:'Salmon fillet',u:'kg',q:94,st:'red'}];
+const tagOf=s=>s==='reorder'?'<span class="tag">Below reorder point</span>':s==='amber'?'<span class="tag amber">Expiry soon</span>':s==='red'?'<span class="tag red">Expired lot, locked</span>':'<span class="tag">In stock</span>';
+
+/* ---------- engine ---------- */
+function Phone(id,init,view,H){
+  const root=$('#'+id),scr=$('.screen',root),P={s:init};
+  P.render=()=>{
+    const ae=document.activeElement,key=ae&&scr.contains(ae)&&ae.dataset.i,pos=key&&ae.selectionStart;
+    const b=$('.body',scr),top=b?b.scrollTop:0;
+    scr.innerHTML=view(P.s);
+    const nb=$('.body',scr); if(nb) nb.scrollTop=top;
+    if(key){const el=$(`[data-i="${key}"]`,scr); if(el){el.focus(); try{el.setSelectionRange(pos,pos)}catch(_){}}}
+  };
+  scr.addEventListener('click',e=>{
+    if(e.target.classList.contains('sheetbg')){P.s.sheet=0;P.render();return}
+    const b=e.target.closest('[data-a]'); if(!b||b.disabled) return;
+    const a=b.dataset.a,fn=BASE[a]||H[a]; if(fn){fn(P.s,b.dataset);P.render()}
+  });
+  scr.addEventListener('input',e=>{const k=e.target.dataset.i; if(k){H.input(P.s,k,e.target.value);P.render()}});
+  P.render(); return P;
+}
+const BASE={
+  tab:(s,d)=>{s.tab=d.v},
+  sheet:(s,d)=>{s.sheet=d.v==='1'},
+  sig:s=>{s.off=!s.off;s.msg=''},
+  retry:s=>{ if(s.off){s.msg='Still no signal. Nothing was sent.'} else {s.q=0;s.msg=''} }
+};
+function enq(s){ if(s.off||s.q>0) s.q++; }
+function shell(s,o){
+  const chip=`<button class="chip ${s.off?'off':''}" data-a="sig" aria-label="Demo: toggle signal"><i></i>${s.off?'No signal':'Online'}</button>`;
+  let ban='';
+  if(s.off) ban=`<div class="banner"><b>No signal.</b> ${s.q} action${s.q===1?'':'s'} waiting on this phone. Nothing sends by itself.<button class="key wide" data-a="retry">Retry</button>${s.msg?`<span class="msg">${s.msg}</span>`:''}</div>`;
+  else if(s.q>0) ban=`<div class="banner"><b>Signal is back.</b> ${s.q} action${s.q===1?'':'s'} still waiting. Send when you are ready.<button class="key wide" data-a="retry">Retry</button></div>`;
+  const tabs=o.tabs.map(t=>`<button role="tab" aria-selected="${s.tab===t.id}" data-a="tab" data-v="${t.id}"><span>${t.l}</span>${t.c!=null?`<span class="num">${t.c}${t.hot?'<span class="dot"></span>':''}</span>`:''}</button>`).join('');
+  const sheet=s.sheet?`<div class="sheetbg"><div class="sheet"><h3>Your stores</h3><button class="key wide" style="justify-content:space-between" aria-pressed="true"><span>Delhi store</span><span class="num">IND-DEL-01</span></button><p class="note">Only stores granted to your role appear here. This sample role has one.</p><button class="key wide" style="margin-top:12px" data-a="sheet" data-v="0">Close</button></div></div>`:'';
+  return `<div class="top"><div class="r1"><span class="brand">Pizza 4P's</span><span class="role">${o.role}</span></div>
+  <div class="r2"><button class="key sm grow" data-a="sheet" data-v="1" style="justify-content:space-between"><span class="num">IND-DEL-01</span><span class="chev"></span></button>${chip}</div></div>
+  <div class="body">${ban}${o.body}</div>${o.bar?`<div class="bar">${o.bar}</div>`:''}<nav class="nav" role="tablist">${tabs}</nav>${sheet}`;
+}
+const stepper=(a,id,v,u,min=0,max=9999)=>`<span class="step"><button data-a="${a}" data-id="${id}" data-d="-1" aria-label="Less" ${v<=min?'disabled':''}>−</button><span class="v num">${fq(v,u)}${un(u)}</span><button data-a="${a}" data-id="${id}" data-d="1" aria-label="More" ${v>=max?'disabled':''}>+</button></span>`;
+
+/* ---------- 1 Home / Stock (Keeper) ---------- */
+const p1=Phone('p1',{tab:'stock',wh:'cold',off:false,q:0,msg:'',par:100},s=>{
+  const tabs=[{id:'stock',l:'Stock'},{id:'pick',l:'Pick',c:4,hot:1},{id:'run',l:'Runner',c:1},{id:'exp',l:'Expiry',c:2},{id:'re',l:'Reorder',c:3}];
+  let body='';
+  const wh=`<div class="seg" role="group" aria-label="Warehouse"><button data-a="wh" data-v="cold" aria-pressed="${s.wh==='cold'}">Cold Room<small>WH-DEL01-COLD</small></button><button data-a="wh" data-v="dry" aria-pressed="${s.wh==='dry'}">Dry Store<small>WH-DEL01-DRY</small></button></div>`;
+  const dry=`<div class="empty"><b>No Dry Store lines in this sample</b>Switch back to Cold Room to see the book stock.</div>`;
+  if(s.tab==='stock'){
+    body=`${wh}<div class="strip" style="margin-top:10px"><span>Issue window open, closes <b>11:30</b><small>sample</small></span></div>`;
+    if(s.wh==='cold'){
+      body+=`<div class="tiles">
+      <button class="tile hot" data-a="tab" data-v="pick"><span class="num">4</span><span class="l">Pick queue, 1 urgent</span></button>
+      <button class="tile" data-a="tab" data-v="run"><span class="num">1</span><span class="l">Awaiting runner</span></button>
+      <button class="tile" data-a="tab" data-v="exp"><span class="num">2</span><span class="l">Expiry watch</span></button>
+      <button class="tile" data-a="tab" data-v="re"><span class="num">3</span><span class="l">Reorder</span></button></div>
+      <div class="h">Book stock, Cold Room</div>`+ITEMS.map(i=>`<div class="row"><div><div class="nm">${i.n}</div><div class="sub">${tagOf(i.st)}</div></div><div class="qty num">${fq(i.q,i.u)}${un(i.u)}</div></div>`).join('');
+    } else body+=dry;
+  } else if(s.tab==='pick'){
+    body=`<div class="h">Requests to pick</div>`+[['Kitchen','3 lines, needed by 11:00',1],['Bar','2 lines, needed by 12:00',0],['Cheese','1 line, needed by 12:30',0],['Kitchen','2 lines, needed by 13:00',0]].map(r=>`<div class="row"><div><div class="nm">${r[0]}</div><div class="sub">${r[1]}</div></div>${r[2]?'<span class="tag urgent">URGENT</span>':'<span class="tag">Standard</span>'}</div>`).join('')+`<p class="note">Open a request on the Pick queue screen to stage it.</p>`;
+  } else if(s.tab==='run'){
+    body=`<div class="h">Awaiting runner</div><div class="row"><div><div class="nm">Kitchen, 3 lines</div><div class="sub">Staged, book stock already down</div></div><span class="tag dark">ISSUE_PENDING</span></div><p class="note">The Runner confirms or declines at the door. You cannot confirm your own staging.</p>`;
+  } else if(s.tab==='exp'){
+    body=`<div class="h">Expiry watch, flagged categories</div>`+ITEMS.filter(i=>i.st==='amber'||i.st==='red').map(i=>`<div class="row"><div><div class="nm">${i.n}</div><div class="sub">${i.st==='amber'?'<span class="tag amber">Amber, inside warning days</span>':'<span class="tag red">EXPIRED LOCK</span>'}</div></div><div class="qty num">${fq(i.q,i.u)}${un(i.u)}</div></div>`).join('')+`<p class="note">Expired lots cannot be picked. They stay in the book until a ledger row removes them.</p>`;
+  } else {
+    const sug=Math.max(0,s.par-32-0);
+    body=`<div class="h">Fresh basil, at or below reorder point</div><div class="row"><div><div class="nm">Book stock</div></div><div class="qty num">3.2${un('kg')}</div></div>
+    <label class="lb">Par level, you set it</label><div>${stepper('par','par',s.par,'kg',0,9999)}</div>
+    <div class="row" style="margin-top:8px"><div><div class="nm">Open PO</div></div><div class="qty num">0.0${un('kg')}</div></div>
+    <div class="panel"><div class="who">Suggested = max(0, par − stock − open PO)</div><div class="qty num" style="text-align:left;font-size:44px;margin-top:6px">${fq(Math.max(0,s.par-32),'kg')}${un('kg')}</div></div>
+    <p class="note">2 more lines sit at or below their reorder point in Dry Store.</p>`;
+  }
+  return shell(s,{role:'Warehouse Keeper, Cold Room',tabs,body});
+},{
+  wh:(s,d)=>{s.wh=d.v},
+  par:(s,d)=>{s.par=Math.max(0,s.par+(+d.d)*50)},
+  input(){}
+});
+
+/* ---------- 2 New request (Requester) ---------- */
+const NEED=['10:30','11:00','12:00','14:00'];
+const p2=Phone('p2',{tab:'new',off:false,q:0,msg:'',win:'in',q1:'',lines:[{n:'Mozzarella block',u:'kg',v:50},{n:'Burrata',u:'pcs',v:6},{n:'Salmon fillet',u:'kg',v:20}],need:'11:00',reason:'',flash:'',edit:null,
+  reqs:[{id:'a',st:'Queued',need:'12:00',lines:[{n:'Fresh basil',u:'kg',v:10}]},{id:'b',st:'Locked',need:'11:00',lines:[{n:'Chicken breast',u:'kg',v:60}]},{id:'c',st:'Cancelled',need:'10:30',lines:[{n:'Pizza dough ball',u:'pcs',v:40}]}],seq:0},s=>{
+  const tabs=[{id:'new',l:'New request'},{id:'my',l:'My requests',c:s.reqs.length}];
+  const out=s.win==='out';
+  let body='';
+  if(s.tab==='new'){
+    const hit=ITEMS.filter(i=>!s.lines.some(l=>l.n===i.n)&&(!s.q1||i.n.toLowerCase().includes(s.q1.toLowerCase()))).slice(0,3);
+    body=`<div class="seg" role="group" aria-label="Demo time of day"><button data-a="win" data-v="in" aria-pressed="${!out}">Inside window<small>10:40</small></button><button data-a="win" data-v="out" aria-pressed="${out}">Outside window<small>12:15</small></button></div>
+    ${out?`<div class="panel" style="background:var(--sig)"><span class="tag dark">URGENT</span> <b>Window closed at 11:30.</b> Your request still goes through. Say why.</div>`:`<div class="who" style="margin-top:8px">Window open until 11:30. This is a standard request.</div>`}
+    <label class="lb" for="srch">Add an item</label><input class="f" id="srch" data-i="q1" value="${s.q1}" placeholder="Search items" autocomplete="off">
+    <div class="sug">${hit.map(i=>`<button class="key sm" data-a="add" data-n="${i.n}">+ ${i.n}</button>`).join('')||'<span class="note">No more matches.</span>'}</div>
+    <div class="h" style="margin-top:20px">Lines</div>`+
+    (s.lines.length?s.lines.map(l=>`<div class="row" style="flex-wrap:nowrap;padding:8px 0;min-height:0"><div class="nm" style="font-size:16px;flex:1;min-width:0">${l.n}</div>${stepper('ln',l.n,l.v,l.u,UN[l.u].step)}<button class="key sm" data-a="rm" data-n="${l.n}" style="width:48px;padding:0" aria-label="Remove ${l.n}">✕</button></div>`).join(''):`<div class="empty"><b>No lines yet</b>Search above and add at least one item.</div>`)+
+    `<label class="lb" for="need">Needed by</label><select class="f" id="need" data-i="need">${NEED.map(t=>`<option ${t===s.need?'selected':''}>${t}</option>`).join('')}</select>`+
+    (out?`<label class="lb" for="why">Reason for the late request, required</label><textarea class="f" id="why" data-i="reason" placeholder="What happened?">${s.reason}</textarea>`:'')+(s.flash?`<p class="note" style="color:var(--ink)"><b>${s.flash}</b></p>`:'');
+  } else {
+    body=`<div class="h">My requests</div>`+(s.reqs.length?s.reqs.map(r=>{
+      const can=r.st==='Queued';
+      const chip=r.st==='Queued'?'<span class="tag dark">Queued</span>':r.st==='Locked'?'<span class="tag amber">Picking, locked</span>':'<span class="tag">Cancelled</span>';
+      const ed=s.edit===r.id;
+      return `<div class="panel" style="margin:0 0 10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">${chip}${r.urgent?'<span class="tag urgent">URGENT</span>':''}<span class="who">needed by <span class="num">${r.need}</span></span></div>
+      ${r.lines.map(l=>ed?`<div class="row" style="padding:6px 0;min-height:0;flex-wrap:wrap"><span class="nm" style="font-size:17px">${l.n}</span>${stepper('rq',r.id+'|'+l.n,l.v,l.u,UN[l.u].step)}</div>`:`<div class="row" style="padding:6px 0;min-height:0"><span class="nm" style="font-size:17px">${l.n}</span><span class="qty num" style="font-size:26px">${fq(l.v,l.u)}${un(l.u)}</span></div>`).join('')}
+      ${can?`<div class="btnrow" style="margin-top:8px"><button class="key sm" data-a="edit" data-id="${r.id}">${ed?'Done editing':'Edit quantity'}</button><button class="key sm" data-a="cancel" data-id="${r.id}">Cancel request</button></div>`:r.st==='Locked'?'<div class="who">The Keeper started picking. Quantity is locked.</div>':'<div class="who">Cancelled. The record stays.</div>'}</div>`}).join(''):'<div class="empty"><b>Nothing here</b></div>');
+  }
+  const ready=s.lines.length&&(!out||s.reason.trim().length>=3);
+  const bar=s.tab==='new'?`<button class="key wide ${out?'sig':''}" data-a="submit" ${ready?'':'disabled'}>${out?'Submit as URGENT':'Submit request'}</button>`:'';
+  return shell(s,{role:'Section Requester, Kitchen',tabs,body,bar});
+},{
+  win:(s,d)=>{s.win=d.v;s.flash=''},
+  add:(s,d)=>{const i=ITEMS.find(x=>x.n===d.n);s.lines.push({n:i.n,u:i.u,v:UN[i.u].step*(i.u==='kg'?2:2)});s.q1=''},
+  rm:(s,d)=>{s.lines=s.lines.filter(l=>l.n!==d.n)},
+  ln:(s,d)=>{const l=s.lines.find(x=>x.n===d.id);l.v=Math.max(UN[l.u].step,l.v+d.d*UN[l.u].step)},
+  rq:(s,d)=>{const [id,n]=d.id.split('|');const l=s.reqs.find(r=>r.id===id).lines.find(x=>x.n===n);l.v=Math.max(UN[l.u].step,l.v+d.d*UN[l.u].step)},
+  edit:(s,d)=>{s.edit=s.edit===d.id?null:d.id},
+  cancel:(s,d)=>{const r=s.reqs.find(x=>x.id===d.id);r.st='Cancelled';s.edit=null;enq(s)},
+  submit:(s)=>{s.reqs.unshift({id:'n'+(++s.seq),st:'Queued',need:s.need,urgent:s.win==='out',lines:s.lines.map(l=>({...l}))});enq(s);s.lines=[];s.reason='';s.tab='my'},
+  input:(s,k,v)=>{s[k]=v}
+});
+
+/* ---------- 3 Pick queue (Keeper) ---------- */
+const LOTS={
+ 'Mozzarella block':{u:'kg',req:50,lots:[{id:'M-0412',rc:'24 Oct',ex:'14 Nov',q:200},{id:'M-0419',rc:'29 Oct',ex:'19 Nov',q:225}]},
+ 'Burrata':{u:'pcs',req:6,lots:[{id:'B-0231',rc:'30 Oct',ex:'04 Nov',q:8,amber:1},{id:'B-0236',rc:'01 Nov',ex:'08 Nov',q:10}]},
+ 'Salmon fillet':{u:'kg',req:20,lots:[{id:'S-0177',rc:'28 Oct',ex:'31 Oct',q:34,lock:1},{id:'S-0181',rc:'31 Oct',ex:'06 Nov',q:60}]}};
+const p3init=()=>({tab:'pick',off:false,q:0,msg:'',staged:false,sel:{'Mozzarella block':'M-0412','Burrata':'B-0231','Salmon fillet':'S-0181'},qty:{'Mozzarella block':50,'Burrata':6,'Salmon fillet':20}});
+const p3=Phone('p3',p3init(),s=>{
+  const tabs=[{id:'pick',l:'Pick'},{id:'st',l:'Staged',c:s.staged?2:1}];
+  let body='',bar='';
+  if(s.tab==='pick'){
+    body=`<div style="display:flex;justify-content:space-between;align-items:center"><div><div class="nm" style="font-size:24px;font-weight:700">Kitchen</div><div class="who">3 lines, needed by 11:00, standard</div></div><span class="tag">${s.staged?'Staged':'Picking'}</span></div>`;
+    for(const n in LOTS){
+      const L=LOTS[n],u=L.u,sel=L.lots.find(l=>l.id===s.sel[n]),cap=Math.min(L.req,sel.q),v=s.qty[n];
+      const fifo=L.lots.find(l=>!l.lock).id;
+      body+=`<div class="lineh"><div class="nm">${n}</div><div class="rq">Requested <span class="num">${fq(L.req,u)}</span> ${u}</div></div>`+
+      L.lots.map(l=>`<button class="lot ${l.lock?'lock':''}" role="radio" aria-checked="${s.sel[n]===l.id}" ${l.lock||s.staged?'disabled':''} data-a="lot" data-n="${n}" data-id="${l.id}"><span class="rb"></span><span class="t"><b>${l.id}</b> ${l.lock?'<span class="tag red">EXPIRED LOCK</span>':l.amber?'<span class="tag amber">Amber, 2 days left</span>':l.id===fifo?'<span class="tag dark">FIFO first</span>':''}<br>recv ${l.rc}, exp ${l.ex}</span><span class="q num">${fq(l.q,u)}</span></button>`).join('')+
+      `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><span class="who">${v===L.req?'Full':'Partial, '+fq(v,u)+' of '+fq(L.req,u)}<br>from ${sel.id}</span>${s.staged?`<span class="qty num">${fq(v,u)}${un(u)}</span>`:stepper('sq',n,v,u,UN[u].step,cap)}</div>`;
+    }
+    const rows=Object.keys(LOTS).map(n=>`<div><span>ISSUE_PENDING −${fq(s.qty[n],LOTS[n].u)} ${LOTS[n].u}</span><span class="m">${s.sel[n]}</span></div>`).join('');
+    body+=`<div class="h" style="margin-top:20px">${s.staged?'Appended to ledger':'This will append'}</div><div class="led">${rows}</div><p class="note">${s.staged?'Book stock dropped at once. The Runner confirms or declines at the door.':'Book stock drops the moment you stage. Staged lines wait for the Runner.'}</p>`;
+    bar=s.staged?`<button class="key wide" disabled>Staged, waiting for Runner</button>`:`<button class="key wide sig" data-a="stage">Stage and hand to runner</button>`;
+  } else {
+    body=`<div class="h">Awaiting runner</div><div class="row"><div><div class="nm">Kitchen, earlier request</div><div class="sub">Staged, 3 lines</div></div><span class="tag dark">ISSUE_PENDING</span></div>`+(s.staged?`<div class="row"><div><div class="nm">Kitchen, this request</div><div class="sub">Staged just now, 3 lines</div></div><span class="tag dark">ISSUE_PENDING</span></div><button class="key wide" data-a="reset" style="margin-top:12px">Reset sample</button>`:'');
+  }
+  return shell(s,{role:'Warehouse Keeper, Cold Room',tabs,body,bar});
+},{
+  lot:(s,d)=>{s.sel[d.n]=d.id;const L=LOTS[d.n],sel=L.lots.find(l=>l.id===d.id);s.qty[d.n]=Math.min(s.qty[d.n],sel.q,L.req)},
+  sq:(s,d)=>{const L=LOTS[d.id],sel=L.lots.find(l=>l.id===s.sel[d.id]);s.qty[d.id]=Math.min(Math.min(L.req,sel.q),Math.max(UN[L.u].step,s.qty[d.id]+d.d*UN[L.u].step))},
+  stage:s=>{s.staged=true;enq(s)},
+  reset:s=>Object.assign(s,p3init()),
+  input(){}
+});
+
+/* ---------- 4 Door confirm (Runner) ---------- */
+const D4=[{n:'Mozzarella block',u:'kg',i:50},{n:'Burrata',u:'pcs',i:6},{n:'Salmon fillet',u:'kg',i:20}];
+const p4init=()=>({tab:'door',off:true,q:2,msg:'',done:false,rec:{'Mozzarella block':30,'Burrata':6,'Salmon fillet':20}});
+const p4=Phone('p4',p4init(),s=>{
+  const tabs=[{id:'door',l:'Door',c:s.done?0:1},{id:'rc',l:'Receipts',c:s.done?1:0}];
+  let body='',bar='';
+  if(s.tab==='door'&&!s.done){
+    body=`<div style="display:flex;justify-content:space-between;align-items:center"><div><div class="nm" style="font-size:24px;font-weight:700">Kitchen</div><div class="who">Issued by the Keeper, ISSUE_PENDING</div></div></div>
+    <div class="btnrow" style="margin-top:12px"><button class="key" data-a="all">Accept all</button><button class="key" data-a="none">Decline all</button></div>`+
+    D4.map(l=>{const r=s.rec[l.n],back=l.i-r;return `<div class="lineh"><div class="nm">${l.n}</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:8px">
+      <div><div class="who">Issued</div><div class="qty num" style="text-align:left;font-size:44px">${fq(l.i,l.u)}${un(l.u)}</div></div>
+      <div style="text-align:right"><div class="who">Received</div>${stepper('rcv',l.n,r,l.u,0,l.i)}</div></div>
+    <div class="who" style="margin-top:6px">${r===l.i?'Full, nothing goes back':r===0?'Declined, all '+fq(l.i,l.u)+' back to shelf':'Partial, <b class="num">'+fq(back,l.u)+'</b> '+l.u+' back to shelf'}</div>`}).join('')+
+    `<p class="note" style="margin-top:14px">Only the Runner can confirm. The Keeper who staged this cannot.</p>`;
+    bar=`<button class="key wide sig" data-a="conf">${s.off||s.q>0?'Confirm, queue it':'Confirm at the door'}</button>`;
+  } else if(s.tab==='door'){
+    body=`<div class="nm" style="font-size:24px;font-weight:700">Kitchen, confirmed</div><div class="who">${s.off?'Saved on this phone, sends on Retry.':'Ledger rows appended.'}</div>`+
+    D4.map(l=>{const r=s.rec[l.n],back=l.i-r;return `<div class="h" style="margin-top:16px">${l.n}</div><div class="led">${r>0?`<div><span class="p">ISSUE_PENDING_OFFSET +${fq(l.i,l.u)}</span></div><div><span>ISSUE_CONFIRMED −${fq(r,l.u)}</span></div>`:''}${back>0?`<div><span>ISSUE_REVERSAL +${fq(back,l.u)}</span></div>`:''}<div><span class="m">Shelf ${back>0?'+'+fq(back,l.u):'unchanged'} ${l.u}</span></div></div>`}).join('')+
+    `<button class="key wide" data-a="reset" style="margin-top:14px">Reset sample</button>`;
+  } else {
+    body=`<div class="h">Receipts</div>`+(s.done?`<div class="row"><div><div class="nm">Kitchen, 3 lines</div><div class="sub">Confirmed just now</div></div><span class="tag dark">Done</span></div><button class="key wide" data-a="reset" style="margin-top:12px">Reset sample</button>`:`<div class="empty"><b>No receipts yet</b>Confirm a delivery at the door first.</div>`);
+  }
+  return shell(s,{role:'Kitchen Runner, Cold Room door',tabs,body,bar});
+},{
+  rcv:(s,d)=>{const l=D4.find(x=>x.n===d.id);s.rec[d.id]=Math.min(l.i,Math.max(0,s.rec[d.id]+d.d*UN[l.u].step))},
+  all:s=>D4.forEach(l=>s.rec[l.n]=l.i),
+  none:s=>D4.forEach(l=>s.rec[l.n]=0),
+  conf:s=>{s.done=true;enq(s)},
+  reset:s=>{const o=s.off,q=s.q;Object.assign(s,p4init(),{off:o,q:Math.max(0,q-1)})},
+  input(){}
+});
+
+/* ---------- 5 Daily balance (Custodian) ---------- */
+const B5=[{n:'Mozzarella block',u:'kg',o:500,r:0,i:75,c:425},{n:'Fresh basil',u:'kg',o:40,r:20,i:28,c:30},{n:'Pizza dough ball',u:'pcs',o:200,r:0,i:60,c:140}];
+const CAUSE=['Spillage or trim not logged','Issued without a ledger row','Counting slip','Other'];
+const p5init=()=>{const s={tab:'bal',off:false,q:0,msg:'',signed:false,it:{}};B5.forEach(b=>s.it[b.n]={c:b.c,rec:false,cause:'',alert:false});return s};
+const exp5=b=>b.o+b.r-b.i;
+const handled5=(s,b)=>{const t=s.it[b.n];return t.c===exp5(b)||(t.rec&&t.cause&&t.alert)};
+const p5=Phone('p5',p5init(),s=>{
+  const open=B5.filter(b=>!handled5(s,b)).length;
+  const tabs=[{id:'bal',l:'Balance'},{id:'log',l:'Log',c:s.signed?1:0}];
+  let body='',bar='';
+  if(s.tab==='bal'){
+    body=`<div class="who">Expected = Opening + Received − Issued. Count benchmark items on the shelf.</div>`+B5.map(b=>{
+      const t=s.it[b.n],e=exp5(b),d=t.c-e,bad=d!==0;
+      return `<div class="panel" style="margin:12px 0 0"><div style="display:flex;justify-content:space-between;align-items:center"><div class="nm" style="font-size:20px;font-weight:700">${b.n}</div>${bad?(handled5(s,b)?'<span class="tag dark">Alert sent</span>':'<span class="tag urgent">Check</span>'):'<span class="tag">Matches</span>'}</div>
+      <div class="fig"><div>Opening<span class="num">${fq(b.o,b.u)}</span></div><div>Received<span class="num">${fq(b.r,b.u)}</span></div><div>Issued<span class="num">${fq(b.i,b.u)}</span></div><div class="ex">Expected<span class="num">${fq(e,b.u)}</span></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><div class="who">Counted</div>${s.signed?`<div class="qty num" style="text-align:left">${fq(t.c,b.u)}${un(b.u)}</div>`:stepper('cnt',b.n,t.c,b.u,0)}</div><div style="text-align:right"><div class="who">Diff</div><div class="diff num ${bad?'bad':''}">${d===0?fq(0,b.u):sg(d,b.u)}</div></div></div>
+      ${bad&&!s.signed?`<div class="steps" style="margin-top:10px;border-top:1px solid var(--line);padding-top:6px">
+        <div class="s ${t.rec?'done':''}"><span class="n">1</span><span class="grow">Recount the shelf</span><button class="key sm" data-a="rec" data-id="${b.n}" ${t.rec?'disabled':''}>${t.rec?'Recounted':'I recounted'}</button></div>
+        <div class="s ${t.cause?'done':''}"><span class="n">2</span><select class="f grow" data-i="cause|${b.n}" aria-label="Cause" ${t.rec?'':'disabled'}><option value="">Document the cause</option>${CAUSE.map(c=>`<option ${c===t.cause?'selected':''}>${c}</option>`).join('')}</select></div>
+        <div class="s ${t.alert?'done':''}"><span class="n">3</span><span class="grow">Alert Finance Lead and RM</span><button class="key sm" data-a="alert" data-id="${b.n}" ${t.rec&&t.cause&&!t.alert?'':'disabled'}>${t.alert?'Sent':'Send alert'}</button></div></div>`:''}</div>`}).join('');
+    bar=s.signed?`<button class="key wide" disabled>Signed for today</button>`:`<button class="key wide sig" data-a="sign" ${open?'disabled':''}>Sign daily balance</button>${open?`<div class="who" style="margin-top:6px;text-align:center">${open} line${open>1?'s':''} still to handle before signing</div>`:''}`;
+  } else {
+    body=`<div class="h">Log, today</div>`+(s.signed?`<div class="row"><div><div class="nm">Daily balance signed</div><div class="sub">Custodian, Cold Room, IND-DEL-01</div></div><span class="tag dark">Done</span></div>${B5.filter(b=>s.it[b.n].alert).map(b=>`<div class="row"><div><div class="nm">Alert, ${b.n}</div><div class="sub">Sent to Finance Lead and RM. Cause: ${s.it[b.n].cause}</div></div></div>`).join('')}<button class="key wide" data-a="reset" style="margin-top:12px">Reset sample</button>`:'<div class="empty"><b>Not signed yet</b>The log fills after sign-off.</div>');
+  }
+  return shell(s,{role:'Custodian, Cold Room',tabs,body,bar});
+},{
+  cnt:(s,d)=>{const b=B5.find(x=>x.n===d.id),t=s.it[d.id];t.c=Math.max(0,t.c+d.d*UN[b.u].step);if(t.c===exp5(b)){t.rec=false;t.cause='';t.alert=false}},
+  rec:(s,d)=>{s.it[d.id].rec=true},
+  alert:(s,d)=>{s.it[d.id].alert=true;enq(s)},
+  sign:s=>{s.signed=true;enq(s)},
+  reset:s=>{const o=s.off;Object.assign(s,p5init(),{off:o})},
+  input:(s,k,v)=>{const [f,n]=k.split('|');s.it[n][f]=v}
+});
+</script>
+</body>
+</html>

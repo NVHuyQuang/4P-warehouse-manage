@@ -1,0 +1,30 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+
+  subgraph Admin["Admin User"]
+    U1((Start)):::startNode --> U2[U2: Admin creates personal user profile]:::actionNode
+    U2 --> U3[U3: Assign Role & Scope: Store + Warehouse + Section]:::actionNode
+    U3 --> U4[U4: System generates individual temporary password]:::actionNode
+  end
+
+  subgraph Staff["Staff User (All Roles)"]
+    U4 --> U5[U5: Staff logs in with username & temporary password]:::actionNode
+    U5 --> U6{U6: First login detected?}:::decisionNode
+    U6 -- "Yes" --> U7[U7: Mandatory force change to private password]:::actionNode
+    U7 --> U8[U8: Staff accesses scoped role dashboard]:::actionNode
+    U6 -- "No" --> U8
+    U8 --> U9[U9: Staff initiates action: request, pick, count]:::actionNode
+  end
+
+  subgraph System["Server / Backend Security"]
+    U9 --> U10{U10: Server validates Role + Scope permissions?}:::decisionNode
+    U10 -- "No (Unauthorized/Cross-store)" --> U11[App: Reject action & log security alert]:::recordNode
+    U11 --> U14((End)):::endNode
+    U10 -- "Yes" --> U12[App: Strip cost/price fields for Kitchen/Bar/Cheese]:::recordNode
+    U12 --> U13[App: Append movement to immutable audit ledger]:::recordNode
+    U13 --> U14
+  end

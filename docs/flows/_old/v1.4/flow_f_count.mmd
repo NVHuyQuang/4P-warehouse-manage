@@ -1,0 +1,33 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+
+  subgraph Counters["Warehouse Keeper & Accountant"]
+    F1((Start)):::startNode --> F2{F2: Is scheduled count a Month-End Full inventory?}:::decisionNode
+    F4[F4: Count bins in spatial order: top-to-bottom, right-to-left]:::actionNode --> F5[F5: Enter first physical count into App Count Function]:::actionNode
+    F7[F7: Second person conducts one physical recount per procedure]:::actionNode --> F8{F8: Recount resolves discrepancy?}:::decisionNode
+    F9[F9: Accountant inputs root-cause reason on adjustment voucher]:::actionNode --> F10{F10: Financial Controller approves adjustment voucher?}:::decisionNode
+    F10 -- "No" --> F9
+    F11[F11: Sign count sheet as balanced without adjustment]:::actionNode
+  end
+
+  subgraph Approver["Financial Controller"]
+    F10 -- "Yes" --> F12[F12: FC approves voucher; App appends adjustment to ledger]:::actionNode
+  end
+
+  subgraph System["App / System"]
+    F2 -- "Yes" --> F3[App: Enforce System Freeze -- block all receipts & issues]:::recordNode
+    F2 -- "No" --> F4
+    F3 --> F4
+    F5 --> F6{F6: App compares count with expected stock: Diff == 0?}:::decisionNode
+    F6 -- "No" --> F7
+    F6 -- "Yes" --> F11
+    F8 -- "Yes" --> F11
+    F8 -- "No" --> F9
+    F11 --> F13[App: Lift freeze & archive reconciled count certificate]:::recordNode
+    F12 --> F13
+    F13 --> F14((End)):::endNode
+  end

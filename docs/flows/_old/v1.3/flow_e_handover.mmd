@@ -1,0 +1,27 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+
+  subgraph Outgoing["Outgoing Custodian"]
+    E1((Start)):::startNode --> E2[E2: Shift ends: initiate room handover workflow in App]:::actionNode
+    E2 --> E3[E3: Select named incoming holder & present physical room key]:::actionNode
+    E7[E7: Outgoing custodian retains key; logs refusal reason in App]:::actionNode --> E8{E8: Manager on duty resolves dispute or reassigns holder?}:::decisionNode
+    E8 -- "Yes" --> E3
+  end
+
+  subgraph Incoming["Incoming Next Holder"]
+    E3 --> E4[E4: Joint physical inspection of door locks and issue log]:::actionNode
+    E4 --> E5{E5: Incoming holder accepts physical room state and key?}:::decisionNode
+    E5 -- "No" --> E7
+    E5 -- "Yes" --> E6[E6: Incoming holder signs digital acceptance on device]:::actionNode
+  end
+
+  subgraph System["App / System"]
+    E6 --> E10[E10: App records shift key transfer in shift custody log; master data unchanged]:::recordNode
+    E8 -- "No" --> E9[E9: App freezes room access; escalates emergency alert to FC]:::recordNode
+    E9 --> E11((End)):::endNode
+    E10 --> E11
+  end

@@ -1,0 +1,30 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+
+  subgraph Requester["Assigned Section Requester"]
+    C1((Start)):::startNode --> C2{C2: User authorized as Section Requester in permissions?}:::decisionNode
+    C2 -- "No" --> C3[C3: App restricts view to read-only; request creation blocked]:::actionNode
+    C2 -- "Yes" --> C4[C4: Create request: select item, needed time & quantity in kg/pcs]:::actionNode
+    C4 --> C5{C5: Is request submitted inside configured Issue Window?}:::decisionNode
+    C5 -- "Yes" --> C6[C6: App queues standard request into storeroom picking list]:::actionNode
+    C5 -- "No" --> C7[C7: Enter operational reason; request flagged URGENT, not blocked]:::actionNode
+    C6 --> C8{C8: Requester requests to modify or cancel queued request?}:::decisionNode
+    C7 --> C8
+    C8 -- "Yes" --> C9{C9: Has warehouse keeper already started picking the request?}:::decisionNode
+    C9 -- "Yes" --> C10[C10: Picking in progress; editing and cancellation locked by App]:::actionNode
+    C9 -- "No" --> C12{C12: Does requester choose Edit Quantity?}:::decisionNode
+    C12 -- "Yes" --> C13[C13: Requester updates quantity on existing open request record]:::actionNode
+    C12 -- "No" --> C14[C14: Requester cancels request; App marks status cancelled]:::actionNode
+    C13 --> C5
+  end
+
+  subgraph Outcome["Request Outcome"]
+    C3 --> C11((End)):::endNode
+    C8 -- "No" --> C11
+    C10 --> C11
+    C14 --> C11
+  end

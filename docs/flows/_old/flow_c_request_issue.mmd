@@ -1,0 +1,42 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+  classDef pendingNode fill:#fff2e8,stroke:#fa8c16,stroke-width:2px,stroke-dasharray: 5 5;
+
+  subgraph Section["Assigned Section Requester (Kitchen / Bar / Cheese)"]
+    C1((Start)):::startNode --> C2{C2: Assigned Requester for Section?}:::decisionNode
+    C2 -- "No" --> C2_BLOCK[C2_BLOCK: App blocks request; view-only mode]:::actionNode
+    C2 -- "Yes" --> C3[C3: Create Request: item, qty in kg/pcs, section, needed time]:::actionNode
+    C3 --> C4{C4: Submitted within Admin Issue Window?}:::decisionNode
+    C4 -- "No" --> C5[C5: Enter operational reason; flagged URGENT, never blocked]:::actionNode
+    C11[C11: Runner inspects goods at door; verifies count vs request]:::actionNode --> C12{C12: Goods match & quality OK?}:::decisionNode
+    C12 -- "No" --> C12_REWORK[C12_REWORK: Reject handoff; request correction]:::actionNode
+    C12 -- "Yes" --> C13[C13: Runner taps digital confirmation in App]:::actionNode
+  end
+
+  subgraph Admin["Admin / Warehouse Keeper"]
+    C7[C7: Review pick queue on device; retrieve items by FIFO]:::actionNode
+    C7 --> C8{C8: Full requested qty available?}:::decisionNode
+    C8 -- "Yes" --> C9[C9: Stage full requested quantity]:::actionNode
+    C8 -- "No (Partial)" --> C10[C10: Enter adjusted issued qty & variance reason]:::actionNode
+    C9 --> C11
+    C10 --> C11
+    C12_REWORK --> C7
+  end
+
+  subgraph Evening["Evening Scenario"]
+    C7 -. "If Admin has left premises" .-> C15["C15: Evening issue when Admin has left [Owner to define]"]:::pendingNode
+  end
+
+  subgraph System["App / System (Append-Only)"]
+    C2_BLOCK --> C16((End)):::endNode
+    C4 -- "Yes" --> C6[App: Queue standard request]:::recordNode
+    C5 --> C5_FLAG[App: Flag request as URGENT & alert Admin]:::recordNode
+    C5_FLAG --> C7
+    C6 --> C7
+    C13 --> C14[App: Append issue to ledger; reduce stock; zero price shown]:::recordNode
+    C14 --> C16
+  end

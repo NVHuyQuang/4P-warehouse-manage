@@ -1,0 +1,26 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+
+  subgraph Admin["Admin User"]
+    H1((Start)):::startNode --> H2[H2: Initiate Add Store or Add Warehouse proposal in App]:::actionNode
+    H2 --> H3[H3: Enter Store/Room metadata, floor, type & assign custodians]:::actionNode
+  end
+
+  subgraph Approver["Financial Controller"]
+    H5 --> H6{H6: FC approves new Store or Warehouse proposal?}:::decisionNode
+    H6 -- "No" --> H7[H7: Reject proposal with mandatory written justification]:::actionNode
+    H6 -- "Yes" --> H8[H8: Sign digital authorization in App]:::actionNode
+  end
+
+  subgraph System["App / System"]
+    H3 --> H4[App: Validate naming uniqueness & store hierarchy]:::recordNode
+    H4 --> H5[App: Queue pending proposal & dispatch alert to FC]:::recordNode
+    H7 --> H9[App: Record rejection & notify requesting Admin]:::recordNode
+    H8 --> H10[App: Activate Store/Warehouse in Master Data; enable access]:::recordNode
+    H9 --> H11((End)):::endNode
+    H10 --> H11
+  end

@@ -1,0 +1,32 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+
+  subgraph Admin["Admin / Warehouse Keeper"]
+    A21((Start)):::startNode --> A22[A22: Admin enters accepted lines into SAP GRPO as today]:::actionNode
+    A22 --> A23[A23: Admin exports GRPO file from SAP and uploads to App]:::actionNode
+  end
+
+  subgraph Server["Node Ingestion Server"]
+    A23 --> A24{A24: Uploaded within 1 working day of SAP posting date?}:::decisionNode
+    A24 -- "No" --> A25[A25: Log upload delay warning to Admin & RM; import proceeds]:::actionNode
+    A24 -- "Yes" --> A26[A26: Read header row 1, map allowlist columns & generate line keys]:::actionNode
+    A25 --> A26
+    A26 --> A27{A27: Is document line key already imported in database?}:::decisionNode
+    A27 -- "Yes" --> A28{A28: Quantity/Item changed with 2nd approval SCM or Finance?}:::decisionNode
+    A28 -- "No" --> A29[A29: Refresh reference fields only; zero stock change]:::actionNode
+    A28 -- "Yes" --> A30[A30: App appends offsetting reversal of old line before re-import]:::actionNode
+    A27 -- "No" --> A31{A31: Store code, item code & UoM mapped in Master Data?}:::decisionNode
+    A30 --> A31
+    A31 -- "No" --> A32[A32: Quarantine line in staging errors; Admin updates master & re-imports]:::actionNode
+    A31 -- "Yes" --> A33[A33: App appends verified GRPO movement to ledger; updates stock]:::actionNode
+  end
+
+  subgraph Outcome["Import Outcome"]
+    A29 --> A34((End)):::endNode
+    A32 --> A34
+    A33 --> A34
+  end

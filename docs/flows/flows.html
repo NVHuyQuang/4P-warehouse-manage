@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pizza 4P's India — Warehouse Stock Control Process Flows (v1.6)</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-subtle: #f1f5f9;
+      --border: #e2e8f0;
+      --border-dark: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-light: #64748b;
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --teal: #0d9488;
+      --amber: #d97706;
+      --amber-bg: #fef3c7;
+      --red: #dc2626;
+      --green: #16a34a;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding: 0 0 80px 0;
+    }
+
+    header {
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 24px 20px;
+      border-bottom: 3px solid var(--primary);
+    }
+    .header-top {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 1560px;
+      margin: 0 auto;
+    }
+    @media (min-width: 768px) {
+      header { padding: 32px 40px; }
+      .header-top { flex-direction: row; justify-content: space-between; align-items: flex-start; }
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+    @media (min-width: 768px) { .brand-title { font-size: 24px; } }
+    .brand-subtitle {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 4px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    @media (min-width: 768px) { .brand-subtitle { font-size: 13px; } }
+    .badge-bar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .badge-primary { background: #0369a1; color: #fff; }
+    .badge-teal { background: #0f766e; color: #fff; }
+    .badge-amber { background: #b45309; color: #fff; }
+
+    /* Sticky Navigation */
+    .nav-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-bar::-webkit-scrollbar { display: none; }
+    .nav-link {
+      padding: 8px 12px;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+    @media (min-width: 768px) { .nav-bar { padding: 12px 40px; gap: 8px; } .nav-link { padding: 8px 14px; } }
+    .nav-link:hover { background: var(--surface-subtle); color: var(--text-main); }
+    .nav-link.active { background: #0284c7; color: #fff; }
+
+    .container {
+      max-width: 1560px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+    @media (min-width: 768px) { .container { margin: 32px auto; padding: 0 32px; } }
+
+    .intro-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+    @media (min-width: 768px) { .intro-card { padding: 24px 32px; margin-bottom: 36px; } }
+    .intro-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .intro-box {
+      background: var(--surface-subtle);
+      padding: 14px 16px;
+      border-radius: 6px;
+      border-left: 3px solid var(--primary);
+    }
+    .intro-box h4 { font-size: 12px; text-transform: uppercase; color: var(--text-light); margin-bottom: 4px; }
+    .intro-box p { font-size: 13px; color: var(--text-main); line-height: 1.45; }
+
+    /* Responsive Table Styles (Card view on mobile <=640px) */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    .table-responsive table {
+      width: 100%;
+      min-width: 620px;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin: 0;
+    }
+    @media (min-width: 768px) {
+      .table-responsive { border: none; border-radius: 0; }
+      .table-responsive table { min-width: 100%; font-size: 13px; margin-top: 8px; }
+    }
+    .table-responsive th {
+      background: #f1f5f9;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 8px 10px;
+      text-align: left;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .table-responsive td {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 640px) {
+      .table-responsive {
+        border: none;
+        overflow-x: visible;
+      }
+      .table-responsive table,
+      .table-responsive thead,
+      .table-responsive tbody,
+      .table-responsive th,
+      .table-responsive td,
+      .table-responsive tr {
+        display: block;
+        min-width: 100% !important;
+      }
+      .table-responsive thead {
+        display: none;
+      }
+      .table-responsive tr {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        padding: 12px 14px;
+        box-shadow: var(--shadow-sm);
+      }
+      .table-responsive td {
+        border: none;
+        padding: 4px 0;
+        display: flex;
+        flex-direction: column;
+        line-height: 1.4;
+      }
+      .table-responsive td:first-child {
+        margin-bottom: 6px;
+      }
+      .table-responsive td::before {
+        content: attr(data-label);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 700;
+        color: var(--text-light);
+        margin-bottom: 2px;
+      }
+      .table-responsive td[data-label="Status"]::before {
+        display: none;
+      }
+    }
+
+    .status-fixed { color: #15803d; font-weight: 700; background: #dcfce7; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+    .status-partly { color: #b45309; font-weight: 700; background: #fef3c7; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+    .status-needs-owner { color: #4338ca; font-weight: 700; background: #e0e7ff; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+
+    /* Flow Section */
+    .flow-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 32px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    @media (min-width: 768px) { .flow-section { margin-bottom: 48px; } }
+    .flow-header {
+      background: #f8fafc;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    @media (min-width: 768px) { .flow-header { padding: 20px 28px; gap: 12px; } }
+    .flow-title-group { display: flex; align-items: center; gap: 12px; }
+    .flow-letter {
+      width: 36px;
+      height: 36px;
+      background: #0f172a;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    @media (min-width: 768px) { .flow-letter { width: 40px; height: 40px; font-size: 17px; border-radius: 8px; } }
+    .flow-name { font-size: 16px; font-weight: 700; color: var(--text-main); line-height: 1.3; }
+    @media (min-width: 768px) { .flow-name { font-size: 19px; } }
+    .flow-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .chart-summary-line {
+      background: #f1f5f9;
+      border-left: 4px solid var(--primary);
+      padding: 10px 16px;
+      font-size: 13px;
+      color: #1e293b;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+    }
+    @media (min-width: 1100px) {
+      .flow-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); min-height: 580px; }
+    }
+
+    .flow-visual {
+      background: #ffffff;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    @media (min-width: 1100px) {
+      .flow-visual { padding: 24px; border-bottom: none; border-right: 1px solid var(--border); }
+    }
+    .flow-visual img {
+      max-width: 100%;
+      height: auto;
+      max-height: 750px;
+      object-fit: contain;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #ffffff;
+      box-shadow: var(--shadow-sm);
+    }
+    .visual-toolbar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding: 0 4px;
+    }
+    .visual-label { font-size: 11px; color: var(--text-light); font-weight: 500; }
+    .btn-group { display: flex; gap: 6px; }
+    .btn-sm {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border-dark);
+      background: #fff;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-sm:hover { background: var(--surface-subtle); color: var(--text-main); }
+
+    .flow-details { padding: 16px; background: #ffffff; overflow-y: auto; }
+    @media (min-width: 768px) { .flow-details { padding: 24px 28px; } }
+
+    .detail-card { margin-bottom: 18px; }
+    .detail-card-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .detail-meta-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 14px; }
+    @media (min-width: 768px) { .detail-meta-table { font-size: 13px; margin-bottom: 16px; } }
+    .detail-meta-table td { padding: 6px 8px; border: 1px solid var(--border); word-break: break-word; }
+    .detail-meta-table td.label { background: #f8fafc; font-weight: 600; color: var(--text-muted); width: 110px; }
+    @media (min-width: 768px) { .detail-meta-table td.label { width: 140px; padding: 6px 10px; } }
+
+    .step-id { font-weight: 700; color: #0369a1; white-space: nowrap; }
+
+    .role-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .role-admin { background: #e0f2fe; color: #0369a1; }
+    .role-kitchen { background: #fef3c7; color: #b45309; }
+    .role-approver { background: #fee2e2; color: #b91c1c; }
+    .role-system { background: #f3e8ff; color: #7e22ce; }
+    .role-scm { background: #e0e7ff; color: #3730a3; }
+
+    .control-box {
+      background: #fffbeb;
+      border-left: 4px solid var(--amber);
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #78350f;
+      margin-top: 14px;
+    }
+    .control-box strong { color: #92400e; }
+    .exception-box {
+      background: #fef2f2;
+      border-left: 4px solid var(--red);
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #991b1b;
+      margin-top: 10px;
+    }
+    .exception-box strong { color: #b91c1c; }
+
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: var(--text-light);
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <div>
+        <div class="brand-title">PIZZA 4P'S INDIA — INVENTORY CONTROL SYSTEM</div>
+        <div class="brand-subtitle">Multi-Store Rollout (5–6 Stores) · Central Storage Rooms · Operational Specification v1.6</div>
+      </div>
+      <div class="badge-bar">
+        <span class="badge badge-primary">Version 1.6</span>
+        <span class="badge badge-teal">Swiss Grid Spec</span>
+        <span class="badge badge-amber">Round 4 Directives Applied</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-bar">
+    <a href="#audit-table" class="nav-link" style="color: #b91c1c; font-weight: 700;">Audit Table</a>
+    <a href="#flow-0" class="nav-link">0. Access & Lifecycle</a>
+    <a href="#flow-a1" class="nav-link active">A-1. Receiving QC</a>
+    <a href="#flow-a2" class="nav-link">A-2. SAP Import</a>
+    <a href="#flow-b" class="nav-link">B. Keep</a>
+    <a href="#flow-c1" class="nav-link">C-1. Request</a>
+    <a href="#flow-c2" class="nav-link">C-2. Issue & Confirm</a>
+    <a href="#flow-d" class="nav-link">D. Balance</a>
+    <a href="#flow-e" class="nav-link">E. Handover</a>
+    <a href="#flow-f" class="nav-link">F. Count</a>
+    <a href="#flow-g" class="nav-link">G. Other Movements</a>
+    <a href="#flow-h" class="nav-link">H. Add Store/WH</a>
+    <a href="#questions" class="nav-link" style="color: #b45309; font-weight: 700;">Open Questions (7)</a>
+  </nav>
+
+  <div class="container">
+
+    <!-- CLOSE-OUT AUDIT & STATUS TABLE (ROUNDS 3, 4, 5 & 6) -->
+    <section class="intro-card" id="audit-table" style="border-left: 4px solid var(--red);">
+      <h3 style="font-size: 16px; font-weight: 700; color: #0f172a;">Close-Out Verification Audit Table (Rounds 3, 4, 5 & 6)</h3>
+      <p style="font-size: 13px; color: #475569; margin-top: 4px;">
+        Tracking all owner decisions, architectural fixes, flow re-connections, and rule corrections across v1.6.
+      </p>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Item</th>
+              <th>Requirement Description</th>
+              <th>Flow / Section</th>
+              <th>Step IDs & Implementation Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>1. Double-Count Formula Fix</strong></td>
+              <td data-label="Requirement">Append-only reversal scheme for stock deduction at issue and runner confirmation. Worked examples.</td>
+              <td data-label="Flow / Section">Section 4.1 &amp; Flow C-2</td>
+              <td data-label="Implementation"><code>4.1 &amp; C25–C31</code>: Implemented explicit append-only offsetting formula: <code>ISSUE_PENDING</code> (-Q) &rarr; confirmed appends <code>ISSUE_PENDING_OFFSET</code> (+Q) &amp; <code>ISSUE_CONFIRMED</code> (-Qconf). Full decline appends <code>ISSUE_REVERSAL</code> (+Q). Provided 3 worked examples (issue 5 decline 5; issue 5 confirm 5; issue 5 confirm 3 decline 2).</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>2. Flow C-2 Unconfirmed &amp; Decline</strong></td>
+              <td data-label="Requirement">Unconfirmed check starts from pending; runner decline loops to re-pick; partial issue choice.</td>
+              <td data-label="Flow / Section">Flow C-2</td>
+              <td data-label="Implementation"><code>C21–C33</code>: Day-end unconfirmed check starts directly from pending state (<code>C27 No</code> &rarr; <code>C28 No</code> &rarr; <code>C30</code>). Decline appends reversal, alerts staff &amp; loops to re-pick (<code>C29</code> &rarr; <code>C22</code>). Requester accepts partial and keeps remaining balance open in queue (<code>C32 Yes</code> &rarr; <code>C22</code>). 11 boxes.</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>3. Flow G Shrinkage &amp; Waste Split</strong></td>
+              <td data-label="Requirement">FC rejected variance books received qty, closes transit &amp; books held shrinkage; split Waste from Return.</td>
+              <td data-label="Flow / Section">Flow G &amp; Data Model</td>
+              <td data-label="Implementation"><code>G1–G14</code>: If FC rejects variance, App books received qty, closes transit and books diff as held shrinkage (<code>G8</code>). Waste and Supplier Return strictly split into 2 paths (<code>G9–G11</code>). Added table <code>t_waste_returns_log</code>. Zero occurrences of Supplier Return Note value fields. 12 boxes.</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>4. Flow 0 Profile Creation &amp; Login</strong></td>
+              <td data-label="Requirement">Admin creates profile &amp; assigns role/scope before invite; login retry loop; lockout limit; forgot password.</td>
+              <td data-label="Flow / Section">Flow 0</td>
+              <td data-label="Implementation"><code>U1–U13</code>: Added Admin profile creation and role/scope assignment (<code>U4</code>) before invitation (<code>U5</code>). Login wrong password retry loop (<code>U9 No</code> &rarr; <code>U10 No</code> &rarr; <code>U9</code>). Lockout after limit (<code>U10 Yes</code> &rarr; <code>U11</code>). Forgot password from login screen (<code>U8</code>). 12 boxes.</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>5. Roles &amp; Waste Approval Separation</strong></td>
+              <td data-label="Requirement">Nobody logs and approves same waste claim; only Sys Admin creates users; Approvers need 2nd approval.</td>
+              <td data-label="Flow / Section">Section 1.1–1.3</td>
+              <td data-label="Implementation">RM removed from waste logging (only Keeper or Staff logs; RM approves minor, FC approves major). Only System Admin creates users; Approver accounts require dual sign-off. Enforced dual-party control on count adjustments and transit variances.</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>6. SAP Import (A-2) Duplicate &amp; Quarantine</strong></td>
+              <td data-label="Requirement">Duplicate check by SAP doc number + line; quarantined lines path after Master Data fix; corrected re-export.</td>
+              <td data-label="Flow / Section">Flow A-2</td>
+              <td data-label="Implementation"><code>A25–A34</code>: Duplicate check by SAP doc line key (<code>A27</code>). Corrected re-export appends offsetting reversal (<code>A30</code>). Admin fixes Master Data and re-imports quarantined lines (<code>A31/A32 Yes</code> &rarr; <code>A29</code>). 12 boxes.</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>7. Flow D Expected Stock &amp; Lane Order</strong></td>
+              <td data-label="Requirement">Restore Expected calculation; FL/RM explanation step; lock after explanation; custodian signs in custodian lane.</td>
+              <td data-label="Flow / Section">Flow D</td>
+              <td data-label="Implementation"><code>D2–D14</code>: Restored <code>Expected = Opening + Received - Issued</code> (<code>D3</code>). Custodian signs in Custodian lane (<code>D10</code>). FL/RM records explanation or marks unresolved (<code>D9</code>). Day locked after explanation (<code>D11</code>). Morning check is separate step (<code>D12</code>). 12 boxes.</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>8. Flow C-1 Edit Label &amp; In-Progress Lock</strong></td>
+              <td data-label="Requirement">C12 label matches question (Does requester choose Edit Quantity? Yes/No); edit modifies open request; blocked if picking started.</td>
+              <td data-label="Flow / Section">Flow C-1</td>
+              <td data-label="Implementation"><code>C8–C14</code>: If picking started, editing/cancelling locked (<code>C9 Yes</code> &rarr; <code>C10</code>). If not started, C12 matches question (<code>Does requester choose Edit Quantity? Yes/No</code>). Editing updates open request record (<code>C13</code>) &amp; returns to window check (<code>C5</code>). 12 boxes.</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>9. Section 8 Pitfalls &amp; Config Cleanup</strong></td>
+              <td data-label="Requirement">Remove Apps Script items; add client secret safety, role rule tests, IndexedDB queue; remove invented numbers.</td>
+              <td data-label="Flow / Section">Section 8 &amp; Master §2.2</td>
+              <td data-label="Implementation">Removed 8.1/8.2. Added: DB admin key never reaches phone, automated test suites for RLS, IndexedDB send once. Replaced "15-30s" with "wake time not published, owner to measure". Removed "tolerance". Moved DB pause ping to platform checklist.</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>10. flows.html Responsive Optimization</strong></td>
+              <td data-label="Requirement">Status column visible on 390px without horizontal scrolling; remove promotional badge; re-render PNGs.</td>
+              <td data-label="Flow / Section">flows.html</td>
+              <td data-label="Implementation">Status placed as first column; added mobile card CSS transformation (stacked with clear labels on &le;640px). Removed promotional badge. Re-rendered all PNGs and verified on mobile.</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>Q1 Decision Applied</strong></td>
+              <td data-label="Requirement">Every runner has an own account (email); (Audit History: Option C rejected to preserve two-person control).</td>
+              <td data-label="Flow / Section">Flow 0 &amp; Section 1</td>
+              <td data-label="Implementation">All Kitchen Runners provisioned with individual accounts via email invitations. (Audit History: Option C rejected to preserve strict two-person physical segregation).</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>Q2 Decision Applied</strong></td>
+              <td data-label="Requirement">Variance alerts go to store FL / RM first; escalate to central FC only if unresolved at morning opening.</td>
+              <td data-label="Flow / Section">Flow D</td>
+              <td data-label="Implementation"><code>D8–D13</code>: Immediate closing variance alerts route to store-level FL / RM (<code>D9</code>); persistent variances at morning opening escalate to central FC (<code>D12/D13</code>).</td>
+            </tr>
+            <tr>
+              <td data-label="Status"><span class="status-fixed">Fixed</span></td>
+              <td data-label="Item"><strong>Q7 Decision Applied</strong></td>
+              <td data-label="Requirement">One login can switch stores, only within granted permissions.</td>
+              <td data-label="Flow / Section">Section 1 &amp; Data Model</td>
+              <td data-label="Implementation">Single login credentials with top-bar Store Switcher dropdown, restricted strictly to stores assigned in <code>m_user_permissions</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FLOW 0 -->
+    <section class="flow-section" id="flow-0">
+      <div class="flow-header">
+        <div class="flow-title-group">
+          <div class="flow-letter">0</div>
+          <div>
+            <div class="flow-name">Users, Roles, Access & Lifecycle</div>
+            <div class="flow-subtitle">Email invitations, private password activation, login attempt lockout, and leaver deactivation</div>
+          </div>
+        </div>
+        <span class="badge badge-teal">Security & Access</span>
+      </div>
+      <div class="chart-summary-line">
+        What this chart does: Provisions individual staff via email invitation links, handles password creation, processes logins with lockout defense, executes password resets, and deactivates departing personnel.
+      </div>
+      <div class="flow-grid">
+        <div class="flow-visual">
+          <img src="flow_0_access_control.svg" alt="Users, Roles, Access & Lifecycle Diagram">
+          <div class="visual-toolbar">
+            <span class="visual-label">12 Process Boxes &bull; Verified Valid</span>
+            <div class="btn-group">
+              <a href="flow_0_access_control.svg" target="_blank" class="btn-sm">Open SVG</a>
+              <a href="flow_0_access_control.png" target="_blank" class="btn-sm">Open PNG</a>
+            </div>
+          </div>
+        </div>
+        <div class="flow-details">
+          <div class="detail-card">
+            <div class="detail-card-title">Transaction Parameters</div>
+            <table class="detail-meta-table">
+              <tr><td class="label">Trigger</td><td>Staff onboarding, password reset, failed login lockout, or staff departure.</td></tr>
+              <tr><td class="label">Actors</td><td>System Admin, Staff User, Database Auth Layer.</td></tr>
+              <tr><td class="label">App Record</td><td>m_users, m_user_invitations, t_security_logs.</td></tr>
+            </table>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Step-by-Step Execution Table (14 Steps)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step ID</th>
+                    <th>Role</th>
+                    <th>Action Description</th>
+                    <th>Next Step / Transition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="step-id">U1</td>
+                    <td><span class="role-badge role-admin">System Admin</span></td>
+                    <td>(Start)</td>
+                    <td>Next: <code>U2</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U2</td>
+                    <td><span class="role-badge role-admin">System Admin</span></td>
+                    <td>U2: Is action triggered by System Admin for user management?</td>
+                    <td>Yes &rarr; <code>U3</code>: U3: Is System Admin onboarding a new staff member?; No &rarr; <code>U8</code>: U8: Does staff request self-service password reset?</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U3</td>
+                    <td><span class="role-badge role-admin">System Admin</span></td>
+                    <td>U3: Is System Admin onboarding a new staff member?</td>
+                    <td>Yes &rarr; <code>U4</code>: U4: System Admin creates profile, assigns role/scope & sends invite; No &rarr; <code>U5</code>: U5: Is System Admin deactivating a leaver account?</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U4</td>
+                    <td><span class="role-badge role-admin">System Admin</span></td>
+                    <td>U4: System Admin creates profile, assigns role/scope & sends invite</td>
+                    <td>Next: <code>U9</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U5</td>
+                    <td><span class="role-badge role-admin">System Admin</span></td>
+                    <td>U5: Is System Admin deactivating a leaver account?</td>
+                    <td>Yes &rarr; <code>U6</code>: U6: System Admin deactivates leaver; database revokes access; No &rarr; <code>U7</code>: U7: System Admin unlocks account; resets attempt counter</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U6</td>
+                    <td><span class="role-badge role-admin">System Admin</span></td>
+                    <td>U6: System Admin deactivates leaver; database revokes access</td>
+                    <td>Next: <code>U14</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U7</td>
+                    <td><span class="role-badge role-admin">System Admin</span></td>
+                    <td>U7: System Admin unlocks account; resets attempt counter</td>
+                    <td>Next: <code>U14</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U8</td>
+                    <td><span class="role-badge role-admin">Staff User</span></td>
+                    <td>U8: Does staff request self-service password reset?</td>
+                    <td>Yes &rarr; <code>U9</code>: U9: System sends reset link by email; user sets password; No &rarr; <code>U10</code>: U10: Staff enters correct password within attempt limit?</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U9</td>
+                    <td><span class="role-badge role-admin">Staff User</span></td>
+                    <td>U9: System sends reset link by email; user sets password</td>
+                    <td>Next: <code>U10</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U10</td>
+                    <td><span class="role-badge role-admin">Staff User</span></td>
+                    <td>U10: Staff enters correct password within attempt limit?</td>
+                    <td>Yes &rarr; <code>U11</code>: U11: Database authenticates session; applies role & scope via RLS; No &rarr; <code>U12</code>: U12: Consecutive failed attempts reach lockout limit?</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U12</td>
+                    <td><span class="role-badge role-admin">Staff User</span></td>
+                    <td>U12: Consecutive failed attempts reach lockout limit?</td>
+                    <td>Yes &rarr; <code>U13</code>: U13: Database locks account; alert sent to System Admin; No &rarr; <code>U10</code>: U10: Staff enters correct password within attempt limit?</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U13</td>
+                    <td><span class="role-badge role-admin">Staff User</span></td>
+                    <td>U13: Database locks account; alert sent to System Admin</td>
+                    <td>Next: <code>U14</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U11</td>
+                    <td><span class="role-badge role-admin">Staff User</span></td>
+                    <td>U11: Database authenticates session; applies role & scope via RLS</td>
+                    <td>Next: <code>U14</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">U14</td>
+                    <td><span class="role-badge role-admin">System Outcome</span></td>
+                    <td>(End)</td>
+                    <td>Process End</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="control-box">
+            <strong>The Control:</strong> No temporary passwords. Every user sets their own private password via expiring email link. Row-Level Security enforced directly by database.
+          </div>
+          <div class="exception-box">
+            <strong>Exceptions & App Behavior:</strong> Staff without email addressed in Section 6 Q1. Lockout requires System Admin manual unlock.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW A1 -->
+    <section class="flow-section" id="flow-a1">
+      <div class="flow-header">
+        <div class="flow-title-group">
+          <div class="flow-letter">A1</div>
+          <div>
+            <div class="flow-name">Physical Receiving & QC</div>
+            <div class="flow-subtitle">Dock arrival windows, open PO match, physical/temp QC inspection, and same-day invoice price variance reporting</div>
+          </div>
+        </div>
+        <span class="badge badge-teal">Phase: RECEIVE</span>
+      </div>
+      <div class="chart-summary-line">
+        What this chart does: Enforces arrival within receiving windows, inspects physical goods against open SAP POs, performs temperature and QC checks line by line, verifies invoice price against PO, and routes discrepancies to SCM the same day.
+      </div>
+      <div class="flow-grid">
+        <div class="flow-visual">
+          <img src="flow_a1_physical_receiving.svg" alt="Physical Receiving & QC Diagram">
+          <div class="visual-toolbar">
+            <span class="visual-label">11 Process Boxes &bull; Verified Valid</span>
+            <div class="btn-group">
+              <a href="flow_a1_physical_receiving.svg" target="_blank" class="btn-sm">Open SVG</a>
+              <a href="flow_a1_physical_receiving.png" target="_blank" class="btn-sm">Open PNG</a>
+            </div>
+          </div>
+        </div>
+        <div class="flow-details">
+          <div class="detail-card">
+            <div class="detail-card-title">Transaction Parameters</div>
+            <table class="detail-meta-table">
+              <tr><td class="label">Trigger</td><td>Supplier delivery truck arrives at store loading dock.</td></tr>
+              <tr><td class="label">Actors</td><td>Admin / Warehouse Keeper, SCM Team.</td></tr>
+              <tr><td class="label">App Record</td><td>Delivery note endorsement, SCM price discrepancy log.</td></tr>
+            </table>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Step-by-Step Execution Table (13 Steps)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step ID</th>
+                    <th>Role</th>
+                    <th>Action Description</th>
+                    <th>Next Step / Transition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="step-id">A1</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>(Start)</td>
+                    <td>Next: <code>A2</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A2</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>A2: Delivery arrives within scheduled Receiving Window?</td>
+                    <td>Yes &rarr; <code>A4</code>: A4: Check Delivery Note against open Purchase Order in SAP; No &rarr; <code>A3</code>: A3: Hold truck at dock or SCM reschedules delivery window</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A3</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>A3: Hold truck at dock or SCM reschedules delivery window</td>
+                    <td>Next: <code>A13</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A4</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>A4: Check Delivery Note against open Purchase Order in SAP</td>
+                    <td>Next: <code>A5</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A5</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>A5: Valid open PO exists for delivery?</td>
+                    <td>Yes &rarr; <code>A7</code>: A7: Inspect delivery line by line: count, temp, quality, expiry; No &rarr; <code>A6</code>: A6: SCM investigates missing PO; refuses truck if unverified</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A7</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>A7: Inspect delivery line by line: count, temp, quality, expiry</td>
+                    <td>Next: <code>A8</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A8</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>A8: Lines pass physical and temperature QC inspection?</td>
+                    <td>Yes &rarr; <code>A10</code>: A10: Supplier invoice price matches approved PO price?; No &rarr; <code>A9</code>: A9: Endorse difference on note; return failed lines to driver</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A9</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>A9: Endorse difference on note; return failed lines to driver</td>
+                    <td>Next: <code>A10</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A10</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>A10: Supplier invoice price matches approved PO price?</td>
+                    <td>Yes &rarr; <code>A12</code>: A12: Put away accepted goods into room; label received date; No &rarr; <code>A11</code>: A11: Report price variance to SCM same day; SCM logs adjustment</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A12</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>A12: Put away accepted goods into room; label received date</td>
+                    <td>Next: <code>A13</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A6</td>
+                    <td><span class="role-badge role-admin">SCM Team</span></td>
+                    <td>A6: SCM investigates missing PO; refuses truck if unverified</td>
+                    <td>Next: <code>A13</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A11</td>
+                    <td><span class="role-badge role-admin">SCM Team</span></td>
+                    <td>A11: Report price variance to SCM same day; SCM logs adjustment</td>
+                    <td>Next: <code>A12</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A13</td>
+                    <td><span class="role-badge role-admin">Receiving Outcome</span></td>
+                    <td>(End)</td>
+                    <td>Process End</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="control-box">
+            <strong>The Control:</strong> Receiving allowed only within 2 fixed windows. No PO, no receipt. Invoice price differences reported to SCM the same day.
+          </div>
+          <div class="exception-box">
+            <strong>Exceptions & App Behavior:</strong> Warm chilled goods rejected at dock. Line-by-line QC prevents good lines from being delayed by a single bad item.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW A2 -->
+    <section class="flow-section" id="flow-a2">
+      <div class="flow-header">
+        <div class="flow-title-group">
+          <div class="flow-letter">A2</div>
+          <div>
+            <div class="flow-name">SAP GRPO Entry, File Export & Import</div>
+            <div class="flow-subtitle">SAP entry as today, file export, server header detection, column mapping, line key validation, and staging error quarantine</div>
+          </div>
+        </div>
+        <span class="badge badge-teal">Phase: INGESTION</span>
+      </div>
+      <div class="chart-summary-line">
+        What this chart does: Ingests the exported SAP GRPO data file into the App, automatically detects header rows, dynamically maps columns, validates lines, quarantines errors into staging, and appends receipts to the movement ledger.
+      </div>
+      <div class="flow-grid">
+        <div class="flow-visual">
+          <img src="flow_a2_sap_import.svg" alt="SAP GRPO Entry, File Export & Import Diagram">
+          <div class="visual-toolbar">
+            <span class="visual-label">12 Process Boxes &bull; Verified Valid</span>
+            <div class="btn-group">
+              <a href="flow_a2_sap_import.svg" target="_blank" class="btn-sm">Open SVG</a>
+              <a href="flow_a2_sap_import.png" target="_blank" class="btn-sm">Open PNG</a>
+            </div>
+          </div>
+        </div>
+        <div class="flow-details">
+          <div class="detail-card">
+            <div class="detail-card-title">Transaction Parameters</div>
+            <table class="detail-meta-table">
+              <tr><td class="label">Trigger</td><td>Admin keys accepted lines into SAP and exports file.</td></tr>
+              <tr><td class="label">Actors</td><td>Admin / Warehouse Keeper, Node Ingestion Server.</td></tr>
+              <tr><td class="label">App Record</td><td>t_grpo_imports, t_grpo_import_items, t_grpo_staging_errors, t_stock_movements.</td></tr>
+            </table>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Step-by-Step Execution Table (14 Steps)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step ID</th>
+                    <th>Role</th>
+                    <th>Action Description</th>
+                    <th>Next Step / Transition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="step-id">A21</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>(Start)</td>
+                    <td>Next: <code>A22</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A22</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>A22: Admin enters accepted lines into SAP GRPO as today</td>
+                    <td>Next: <code>A23</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A23</td>
+                    <td><span class="role-badge role-admin">Admin / Warehouse Keeper</span></td>
+                    <td>A23: Admin exports GRPO file from SAP and uploads to App</td>
+                    <td>Next: <code>A24</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A24</td>
+                    <td><span class="role-badge role-admin">Node Ingestion Server</span></td>
+                    <td>A24: Uploaded within 1 working day of SAP posting date?</td>
+                    <td>Yes &rarr; <code>A26</code>: A26: Read header row 1, map allowlist columns & generate line keys; No &rarr; <code>A25</code>: A25: Log upload delay warning to Admin & RM; import proceeds</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A25</td>
+                    <td><span class="role-badge role-admin">Node Ingestion Server</span></td>
+                    <td>A25: Log upload delay warning to Admin & RM; import proceeds</td>
+                    <td>Next: <code>A26</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A26</td>
+                    <td><span class="role-badge role-admin">Node Ingestion Server</span></td>
+                    <td>A26: Read header row 1, map allowlist columns & generate line keys</td>
+                    <td>Next: <code>A27</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A27</td>
+                    <td><span class="role-badge role-admin">Node Ingestion Server</span></td>
+                    <td>A27: Is document line key already imported in database?</td>
+                    <td>Yes &rarr; <code>A28</code>: A28: Quantity/Item changed with 2nd approval SCM or Finance?; No &rarr; <code>A31</code>: A31: Store code, item code & UoM mapped in Master Data?</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A28</td>
+                    <td><span class="role-badge role-admin">Node Ingestion Server</span></td>
+                    <td>A28: Quantity/Item changed with 2nd approval SCM or Finance?</td>
+                    <td>Yes &rarr; <code>A30</code>: A30: App appends offsetting reversal of old line before re-import; No &rarr; <code>A29</code>: A29: Refresh reference fields only; zero stock change</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A29</td>
+                    <td><span class="role-badge role-admin">Node Ingestion Server</span></td>
+                    <td>A29: Refresh reference fields only; zero stock change</td>
+                    <td>Next: <code>A34</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A30</td>
+                    <td><span class="role-badge role-admin">Node Ingestion Server</span></td>
+                    <td>A30: App appends offsetting reversal of old line before re-import</td>
+                    <td>Next: <code>A31</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A31</td>
+                    <td><span class="role-badge role-admin">Node Ingestion Server</span></td>
+                    <td>A31: Store code, item code & UoM mapped in Master Data?</td>
+                    <td>Yes &rarr; <code>A33</code>: A33: App appends verified GRPO movement to ledger; updates stock; No &rarr; <code>A32</code>: A32: Quarantine line in staging errors; Admin updates master & re-imports</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A32</td>
+                    <td><span class="role-badge role-admin">Node Ingestion Server</span></td>
+                    <td>A32: Quarantine line in staging errors; Admin updates master & re-imports</td>
+                    <td>Next: <code>A34</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A33</td>
+                    <td><span class="role-badge role-admin">Node Ingestion Server</span></td>
+                    <td>A33: App appends verified GRPO movement to ledger; updates stock</td>
+                    <td>Next: <code>A34</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">A34</td>
+                    <td><span class="role-badge role-admin">Import Outcome</span></td>
+                    <td>(End)</td>
+                    <td>Process End</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="control-box">
+            <strong>The Control:</strong> Line key (GRPO No. + Item Code + occurrence order) stops duplicate line ingestion. Header auto-detection handles formatting variances across stores.
+          </div>
+          <div class="exception-box">
+            <strong>Exceptions & App Behavior:</strong> Unmapped item codes quarantined in t_grpo_staging_errors; valid rows imported so kitchen picking is not delayed.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW B -->
+    <section class="flow-section" id="flow-b">
+      <div class="flow-header">
+        <div class="flow-title-group">
+          <div class="flow-letter">B</div>
+          <div>
+            <div class="flow-name">Keep (Custodian & Issue Windows)</div>
+            <div class="flow-subtitle">One named custodian per room, physical room locking outside Admin-configured issue windows</div>
+          </div>
+        </div>
+        <span class="badge badge-teal">Phase: KEEP</span>
+      </div>
+      <div class="chart-summary-line">
+        What this chart does: Restricts storeroom access to single named custodians per room, enforces physical locking outside Admin-configured issue windows, and audits urgent access.
+      </div>
+      <div class="flow-grid">
+        <div class="flow-visual">
+          <img src="flow_b_keep.svg" alt="Keep (Custodian & Issue Windows) Diagram">
+          <div class="visual-toolbar">
+            <span class="visual-label">10 Process Boxes &bull; Verified Valid</span>
+            <div class="btn-group">
+              <a href="flow_b_keep.svg" target="_blank" class="btn-sm">Open SVG</a>
+              <a href="flow_b_keep.png" target="_blank" class="btn-sm">Open PNG</a>
+            </div>
+          </div>
+        </div>
+        <div class="flow-details">
+          <div class="detail-card">
+            <div class="detail-card-title">Transaction Parameters</div>
+            <table class="detail-meta-table">
+              <tr><td class="label">Trigger</td><td>Daily shift start or scheduled issue window.</td></tr>
+              <tr><td class="label">Actors</td><td>Admin User, Room Custodian (or Backup).</td></tr>
+              <tr><td class="label">App Record</td><td>t_custody_logs.</td></tr>
+            </table>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Step-by-Step Execution Table (12 Steps)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step ID</th>
+                    <th>Role</th>
+                    <th>Action Description</th>
+                    <th>Next Step / Transition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="step-id">B1</td>
+                    <td><span class="role-badge role-admin">Admin User</span></td>
+                    <td>(Start)</td>
+                    <td>Next: <code>B2</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">B2</td>
+                    <td><span class="role-badge role-admin">Admin User</span></td>
+                    <td>B2: Admin configures daily Issue Windows in App settings</td>
+                    <td>Next: <code>B3</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">B3</td>
+                    <td><span class="role-badge role-admin">Custodian / Backup per Room</span></td>
+                    <td>B3: Custodian takes physical room key per Master Data</td>
+                    <td>Next: <code>B4</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">B5</td>
+                    <td><span class="role-badge role-admin">Custodian / Backup per Room</span></td>
+                    <td>B5: Unlock storeroom door during configured Issue Window</td>
+                    <td>Next: <code>B6</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">B6</td>
+                    <td><span class="role-badge role-admin">Custodian / Backup per Room</span></td>
+                    <td>B6: Supervise picking; dispense goods against App requests</td>
+                    <td>Next: <code>B7</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">B7</td>
+                    <td><span class="role-badge role-admin">Custodian / Backup per Room</span></td>
+                    <td>B7: Window ends: lock storeroom door immediately</td>
+                    <td>Next: <code>B11</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">B9</td>
+                    <td><span class="role-badge role-admin">Custodian / Backup per Room</span></td>
+                    <td>B9: Keep room locked; refuse all unscheduled access</td>
+                    <td>Next: <code>B12</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">B10</td>
+                    <td><span class="role-badge role-admin">Custodian / Backup per Room</span></td>
+                    <td>B10: Unlock room for emergency extraction of flagged urgent item</td>
+                    <td>Next: <code>B7</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">B4</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>B4: Is current time within configured Issue Window?</td>
+                    <td>Yes &rarr; <code>B5</code>: B5: Unlock storeroom door during configured Issue Window; No &rarr; <code>B8</code>: B8: Authorized urgent request pending in App?</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">B8</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>B8: Authorized urgent request pending in App?</td>
+                    <td>Yes &rarr; <code>B10</code>: B10: Unlock room for emergency extraction of flagged urgent item; No &rarr; <code>B9</code>: B9: Keep room locked; refuse all unscheduled access</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">B11</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>App: Record room locked status & custody confirmation</td>
+                    <td>Next: <code>B12</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">B12</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>(End)</td>
+                    <td>Process End</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="control-box">
+            <strong>The Control:</strong> Storerooms locked outside windows. Only 1 named custodian and 1 backup hold physical keys per room.
+          </div>
+          <div class="exception-box">
+            <strong>Exceptions & App Behavior:</strong> Urgent requests logged with staff ID and timestamp; reviewed weekly by Financial Controller.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW C1 -->
+    <section class="flow-section" id="flow-c1">
+      <div class="flow-header">
+        <div class="flow-title-group">
+          <div class="flow-letter">C1</div>
+          <div>
+            <div class="flow-name">Section Stock Request</div>
+            <div class="flow-subtitle">Authorized section requesters, pre-picking amendments/cancellations, window validation, and urgent tagging</div>
+          </div>
+        </div>
+        <span class="badge badge-teal">Requisition Core</span>
+      </div>
+      <div class="chart-summary-line">
+        What this chart does: Validates that only assigned section requesters can create requisitions, permits amendment (returning to submission) or cancellation before picking, and tags out-of-window requests as urgent without blocking.
+      </div>
+      <div class="flow-grid">
+        <div class="flow-visual">
+          <img src="flow_c1_request.svg" alt="Section Stock Request Diagram">
+          <div class="visual-toolbar">
+            <span class="visual-label">12 Process Boxes &bull; Verified Valid</span>
+            <div class="btn-group">
+              <a href="flow_c1_request.svg" target="_blank" class="btn-sm">Open SVG</a>
+              <a href="flow_c1_request.png" target="_blank" class="btn-sm">Open PNG</a>
+            </div>
+          </div>
+        </div>
+        <div class="flow-details">
+          <div class="detail-card">
+            <div class="detail-card-title">Transaction Parameters</div>
+            <table class="detail-meta-table">
+              <tr><td class="label">Trigger</td><td>Kitchen, Bar, or Cheese section requires stock.</td></tr>
+              <tr><td class="label">Actors</td><td>Assigned Section Requester, Database Engine.</td></tr>
+              <tr><td class="label">App Record</td><td>t_requests, t_request_items.</td></tr>
+            </table>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Step-by-Step Execution Table (14 Steps)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step ID</th>
+                    <th>Role</th>
+                    <th>Action Description</th>
+                    <th>Next Step / Transition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="step-id">C1</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>(Start)</td>
+                    <td>Next: <code>C2</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C2</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C2: User authorized as Section Requester in permissions?</td>
+                    <td>Yes &rarr; <code>C4</code>: C4: Create request: select item, needed time & quantity in kg/pcs; No &rarr; <code>C3</code>: C3: App restricts view to read-only; request creation blocked</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C3</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C3: App restricts view to read-only; request creation blocked</td>
+                    <td>Next: <code>C11</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C4</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C4: Create request: select item, needed time & quantity in kg/pcs</td>
+                    <td>Next: <code>C5</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C5</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C5: Is request submitted inside configured Issue Window?</td>
+                    <td>Yes &rarr; <code>C6</code>: C6: App queues standard request into storeroom picking list; No &rarr; <code>C7</code>: C7: Enter operational reason; request flagged URGENT, not blocked</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C6</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C6: App queues standard request into storeroom picking list</td>
+                    <td>Next: <code>C8</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C7</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C7: Enter operational reason; request flagged URGENT, not blocked</td>
+                    <td>Next: <code>C8</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C8</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C8: Requester requests to modify or cancel queued request?</td>
+                    <td>Yes &rarr; <code>C9</code>: C9: Has warehouse keeper already started picking the request?; No &rarr; <code>C11</code>: (End)</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C9</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C9: Has warehouse keeper already started picking the request?</td>
+                    <td>Yes &rarr; <code>C10</code>: C10: Picking in progress; editing and cancellation locked by App; No &rarr; <code>C12</code>: C12: Does requester choose Edit Quantity?</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C10</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C10: Picking in progress; editing and cancellation locked by App</td>
+                    <td>Next: <code>C11</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C12</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C12: Does requester choose Edit Quantity?</td>
+                    <td>Yes &rarr; <code>C13</code>: C13: Requester updates quantity on existing open request record; No &rarr; <code>C14</code>: C14: Requester cancels request; App marks status cancelled</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C13</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C13: Requester updates quantity on existing open request record</td>
+                    <td>Next: <code>C5</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C14</td>
+                    <td><span class="role-badge role-admin">Assigned Section Requester</span></td>
+                    <td>C14: Requester cancels request; App marks status cancelled</td>
+                    <td>Next: <code>C11</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C11</td>
+                    <td><span class="role-badge role-admin">Request Outcome</span></td>
+                    <td>(End)</td>
+                    <td>Process End</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="control-box">
+            <strong>The Control:</strong> Only assigned section requesters can create requests. Database Row-Level Security blocks unassigned staff.
+          </div>
+          <div class="exception-box">
+            <strong>Exceptions & App Behavior:</strong> Requests outside window flagged URGENT with mandatory reason, never blocked. Editing quantity returns directly to submission step (C5).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW C2 -->
+    <section class="flow-section" id="flow-c2">
+      <div class="flow-header">
+        <div class="flow-title-group">
+          <div class="flow-letter">C2</div>
+          <div>
+            <div class="flow-name">Stock Issue and Confirmation</div>
+            <div class="flow-subtitle">Immediate pending deduction at issue, reversal on decline, expired lot quarantine, and unconfirmed RM alert</div>
+          </div>
+        </div>
+        <span class="badge badge-teal">Issuance Core</span>
+      </div>
+      <div class="chart-summary-line">
+        What this chart does: Manages FIFO picking, diverts expired lots to quarantine, deducts stock immediately at issue as pending confirmation, handles runner acceptance or decline with reversal entries, and checks unconfirmed issues at close.
+      </div>
+      <div class="flow-grid">
+        <div class="flow-visual">
+          <img src="flow_c2_issue_confirm.svg" alt="Stock Issue and Confirmation Diagram">
+          <div class="visual-toolbar">
+            <span class="visual-label">12 Process Boxes &bull; Verified Valid</span>
+            <div class="btn-group">
+              <a href="flow_c2_issue_confirm.svg" target="_blank" class="btn-sm">Open SVG</a>
+              <a href="flow_c2_issue_confirm.png" target="_blank" class="btn-sm">Open PNG</a>
+            </div>
+          </div>
+        </div>
+        <div class="flow-details">
+          <div class="detail-card">
+            <div class="detail-card-title">Transaction Parameters</div>
+            <table class="detail-meta-table">
+              <tr><td class="label">Trigger</td><td>Requisitions appear in storeroom picking queue.</td></tr>
+              <tr><td class="label">Actors</td><td>Warehouse Keeper, Kitchen Runner, Restaurant Manager.</td></tr>
+              <tr><td class="label">App Record</td><td>t_stock_movements (types: ISSUE_PENDING, ISSUE_CONFIRMED, ISSUE_REVERSAL).</td></tr>
+            </table>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Step-by-Step Execution Table (14 Steps)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step ID</th>
+                    <th>Role</th>
+                    <th>Action Description</th>
+                    <th>Next Step / Transition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="step-id">C21</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper</span></td>
+                    <td>(Start)</td>
+                    <td>Next: <code>C22</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C22</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper</span></td>
+                    <td>C22: Admin retrieves items from pick queue following FIFO</td>
+                    <td>Next: <code>C23</code>, <code>C26</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C23</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper</span></td>
+                    <td>C23: Candidate lot valid and unexpired?</td>
+                    <td>Yes &rarr; <code>C25</code>: C25: Stage quantity full or partial; App appends pending deduction; No &rarr; <code>C24</code>: C24: Mark lot blocked in master data; alert keeper</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C24</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper</span></td>
+                    <td>C24: Mark lot blocked in master data; alert keeper</td>
+                    <td>Next: <code>C22</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C25</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper</span></td>
+                    <td>C25: Stage quantity full or partial; App appends pending deduction</td>
+                    <td>Next: <code>C27</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C26</td>
+                    <td><span class="role-badge role-admin">Evening Scenario</span></td>
+                    <td>C26: Evening issue when Admin left - Owner to define</td>
+                    <td>Next: <code>C27</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C27</td>
+                    <td><span class="role-badge role-admin">Kitchen Runner</span></td>
+                    <td>C27: Does runner inspect & accept goods matched to ISSUED qty?</td>
+                    <td>Yes &rarr; <code>C31</code>: C31: Runner confirms; App appends offset & confirmed issue; No &rarr; <code>C28</code>: C28: Does runner actively decline the issued goods?</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C28</td>
+                    <td><span class="role-badge role-admin">Kitchen Runner</span></td>
+                    <td>C28: Does runner actively decline the issued goods?</td>
+                    <td>Yes &rarr; <code>C29</code>: C29: Runner declines; goods to shelf; App appends reversal; alert staff; No &rarr; <code>C30</code>: C30: Day ends unconfirmed; App alerts RM & keeper to confirm or reverse</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C29</td>
+                    <td><span class="role-badge role-admin">Kitchen Runner</span></td>
+                    <td>C29: Runner declines; goods to shelf; App appends reversal; alert staff</td>
+                    <td>Next: <code>C35</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C30</td>
+                    <td><span class="role-badge role-admin">Kitchen Runner</span></td>
+                    <td>C30: Day ends unconfirmed; App alerts RM & keeper to confirm or reverse</td>
+                    <td>Next: <code>C33</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C31</td>
+                    <td><span class="role-badge role-admin">Kitchen Runner</span></td>
+                    <td>C31: Runner confirms; App appends offset & confirmed issue</td>
+                    <td>Next: <code>C32</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C32</td>
+                    <td><span class="role-badge role-admin">Kitchen Runner</span></td>
+                    <td>C32: For partial issue, keep remaining balance open in queue?</td>
+                    <td>Yes &rarr; <code>C22</code>: C22: Admin retrieves items from pick queue following FIFO; No &rarr; <code>C33</code>: (End)</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C35</td>
+                    <td><span class="role-badge role-admin">Kitchen Runner</span></td>
+                    <td>C35: Does requester choose re-pick or cancel remaining request?</td>
+                    <td>Yes &rarr; <code>C22</code>: C22: Admin retrieves items from pick queue following FIFO; No &rarr; <code>C33</code>: (End)</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">C33</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>(End)</td>
+                    <td>Process End</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="control-box">
+            <strong>The Control:</strong> Available stock deducted immediately at issue as pending confirmation (Decision Q7). If declined, an immutable reversal entry is appended. Zero prices shown to kitchen.
+          </div>
+          <div class="exception-box">
+            <strong>Exceptions & App Behavior:</strong> Declined issue appends ISSUE_REVERSAL to ledger and unreserves physical goods. Unconfirmed issues alert RM at close.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW D -->
+    <section class="flow-section" id="flow-d">
+      <div class="flow-header">
+        <div class="flow-title-group">
+          <div class="flow-letter">D</div>
+          <div>
+            <div class="flow-name">Balance (Daily Close Reconciliation)</div>
+            <div class="flow-subtitle">Custodian day closing signature, Finance Lead alert, and persistent morning variance alert without door locking</div>
+          </div>
+        </div>
+        <span class="badge badge-teal">Phase: BALANCE</span>
+      </div>
+      <div class="chart-summary-line">
+        What this chart does: Executes end-of-day mathematical balance, records custodian closing signature, alerts Finance Lead to variances, and flags persistent unresolved variances at the next morning issue window without blocking service.
+      </div>
+      <div class="flow-grid">
+        <div class="flow-visual">
+          <img src="flow_d_balance.svg" alt="Balance (Daily Close Reconciliation) Diagram">
+          <div class="visual-toolbar">
+            <span class="visual-label">12 Process Boxes &bull; Verified Valid</span>
+            <div class="btn-group">
+              <a href="flow_d_balance.svg" target="_blank" class="btn-sm">Open SVG</a>
+              <a href="flow_d_balance.png" target="_blank" class="btn-sm">Open PNG</a>
+            </div>
+          </div>
+        </div>
+        <div class="flow-details">
+          <div class="detail-card">
+            <div class="detail-card-title">Transaction Parameters</div>
+            <table class="detail-meta-table">
+              <tr><td class="label">Trigger</td><td>End of daily warehouse operations.</td></tr>
+              <tr><td class="label">Actors</td><td>Custodian / Warehouse Keeper, Finance Lead, Restaurant Manager, FC.</td></tr>
+              <tr><td class="label">App Record</td><td>t_daily_balances, t_daily_balance_items.</td></tr>
+            </table>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Step-by-Step Execution Table (14 Steps)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step ID</th>
+                    <th>Role</th>
+                    <th>Action Description</th>
+                    <th>Next Step / Transition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="step-id">D1</td>
+                    <td><span class="role-badge role-admin">Custodian / Warehouse Keeper</span></td>
+                    <td>(Start)</td>
+                    <td>Next: <code>D2</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D2</td>
+                    <td><span class="role-badge role-admin">Custodian / Warehouse Keeper</span></td>
+                    <td>D2: Initiate daily closing balance routine at shift end</td>
+                    <td>Next: <code>D3</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D3</td>
+                    <td><span class="role-badge role-admin">Custodian / Warehouse Keeper</span></td>
+                    <td>D3: App computes Expected = Opening + Received - Issued</td>
+                    <td>Next: <code>D4</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D4</td>
+                    <td><span class="role-badge role-admin">Custodian / Warehouse Keeper</span></td>
+                    <td>D4: Count physical stock of top benchmark items & enter in App</td>
+                    <td>Next: <code>D5</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D5</td>
+                    <td><span class="role-badge role-admin">Custodian / Warehouse Keeper</span></td>
+                    <td>D5: Initial count variance Diff == 0?</td>
+                    <td>Yes &rarr; <code>D10</code>: D10: Custodian signs verified daily balance sheet in custodian lane; No &rarr; <code>D6</code>: D6: Recount immediately; audit physical bins and slips</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D6</td>
+                    <td><span class="role-badge role-admin">Custodian / Warehouse Keeper</span></td>
+                    <td>D6: Recount immediately; audit physical bins and slips</td>
+                    <td>Next: <code>D7</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D7</td>
+                    <td><span class="role-badge role-admin">Custodian / Warehouse Keeper</span></td>
+                    <td>D7: Count discrepancy resolved by physical recount?</td>
+                    <td>Yes &rarr; <code>D4</code>: D4: Count physical stock of top benchmark items & enter in App; No &rarr; <code>D8</code>: D8: Document variance cause; alert Finance Lead or RM</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D8</td>
+                    <td><span class="role-badge role-admin">Custodian / Warehouse Keeper</span></td>
+                    <td>D8: Document variance cause; alert Finance Lead or RM</td>
+                    <td>Next: <code>D9</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D10</td>
+                    <td><span class="role-badge role-admin">Custodian / Warehouse Keeper</span></td>
+                    <td>D10: Custodian signs verified daily balance sheet in custodian lane</td>
+                    <td>Next: <code>D11</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D9</td>
+                    <td><span class="role-badge role-admin">Finance Lead / RM</span></td>
+                    <td>D9: Finance Lead or RM records explanation or marks unresolved</td>
+                    <td>Next: <code>D10</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D11</td>
+                    <td><span class="role-badge role-admin">Central FC & App</span></td>
+                    <td>D11: App locks and archives day closing balance record</td>
+                    <td>Next: <code>D12</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D12</td>
+                    <td><span class="role-badge role-admin">Central FC & App</span></td>
+                    <td>D12: Variance remains unresolved when morning issue window opens?</td>
+                    <td>Yes &rarr; <code>D13</code>: D13: App flags persistent variance alert to central FC; service proceeds; No &rarr; <code>D14</code>: (End)</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D13</td>
+                    <td><span class="role-badge role-admin">Central FC & App</span></td>
+                    <td>D13: App flags persistent variance alert to central FC; service proceeds</td>
+                    <td>Next: <code>D14</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">D14</td>
+                    <td><span class="role-badge role-admin">Central FC & App</span></td>
+                    <td>(End)</td>
+                    <td>Process End</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="control-box">
+            <strong>The Control:</strong> Benchmark items counted daily; custodian signs day record at close; separate morning check notifies leadership without blocking store prep.
+          </div>
+          <div class="exception-box">
+            <strong>Exceptions & App Behavior:</strong> Unresolved daily discrepancies flag alerts to FC and RM dashboards (Decision Q10: no door lock).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW E -->
+    <section class="flow-section" id="flow-e">
+      <div class="flow-header">
+        <div class="flow-title-group">
+          <div class="flow-letter">E</div>
+          <div>
+            <div class="flow-name">Handover (Custodian Shift Handover)</div>
+            <div class="flow-subtitle">Shift key custody transfer logged in shift log; permanent master data custodian assignments untouched</div>
+          </div>
+        </div>
+        <span class="badge badge-teal">Phase: HANDOVER</span>
+      </div>
+      <div class="chart-summary-line">
+        What this chart does: Transfers room key and log custody between shift holders, logs temporary key possession in a dedicated shift log without altering permanent master data, and manages dispute recovery.
+      </div>
+      <div class="flow-grid">
+        <div class="flow-visual">
+          <img src="flow_e_handover.svg" alt="Handover (Custodian Shift Handover) Diagram">
+          <div class="visual-toolbar">
+            <span class="visual-label">9 Process Boxes &bull; Verified Valid</span>
+            <div class="btn-group">
+              <a href="flow_e_handover.svg" target="_blank" class="btn-sm">Open SVG</a>
+              <a href="flow_e_handover.png" target="_blank" class="btn-sm">Open PNG</a>
+            </div>
+          </div>
+        </div>
+        <div class="flow-details">
+          <div class="detail-card">
+            <div class="detail-card-title">Transaction Parameters</div>
+            <table class="detail-meta-table">
+              <tr><td class="label">Trigger</td><td>Custodian shift ends or leaves premises.</td></tr>
+              <tr><td class="label">Actors</td><td>Outgoing Custodian, Incoming Next Holder, Manager on Duty.</td></tr>
+              <tr><td class="label">App Record</td><td>t_shift_custody_logs.</td></tr>
+            </table>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Step-by-Step Execution Table (11 Steps)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step ID</th>
+                    <th>Role</th>
+                    <th>Action Description</th>
+                    <th>Next Step / Transition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="step-id">E1</td>
+                    <td><span class="role-badge role-admin">Outgoing Custodian</span></td>
+                    <td>(Start)</td>
+                    <td>Next: <code>E2</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">E2</td>
+                    <td><span class="role-badge role-admin">Outgoing Custodian</span></td>
+                    <td>E2: Shift ends: initiate room handover workflow in App</td>
+                    <td>Next: <code>E3</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">E3</td>
+                    <td><span class="role-badge role-admin">Outgoing Custodian</span></td>
+                    <td>E3: Select named incoming holder & present physical room key</td>
+                    <td>Next: <code>E4</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">E7</td>
+                    <td><span class="role-badge role-admin">Outgoing Custodian</span></td>
+                    <td>E7: Outgoing custodian retains key; logs refusal reason in App</td>
+                    <td>Next: <code>E8</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">E8</td>
+                    <td><span class="role-badge role-admin">Outgoing Custodian</span></td>
+                    <td>E8: Manager on duty resolves dispute or reassigns holder?</td>
+                    <td>Yes &rarr; <code>E3</code>: E3: Select named incoming holder & present physical room key; No &rarr; <code>E9</code>: E9: App freezes room access; escalates emergency alert to FC</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">E4</td>
+                    <td><span class="role-badge role-admin">Incoming Next Holder</span></td>
+                    <td>E4: Joint physical inspection of door locks and issue log</td>
+                    <td>Next: <code>E5</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">E5</td>
+                    <td><span class="role-badge role-admin">Incoming Next Holder</span></td>
+                    <td>E5: Incoming holder accepts physical room state and key?</td>
+                    <td>Yes &rarr; <code>E6</code>: E6: Incoming holder signs digital acceptance on device; No &rarr; <code>E7</code>: E7: Outgoing custodian retains key; logs refusal reason in App</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">E6</td>
+                    <td><span class="role-badge role-admin">Incoming Next Holder</span></td>
+                    <td>E6: Incoming holder signs digital acceptance on device</td>
+                    <td>Next: <code>E10</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">E10</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>E10: App records shift key transfer in shift log; master data unchanged</td>
+                    <td>Next: <code>E11</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">E9</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>E9: App freezes room access; escalates emergency alert to FC</td>
+                    <td>Next: <code>E11</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">E11</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>(End)</td>
+                    <td>Process End</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="control-box">
+            <strong>The Control:</strong> Temporary key possession recorded in shift log without overwriting permanent Master Data assignments.
+          </div>
+          <div class="exception-box">
+            <strong>Exceptions & App Behavior:</strong> Handover refusal retains key with outgoing custodian; triggers MOD dispute loop (E8 -> E3) or emergency lockdown (E9).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW F -->
+    <section class="flow-section" id="flow-f">
+      <div class="flow-header">
+        <div class="flow-title-group">
+          <div class="flow-letter">F</div>
+          <div>
+            <div class="flow-name">Count & Reconciliation</div>
+            <div class="flow-subtitle">Scheduled cycle counts, system freeze, App count function comparing physical vs book stock, recount verification, and approved post-cutoff adjustments</div>
+          </div>
+        </div>
+        <span class="badge badge-teal">Phase: COUNT</span>
+      </div>
+      <div class="chart-summary-line">
+        What this chart does: Governs periodic and month-end counts under freeze, uses the App Count Function to compare physical vs book stock, mandates a single recount, and reconciles the ledger upon FC approval.
+      </div>
+      <div class="flow-grid">
+        <div class="flow-visual">
+          <img src="flow_f_count.svg" alt="Count & Reconciliation Diagram">
+          <div class="visual-toolbar">
+            <span class="visual-label">12 Process Boxes &bull; Verified Valid</span>
+            <div class="btn-group">
+              <a href="flow_f_count.svg" target="_blank" class="btn-sm">Open SVG</a>
+              <a href="flow_f_count.png" target="_blank" class="btn-sm">Open PNG</a>
+            </div>
+          </div>
+        </div>
+        <div class="flow-details">
+          <div class="detail-card">
+            <div class="detail-card-title">Transaction Parameters</div>
+            <table class="detail-meta-table">
+              <tr><td class="label">Trigger</td><td>Weekly high-value schedule or Month-End close cutoff.</td></tr>
+              <tr><td class="label">Actors</td><td>Warehouse Keeper, Store Accountant, Financial Controller.</td></tr>
+              <tr><td class="label">App Record</td><td>t_stock_counts, t_stock_count_items, t_stock_adjustments, t_stock_movements.</td></tr>
+            </table>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Step-by-Step Execution Table (14 Steps)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step ID</th>
+                    <th>Role</th>
+                    <th>Action Description</th>
+                    <th>Next Step / Transition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="step-id">F1</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper & Accountant</span></td>
+                    <td>(Start)</td>
+                    <td>Next: <code>F2</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F2</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper & Accountant</span></td>
+                    <td>F2: Is scheduled count a Month-End Full inventory?</td>
+                    <td>Yes &rarr; <code>F3</code>: App: Enforce System Freeze -- block all receipts & issues; No &rarr; <code>F4</code>: F4: Count bins in spatial order: top-to-bottom, right-to-left</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F4</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper & Accountant</span></td>
+                    <td>F4: Count bins in spatial order: top-to-bottom, right-to-left</td>
+                    <td>Next: <code>F5</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F5</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper & Accountant</span></td>
+                    <td>F5: Enter first physical count into App Count Function</td>
+                    <td>Next: <code>F6</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F7</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper & Accountant</span></td>
+                    <td>F7: Second person conducts one physical recount per procedure</td>
+                    <td>Next: <code>F8</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F8</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper & Accountant</span></td>
+                    <td>F8: Recount resolves discrepancy?</td>
+                    <td>Yes &rarr; <code>F11</code>: F11: Sign count sheet as balanced without adjustment; No &rarr; <code>F9</code>: F9: Accountant inputs root-cause reason on adjustment voucher</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F9</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper & Accountant</span></td>
+                    <td>F9: Accountant inputs root-cause reason on adjustment voucher</td>
+                    <td>Next: <code>F10</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F10</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper & Accountant</span></td>
+                    <td>F10: Financial Controller approves adjustment voucher?</td>
+                    <td>Yes &rarr; <code>F12</code>: F12: FC approves voucher; App appends adjustment to ledger; No &rarr; <code>F9</code>: F9: Accountant inputs root-cause reason on adjustment voucher</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F11</td>
+                    <td><span class="role-badge role-admin">Warehouse Keeper & Accountant</span></td>
+                    <td>F11: Sign count sheet as balanced without adjustment</td>
+                    <td>Next: <code>F13</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F12</td>
+                    <td><span class="role-badge role-admin">Financial Controller</span></td>
+                    <td>F12: FC approves voucher; App appends adjustment to ledger</td>
+                    <td>Next: <code>F13</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F3</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>App: Enforce System Freeze -- block all receipts & issues</td>
+                    <td>Next: <code>F4</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F6</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>F6: App compares count with expected stock: Diff == 0?</td>
+                    <td>Yes &rarr; <code>F11</code>: F11: Sign count sheet as balanced without adjustment; No &rarr; <code>F7</code>: F7: Second person conducts one physical recount per procedure</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F13</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>App: Lift freeze & archive reconciled count certificate</td>
+                    <td>Next: <code>F14</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">F14</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>(End)</td>
+                    <td>Process End</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="control-box">
+            <strong>The Control:</strong> App count function compares physical count directly against derived book stock. Recount done by independent second person. Adjustments post only with FC approval.
+          </div>
+          <div class="exception-box">
+            <strong>Exceptions & App Behavior:</strong> Rejection of adjustment voucher by FC triggers investigation loop (F10 -> F9). Emergency issues during freeze require break-glass FC override.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW G -->
+    <section class="flow-section" id="flow-g">
+      <div class="flow-header">
+        <div class="flow-title-group">
+          <div class="flow-letter">G</div>
+          <div>
+            <div class="flow-name">Other Movements (Waste, Returns, Transfers)</div>
+            <div class="flow-subtitle">Waste disposal write-offs, supplier returns with PO match, and in-transit store transfers with dual signatures</div>
+          </div>
+        </div>
+        <span class="badge badge-teal">Phase: OTHER</span>
+      </div>
+      <div class="chart-summary-line">
+        What this chart does: Controls non-standard stock movements with split dispatch/receiving lanes, dedicated supplier return verification, in-transit transfer status with dual signatures, and FC variance approvals (Quantities only).
+      </div>
+      <div class="flow-grid">
+        <div class="flow-visual">
+          <img src="flow_g_other_movements.svg" alt="Other Movements (Waste, Returns, Transfers) Diagram">
+          <div class="visual-toolbar">
+            <span class="visual-label">12 Process Boxes &bull; Verified Valid</span>
+            <div class="btn-group">
+              <a href="flow_g_other_movements.svg" target="_blank" class="btn-sm">Open SVG</a>
+              <a href="flow_g_other_movements.png" target="_blank" class="btn-sm">Open PNG</a>
+            </div>
+          </div>
+        </div>
+        <div class="flow-details">
+          <div class="detail-card">
+            <div class="detail-card-title">Transaction Parameters</div>
+            <table class="detail-meta-table">
+              <tr><td class="label">Trigger</td><td>Spoilage identified, vendor return needed, or outlet transfer requested.</td></tr>
+              <tr><td class="label">Actors</td><td>Dispatching Keeper (Store A), Approver (RM / FC), Receiving Keeper (Store B).</td></tr>
+              <tr><td class="label">App Record</td><td>t_other_movements, t_transfer_intransit, t_waste_returns_log, t_stock_movements.</td></tr>
+            </table>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Step-by-Step Execution Table (14 Steps)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step ID</th>
+                    <th>Role</th>
+                    <th>Action Description</th>
+                    <th>Next Step / Transition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="step-id">G1</td>
+                    <td><span class="role-badge role-admin">Dispatching Keeper (Store A)</span></td>
+                    <td>(Start)</td>
+                    <td>Next: <code>G2</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G2</td>
+                    <td><span class="role-badge role-admin">Dispatching Keeper (Store A)</span></td>
+                    <td>G2: Is movement an Inter-Store Transfer?</td>
+                    <td>Yes &rarr; <code>G3</code>: G3: Dispatch keeper signs BOTH units; App marks In-Transit; No &rarr; <code>G9</code>: G9: Is outflow a Supplier Return?</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G3</td>
+                    <td><span class="role-badge role-admin">Dispatching Keeper (Store A)</span></td>
+                    <td>G3: Dispatch keeper signs BOTH units; App marks In-Transit</td>
+                    <td>Next: <code>G4</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G9</td>
+                    <td><span class="role-badge role-admin">Dispatching Keeper (Store A)</span></td>
+                    <td>G9: Is outflow a Supplier Return?</td>
+                    <td>Yes &rarr; <code>G10</code>: G10: Match PO/GRPO; generate return document & driver sign; No &rarr; <code>G11</code>: G11: Staff logs item, waste quantity, photo evidence & reason</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G10</td>
+                    <td><span class="role-badge role-admin">Dispatching Keeper (Store A)</span></td>
+                    <td>G10: Match PO/GRPO; generate return document & driver sign</td>
+                    <td>Next: <code>G12</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G11</td>
+                    <td><span class="role-badge role-admin">Dispatching Keeper (Store A)</span></td>
+                    <td>G11: Staff logs item, waste quantity, photo evidence & reason</td>
+                    <td>Next: <code>G12</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G4</td>
+                    <td><span class="role-badge role-admin">Receiving Keeper (Store B)</span></td>
+                    <td>G4: Receiving keeper verifies seal; counts in BOTH units</td>
+                    <td>Next: <code>G5</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G5</td>
+                    <td><span class="role-badge role-admin">Receiving Keeper (Store B)</span></td>
+                    <td>G5: Counted quantities match dispatch note in BOTH units?</td>
+                    <td>Yes &rarr; <code>G6</code>: G6: Receiving keeper signs; App appends Transfer In to ledger; No &rarr; <code>G7</code>: G7: FC approves transit variance adjustment voucher?</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G6</td>
+                    <td><span class="role-badge role-admin">Receiving Keeper (Store B)</span></td>
+                    <td>G6: Receiving keeper signs; App appends Transfer In to ledger</td>
+                    <td>Next: <code>G14</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G7</td>
+                    <td><span class="role-badge role-admin">Approver (RM / FC)</span></td>
+                    <td>G7: FC approves transit variance adjustment voucher?</td>
+                    <td>Yes &rarr; <code>G6</code>: G6: Receiving keeper signs; App appends Transfer In to ledger; No &rarr; <code>G8</code>: G8: Book received qty; close transit; book diff as held shrinkage</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G8</td>
+                    <td><span class="role-badge role-admin">Approver (RM / FC)</span></td>
+                    <td>G8: Book received qty; close transit; book diff as held shrinkage</td>
+                    <td>Next: <code>G14</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G12</td>
+                    <td><span class="role-badge role-admin">Approver (RM / FC)</span></td>
+                    <td>G12: Independent Approver authorizes waste or supplier return?</td>
+                    <td>Yes &rarr; <code>G13</code>: App: Append Waste or Return movement; deducts stock; No &rarr; <code>G14</code>: (End)</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G13</td>
+                    <td><span class="role-badge role-admin">Approver (RM / FC)</span></td>
+                    <td>App: Append Waste or Return movement; deducts stock</td>
+                    <td>Next: <code>G14</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">G14</td>
+                    <td><span class="role-badge role-admin">Movement Outcome</span></td>
+                    <td>(End)</td>
+                    <td>Process End</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="control-box">
+            <strong>The Control:</strong> Transfers tracked in-transit with dispatch signature and receiving verification. FC approves transit variances. Waste claims require photo evidence.
+          </div>
+          <div class="exception-box">
+            <strong>Exceptions & App Behavior:</strong> Broken vehicle seal halts unloading immediately; escalates to FC. Claim rejection leaves goods in stock.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLOW H -->
+    <section class="flow-section" id="flow-h">
+      <div class="flow-header">
+        <div class="flow-title-group">
+          <div class="flow-letter">H</div>
+          <div>
+            <div class="flow-name">Add a New Store or Warehouse (Approval)</div>
+            <div class="flow-subtitle">Multi-store expansion (5–6 stores), structural validation, Financial Controller authorization, and master data activation</div>
+          </div>
+        </div>
+        <span class="badge badge-teal">FC Approval Gate</span>
+      </div>
+      <div class="chart-summary-line">
+        What this chart does: Manages multi-store expansion proposals, validates store/warehouse hierarchy, enforces FC approval, and activates master data.
+      </div>
+      <div class="flow-grid">
+        <div class="flow-visual">
+          <img src="flow_h_add_store_warehouse.svg" alt="Add a New Store or Warehouse (Approval) Diagram">
+          <div class="visual-toolbar">
+            <span class="visual-label">9 Process Boxes &bull; Verified Valid</span>
+            <div class="btn-group">
+              <a href="flow_h_add_store_warehouse.svg" target="_blank" class="btn-sm">Open SVG</a>
+              <a href="flow_h_add_store_warehouse.png" target="_blank" class="btn-sm">Open PNG</a>
+            </div>
+          </div>
+        </div>
+        <div class="flow-details">
+          <div class="detail-card">
+            <div class="detail-card-title">Transaction Parameters</div>
+            <table class="detail-meta-table">
+              <tr><td class="label">Trigger</td><td>Business expansion requires new restaurant store or controlled storeroom.</td></tr>
+              <tr><td class="label">Actors</td><td>Admin User, Financial Controller (FC).</td></tr>
+              <tr><td class="label">App Record</td><td>t_store_warehouse_approvals, m_stores, m_warehouses.</td></tr>
+            </table>
+          </div>
+          <div class="detail-card">
+            <div class="detail-card-title">Step-by-Step Execution Table (11 Steps)</div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Step ID</th>
+                    <th>Role</th>
+                    <th>Action Description</th>
+                    <th>Next Step / Transition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="step-id">H1</td>
+                    <td><span class="role-badge role-admin">Admin User</span></td>
+                    <td>(Start)</td>
+                    <td>Next: <code>H2</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">H2</td>
+                    <td><span class="role-badge role-admin">Admin User</span></td>
+                    <td>H2: Initiate Add Store or Add Warehouse proposal in App</td>
+                    <td>Next: <code>H3</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">H3</td>
+                    <td><span class="role-badge role-admin">Admin User</span></td>
+                    <td>H3: Enter Store/Room metadata, floor, type & assign custodians</td>
+                    <td>Next: <code>H4</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">H6</td>
+                    <td><span class="role-badge role-admin">Financial Controller</span></td>
+                    <td>H6: FC approves new Store or Warehouse proposal?</td>
+                    <td>Yes &rarr; <code>H8</code>: H8: Sign digital authorization in App; No &rarr; <code>H7</code>: H7: Reject proposal with mandatory written justification</td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">H7</td>
+                    <td><span class="role-badge role-admin">Financial Controller</span></td>
+                    <td>H7: Reject proposal with mandatory written justification</td>
+                    <td>Next: <code>H9</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">H8</td>
+                    <td><span class="role-badge role-admin">Financial Controller</span></td>
+                    <td>H8: Sign digital authorization in App</td>
+                    <td>Next: <code>H10</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">H4</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>App: Validate naming uniqueness & store hierarchy</td>
+                    <td>Next: <code>H5</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">H5</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>App: Queue pending proposal & dispatch alert to FC</td>
+                    <td>Next: <code>H6</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">H9</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>App: Record rejection & notify requesting Admin</td>
+                    <td>Next: <code>H11</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">H10</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>App: Activate Store/Warehouse in Master Data; enable access</td>
+                    <td>Next: <code>H11</code></td>
+                  </tr>
+                  <tr>
+                    <td class="step-id">H11</td>
+                    <td><span class="role-badge role-admin">App / System</span></td>
+                    <td>(End)</td>
+                    <td>Process End</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="control-box">
+            <strong>The Control:</strong> Hard authorization gate. Storekeepers cannot create unmonitored storage rooms. Every storage facility requires formal FC approval and named custodians.
+          </div>
+          <div class="exception-box">
+            <strong>Exceptions & App Behavior:</strong> Pop-up event storage must still go through Flow H with an explicit expiration date.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: OPEN QUESTIONS -->
+    <section class="intro-card" id="questions" style="border-left: 4px solid var(--amber);">
+      <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Section 6: Open Questions for Owner Decision (v1.6 Renewed)</h3>
+      <p style="font-size: 14px; color: #475569; margin-bottom: 20px;">
+        7 specific technical and operational decisions required from the Financial Controller. All design assumptions are marked [ASSUMPTION].
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="background: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid var(--border);">
+          <strong style="color: #0369a1;">Q1: Staff Without Company Email Addresses (Decision 1) [ASSUMPTION]</strong>
+          <p style="font-size: 13px; color: #334155; margin-top: 4px;"><strong>Question:</strong> How should staff without an individual company email be onboarded for mobile app access?</p>
+          <p style="font-size: 12px; color: #64748b; margin-top: 2px;"><em>Recommendation:</em> Standardize company internal email domain for all runners so personal email privacy is protected.</p>
+        </div>
+
+        <div style="background: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid var(--border);">
+          <strong style="color: #0369a1;">Q2: Daily Variance Escalation — Store-Level Finance Lead vs. Central FC (Flow D) [ASSUMPTION]</strong>
+          <p style="font-size: 13px; color: #334155; margin-top: 4px;"><strong>Question:</strong> Across 5–6 stores, should evening variance alerts route to a store-level Finance Lead / RM first, or directly to the central FC?</p>
+          <p style="font-size: 12px; color: #64748b; margin-top: 2px;"><em>Recommendation:</em> Route to store-level Finance Lead / RM immediately at close; escalate to central FC only if unresolved by next morning's issue window. Limit: owner to set.</p>
+        </div>
+
+        <div style="background: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid var(--border);">
+          <strong style="color: #0369a1;">Q3: SAP GRPO Line Key & Lack of Line-Number Column (Real SAP Sample Facts)</strong>
+          <p style="font-size: 13px; color: #334155; margin-top: 4px;"><strong>Question:</strong> Can the SAP administrator add an explicit line-number column to the export layout?</p>
+          <p style="font-size: 12px; color: #64748b; margin-top: 2px;"><em>Assumption:</em> Real export is .xlsx with 27 columns. Analysis shows 121 rows share the same GRPO No. + Item Code. Fallback key = GRPO No. + Item Code + occurrence order inside document.</p>
+        </div>
+
+        <div style="background: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid var(--border);">
+          <strong style="color: #0369a1;">Q4: Scope of GRPO Remarks (Inbound Supplier Receipts vs. Internal Transfers)</strong>
+          <p style="font-size: 13px; color: #334155; margin-top: 4px;"><strong>Question:</strong> Are all GRPO lines in this export inbound receipts from external vendors to the main warehouse, or do some lines represent internal store-to-store transfers?</p>
+          <p style="font-size: 12px; color: #64748b; margin-top: 2px;"><em>Recommendation:</em> Filter file at ingestion to include only inbound PO receipts; store-to-store transfers must use Flow G.</p>
+        </div>
+
+        <div style="background: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid var(--border);">
+          <strong style="color: #0369a1;">Q5: Mandatory Deadline for SAP GRPO Upload (Flow A-2)</strong>
+          <p style="font-size: 13px; color: #334155; margin-top: 4px;"><strong>Question:</strong> Confirm whether persistent late uploads should trigger an escalation to the SCM Lead.</p>
+          <p style="font-size: 12px; color: #64748b; margin-top: 2px;"><em>Recommendation:</em> Owner decided: latest 1 working day after SAP posting date (warning badge displayed). Summarize late upload frequency in weekly SCM executive digests.</p>
+        </div>
+
+        <div style="background: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid var(--border);">
+          <strong style="color: #0369a1;">Q6: Evening Issue Protocol when Admin has Left (Flow C-2 Step C26)</strong>
+          <p style="font-size: 13px; color: #334155; margin-top: 4px;"><strong>Question:</strong> Which evening access protocol do you approve for Step C26?</p>
+          <p style="font-size: 12px; color: #64748b; margin-top: 2px;"><em>Recommendation:</em> Option A: Shift handover of evening key to Restaurant Manager (RM / Manager on Duty) via Flow E. Kitchen submits urgent request in App; RM dispenses and runner confirms receipt on RM device.</p>
+        </div>
+
+        <div style="background: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid var(--border);">
+          <strong style="color: #0369a1;">Q7: User Scope Boundaries across 5–6 Stores (Flow 0)</strong>
+          <p style="font-size: 13px; color: #334155; margin-top: 4px;"><strong>Question:</strong> Should a user account be locked to exactly 1 store, or can regional staff switch between stores?</p>
+          <p style="font-size: 12px; color: #64748b; margin-top: 2px;"><em>Recommendation:</em> Single login with a top-bar Store Switcher dropdown, restricted strictly to stores granted in <code>m_user_permissions</code>.</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    Pizza 4P's India Operations &bull; Back-of-House Inventory Control &bull; Verified Specification v1.6<br>
+    <small style="color: #64748b;">Contrast ratios mathematically computed via WCAG 2.1 relative luminance formula: Navy (#0f172a) on White = 17.85:1 &bull; Primary (#0369a1) on White = 5.93:1 &bull; Amber (#b45309) on White = 5.02:1.</small>
+  </footer>
+
+</body>
+</html>

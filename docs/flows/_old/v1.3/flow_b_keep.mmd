@@ -1,0 +1,29 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+
+  subgraph Admin["Admin User"]
+    B1((Start)):::startNode --> B2[B2: Admin configures daily Issue Windows in App settings]:::actionNode
+  end
+
+  subgraph Custodian["Custodian / Backup per Room"]
+    B2 --> B3[B3: Custodian takes physical room key per Master Data]:::actionNode
+    B5[B5: Unlock storeroom door during configured Issue Window]:::actionNode --> B6[B6: Supervise picking; dispense goods against App requests]:::actionNode
+    B6 --> B7[B7: Window ends: lock storeroom door immediately]:::actionNode
+    B9[B9: Keep room locked; refuse all unscheduled access]:::actionNode
+    B10[B10: Unlock room for emergency extraction of flagged urgent item]:::actionNode --> B7
+  end
+
+  subgraph System["App / System"]
+    B3 --> B4{B4: Is current time within configured Issue Window?}:::decisionNode
+    B4 -- "Yes" --> B5
+    B4 -- "No" --> B8{B8: Authorized urgent request pending in App?}:::decisionNode
+    B8 -- "No" --> B9
+    B8 -- "Yes" --> B10
+    B7 --> B11[App: Record room locked status & custody confirmation]:::recordNode
+    B9 --> B12((End)):::endNode
+    B11 --> B12
+  end

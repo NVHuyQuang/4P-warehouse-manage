@@ -1,0 +1,32 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+
+  subgraph Admin["System Admin"]
+    U1((Start)):::startNode --> U2{U2: Is action triggered by System Admin for user management?}:::decisionNode
+    U2 -- "Yes" --> U3{U3: Is System Admin onboarding a new staff member?}:::decisionNode
+    U3 -- "Yes" --> U4[U4: System Admin creates profile and assigns role and scope]:::actionNode
+    U4 --> U5[U5: System Admin dispatches email invitation link; expiry: owner to set]:::actionNode
+    U3 -- "No" --> U6[U6: System Admin deactivates leaver or unlocks account]:::actionNode
+  end
+
+  subgraph Staff["Staff User"]
+    U5 --> U7[U7: User opens email link and sets private password]:::actionNode
+    U2 -- "No" --> U8{U8: Does staff request password reset from login screen?}:::decisionNode
+    U8 -- "Yes" --> U5
+    U7 --> U9{U9: Staff enters correct password within attempt limit?}:::decisionNode
+    U8 -- "No" --> U9
+    U9 -- "No" --> U10{U10: Consecutive failed attempts exceed lockout limit?}:::decisionNode
+    U10 -- "No" --> U9
+    U10 -- "Yes" --> U11[U11: Database locks account; alert sent to System Admin]:::actionNode
+    U9 -- "Yes" --> U12[U12: Database authenticates session; applies role & scope via RLS]:::actionNode
+  end
+
+  subgraph System["System Outcome"]
+    U6 --> U13((End)):::endNode
+    U11 --> U13
+    U12 --> U13
+  end

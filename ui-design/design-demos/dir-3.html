@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Day-Dot</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#ffffff; --ink:#0a0a0a; --grey:#575757; --wash:#efefef;
+  --mon:#FFD400; --tue:#FF8A1F; --wed:#FF5C8A; --thu:#9BE22B; --fri:#4DA3FF; --sat:#B58CFF; --sun:#19D3C5;
+  --amber:#FFB800; --red:#D0021B; --ok:#0B7A3B;
+  --rule:3px solid var(--ink);
+  --sans:'Archivo','Arial Black',Arial,sans-serif;
+  --mono:'IBM Plex Mono',Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-weight:600;font-size:16px;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+button:disabled{cursor:not-allowed}
+
+/* ---------- board ---------- */
+.board{position:relative;width:2400px;height:2020px;background:var(--paper);overflow:hidden}
+.strip{position:absolute;left:0;top:0;width:100%;height:132px;display:grid;grid-template-columns:repeat(7,1fr);border-bottom:var(--rule)}
+.strip div{display:flex;align-items:flex-end;padding:0 24px 14px;font-weight:900;font-stretch:125%;font-size:64px;line-height:1;border-right:var(--rule);letter-spacing:-.02em}
+.strip div:last-child{border-right:0}
+.board h1{position:absolute;left:140px;top:170px;font-weight:900;font-stretch:112%;font-size:120px;line-height:1;letter-spacing:-.035em}
+.pos{position:absolute;left:144px;top:330px;font-size:30px;font-weight:600;max-width:1500px;line-height:1.25}
+.mark{position:absolute;right:140px;top:190px;text-align:right;font-weight:800;font-size:34px;line-height:1.2}
+.mark small{display:block;font-size:14px;font-weight:600;color:var(--grey);margin-top:6px}
+.slot{position:absolute;width:410px}
+.cap{background:var(--ink);color:#fff;padding:14px 20px 16px;height:100px;border:var(--rule)}
+.cap b{display:block;font-size:42px;font-weight:900;font-stretch:112%;line-height:1;letter-spacing:-.02em}
+.cap span{display:block;font-size:17px;margin-top:8px;font-weight:600}
+.note{position:absolute;width:400px;font-size:18px;line-height:1.4}
+.note h3{font-size:30px;font-weight:900;font-stretch:112%;margin-bottom:10px;letter-spacing:-.02em}
+.key{display:grid;grid-template-columns:repeat(7,1fr);gap:0;margin:0 0 14px;border:var(--rule)}
+.key .dd{width:auto;height:54px;border:0;border-right:var(--rule);font-size:15px}
+.key .dd:last-child{border-right:0}
+.flash{animation:fl .9s}
+@keyframes fl{0%,60%{outline:10px solid var(--ink);outline-offset:6px}100%{outline:10px solid transparent;outline-offset:6px}}
+
+/* ---------- phone ---------- */
+.phone{width:410px;height:864px;padding:10px;background:var(--ink);border-radius:46px;margin-top:-3px}
+.screen{position:relative;width:390px;height:844px;background:var(--paper);border-radius:36px;overflow:hidden;display:flex;flex-direction:column}
+.top{display:flex;height:60px;flex:none;border-bottom:var(--rule)}
+.top button{height:57px;font-weight:800;font-size:16px;display:flex;align-items:center;gap:10px;padding:0 14px}
+.top .l{border-right:var(--rule);flex:1}
+.top .r{margin-left:auto;border-left:var(--rule);font-family:var(--mono);font-size:15px}
+.bars{width:20px;height:14px;border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);position:relative}
+.bars:after{content:"";position:absolute;left:0;right:0;top:3px;height:3px;background:var(--ink)}
+.chev{width:9px;height:9px;border-right:3px solid var(--ink);border-bottom:3px solid var(--ink);transform:rotate(45deg) translate(-2px,-2px)}
+.body{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+.bar{flex:none;border-top:var(--rule);padding:10px 12px 12px;background:var(--paper)}
+.bar small{display:block;font-size:13px;color:var(--grey);margin-bottom:7px;font-weight:600}
+.giant{width:100%;height:68px;background:var(--ink);color:#fff;font-weight:900;font-stretch:112%;font-size:24px;letter-spacing:-.01em;border-radius:0}
+.giant:disabled{background:var(--wash);color:var(--grey);border:3px dashed var(--grey)}
+.giant.urgent{background:var(--red)}
+.h{font-weight:900;font-stretch:112%;font-size:44px;line-height:1;letter-spacing:-.03em;padding:18px 14px 4px}
+.sub{padding:0 14px 14px;font-size:16px;color:var(--grey);font-weight:600}
+.seg{display:flex;border-top:var(--rule);border-bottom:var(--rule)}
+.seg button{flex:1;min-height:56px;font-weight:800;font-size:16px;text-align:left;padding:6px 14px;border-right:var(--rule);line-height:1.15}
+.seg button:last-child{border-right:0}
+.seg button small{display:block;font-family:var(--mono);font-size:12px;font-weight:600;margin-top:2px}
+.seg .on{background:var(--ink);color:#fff}
+.slab{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:var(--rule);min-height:64px}
+.slab .t{flex:1;min-width:0}
+.slab .t b{display:block;font-size:19px;font-weight:800;line-height:1.15}
+.slab .t i{display:block;font-style:normal;font-size:14px;color:var(--grey);margin-top:2px}
+.qty{font-weight:900;font-stretch:112%;font-size:30px;letter-spacing:-.03em;text-align:right;line-height:1;white-space:nowrap}
+.qty small{font-size:15px;font-weight:700;letter-spacing:0;margin-left:3px}
+.dd{flex:none;width:52px;height:52px;border:var(--rule);display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;font-stretch:112%;color:var(--ink)}
+.d-mon{background:var(--mon)}.d-tue{background:var(--tue)}.d-wed{background:var(--wed)}.d-thu{background:var(--thu)}.d-fri{background:var(--fri)}.d-sat{background:var(--sat)}.d-sun{background:var(--sun)}
+.dd.sm{width:44px;height:44px;font-size:14px}
+.tag{display:inline-block;font-size:13px;font-weight:800;padding:2px 8px;border:2px solid var(--ink);margin-top:5px;line-height:1.3}
+.tag.amber{background:var(--amber)}
+.tag.red{background:var(--red);color:#fff;border-color:var(--red)}
+.tag.ink{background:var(--ink);color:#fff}
+.tag.grey{background:var(--wash);border-color:var(--grey);color:var(--ink)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;border-bottom:var(--rule)}
+.tile{min-height:100px;padding:10px 14px;text-align:left;border-right:var(--rule);border-bottom:var(--rule);position:relative}
+.tile:nth-child(2n){border-right:0}.tile:nth-child(n+3){border-bottom:0}
+.tile b{display:block;font-size:56px;font-weight:900;font-stretch:112%;line-height:.95;letter-spacing:-.04em}
+.tile span{display:block;font-size:16px;font-weight:700;margin-top:2px}
+.tile.on{background:var(--ink);color:#fff}
+.tile em{position:absolute;right:10px;top:12px;font-style:normal;background:var(--red);color:#fff;font-size:13px;font-weight:800;padding:3px 7px}
+.banner{padding:12px 14px;border-bottom:var(--rule);background:var(--ink);color:#fff;display:flex;gap:12px;align-items:center}
+.banner p{flex:1;font-size:16px;line-height:1.25}
+.banner button{height:52px;min-width:92px;padding:0 14px;background:var(--mon);color:var(--ink);font-weight:900;border:3px solid var(--mon);font-size:17px}
+.win{padding:12px 14px;border-bottom:var(--rule);display:flex;gap:12px;align-items:center;font-size:16px;font-weight:700}
+.dot{width:16px;height:16px;border-radius:50%;background:var(--ok);border:3px solid var(--ink);flex:none}
+.dot.out{background:var(--red)}
+.sw{margin-left:auto;height:48px;min-width:96px;border:var(--rule);font-weight:800;padding:0 10px;font-size:15px}
+.sw.on{background:var(--ink);color:#fff}
+.step{display:flex;align-items:stretch;border:var(--rule)}
+.step button{width:68px;height:64px;font-size:40px;font-weight:900;line-height:1;background:var(--paper)}
+.step button:first-child{border-right:var(--rule)}.step button:last-child{border-left:var(--rule);background:var(--ink);color:#fff}
+.step button:disabled{background:var(--wash);color:var(--grey)}
+.step output{flex:1;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;font-stretch:112%;letter-spacing:-.03em;min-width:92px}
+.step output small{font-size:16px;margin-left:4px;font-weight:700;letter-spacing:0}
+.step.sm button{width:56px;height:52px;font-size:32px}.step.sm output{font-size:28px;min-width:80px}
+.ln{padding:12px 14px;border-bottom:var(--rule)}
+.ln .r1{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}
+.ln .r1 b{font-size:20px;font-weight:800}
+.ghost{min-height:48px;padding:0 12px;border:var(--rule);font-weight:800;font-size:15px}
+.ghost.on{background:var(--ink);color:#fff}
+.ghost.danger{border-color:var(--red);color:var(--red)}
+.u{display:inline-flex}.u .ghost{min-height:48px}.u .ghost+.ghost{border-left:0}
+input[type=text],textarea{width:100%;font:inherit;font-weight:600;font-size:18px;padding:12px 14px;border:var(--rule);border-radius:0;background:var(--paper);color:var(--ink)}
+textarea{min-height:92px;resize:none}
+input::placeholder,textarea::placeholder{color:var(--grey)}
+.fld{padding:12px 14px;border-bottom:var(--rule)}
+.fld label{display:block;font-size:14px;font-weight:800;margin-bottom:6px}
+.res button{display:flex;width:100%;align-items:center;gap:12px;min-height:56px;padding:6px 14px;border-bottom:2px solid var(--ink);text-align:left;font-weight:800;font-size:18px}
+.res button span{margin-left:auto;font-size:14px;font-weight:700;color:var(--grey)}
+.sec{padding:16px 14px 8px;font-weight:900;font-stretch:112%;font-size:26px;letter-spacing:-.02em}
+.req{padding:12px 14px;border-bottom:var(--rule)}
+.req .r1{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.req .id{font-family:var(--mono);font-size:14px}
+.req p{font-size:17px;line-height:1.3}
+.req .ac{display:flex;gap:8px;margin-top:10px}
+.req.cx p{text-decoration:line-through;color:var(--grey)}
+.urgent-badge{background:var(--red);color:#fff;font-weight:900;font-size:15px;padding:4px 10px;letter-spacing:.02em}
+.lot{display:flex;align-items:center;gap:10px;width:100%;min-height:68px;padding:6px 14px;border-top:2px solid var(--ink);text-align:left}
+.lot .t{flex:1;font-size:14px;line-height:1.3}
+.lot .t b{font-family:var(--mono);font-size:14px;font-weight:600;display:block}
+.lot .q{font-weight:900;font-size:19px;font-stretch:112%;text-align:right}
+.lot.sel{background:var(--ink);color:#fff}
+.lot.sel .dd{border-color:#fff}
+.lot.lock{background:repeating-linear-gradient(135deg,#fff 0 8px,#e3e3e3 8px 16px);color:var(--grey)}
+.lot.lock .q{text-decoration:line-through}
+.box{width:26px;height:26px;border:3px solid currentColor;flex:none;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;font-weight:900}
+.ledger{margin:12px 14px;border:var(--rule);font-family:var(--mono);font-size:14px;font-weight:600}
+.ledger div{padding:8px 10px;border-bottom:2px solid var(--ink);line-height:1.35}
+.ledger div:last-child{border-bottom:0}
+.ledger div.hd{background:var(--ink);color:#fff;font-family:var(--sans);font-weight:800;font-size:14px}
+.ledger b{font-weight:600}
+.msg{margin:10px 14px 0;font-size:15px;font-weight:700;color:var(--red)}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);border:var(--rule);margin-bottom:12px}
+.grid4 div{padding:6px 8px;border-right:2px solid var(--ink);font-size:12px;font-weight:700;color:var(--grey)}
+.grid4 div:last-child{border-right:0;background:var(--ink);color:#fff}
+.grid4 b{display:block;font-size:22px;font-weight:900;font-stretch:112%;color:inherit;letter-spacing:-.03em}
+.grid4 div:not(:last-child) b{color:var(--ink)}
+.diff{display:inline-flex;align-items:center;justify-content:center;min-width:112px;height:64px;padding:0 12px;border:var(--rule);font-size:28px;font-weight:900;font-stretch:112%;letter-spacing:-.03em}
+.diff small{font-size:13px;font-weight:700;margin-right:6px;letter-spacing:0}
+.diff.z{background:var(--thu)}
+.diff.nz{background:var(--red);color:#fff;border-color:var(--ink)}
+.diff.ok2{background:var(--paper)}
+.row2{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.panel{margin:12px 0 0;border:var(--rule);background:var(--wash)}
+.panel .p{padding:12px;border-bottom:2px solid var(--ink)}
+.panel .p:last-child{border-bottom:0}
+.panel h4{font-size:17px;font-weight:900;margin-bottom:8px}
+.causes{display:flex;flex-wrap:wrap;gap:8px}
+.done-pill{padding:12px;font-weight:800;font-size:15px;line-height:1.3}
+.empty{margin:24px 14px;padding:20px;border:var(--rule);border-style:dashed;font-size:17px;line-height:1.35}
+.empty b{display:block;font-size:22px;font-weight:900;margin-bottom:6px}
+.btnrow{display:flex;gap:10px;padding:12px 14px;border-bottom:var(--rule)}
+.btnrow .ghost{flex:1;min-height:56px;font-size:17px}
+.layer{position:absolute;inset:0;pointer-events:none}
+.layer .scrim{position:absolute;inset:0;background:rgba(0,0,0,.55);pointer-events:auto}
+.layer .sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-top:var(--rule);pointer-events:auto}
+.sheet h5{font-size:26px;font-weight:900;font-stretch:112%;padding:16px 14px 6px;letter-spacing:-.02em}
+.sheet p{padding:0 14px 10px;font-size:15px;color:var(--grey)}
+.sheet .opt{display:flex;width:100%;align-items:center;gap:12px;min-height:64px;padding:8px 14px;border-top:var(--rule);text-align:left;font-weight:800;font-size:19px}
+.sheet .opt.on{background:var(--ink);color:#fff}
+.sheet .opt small{display:block;font-size:13px;font-weight:600;font-family:var(--mono)}
+.sheet .opt.off{color:var(--grey)}
+.sheet .x{width:100%;height:60px;border-top:var(--rule);font-weight:900;font-size:19px}
+.resultok{margin:12px 14px 0;border:var(--rule);background:var(--thu);padding:12px;font-weight:800;font-size:17px;line-height:1.3}
+a.reset,.reset{display:inline-flex;align-items:center;min-height:48px;padding:0 4px;text-decoration:underline;font-weight:800;font-size:15px}
+</style>
+</head>
+<body>
+<div class="board" id="board">
+  <div class="strip"><div style="background:var(--mon)">Mon</div><div style="background:var(--tue)">Tue</div><div style="background:var(--wed)">Wed</div><div style="background:var(--thu)">Thu</div><div style="background:var(--fri)">Fri</div><div style="background:var(--sat)">Sat</div><div style="background:var(--sun)">Sun</div></div>
+  <h1>Every lot wears its day.</h1>
+  <p class="pos">Inventory control for the storeroom, in the day-of-week dots the kitchen already sticks on every box. Oldest colour leaves first.</p>
+  <div class="mark">Pizza 4P's<small>text wordmark, placeholder for logo</small></div>
+
+  <div class="slot" style="left:140px;top:480px"><div class="cap"><b>Stock</b><span>Warehouse Keeper, Cold Room</span></div><div class="phone" id="p1"></div></div>
+  <div class="slot" style="left:570px;top:615px"><div class="cap"><b>New request</b><span>Section Requester, Kitchen</span></div><div class="phone" id="p2"></div></div>
+  <div class="slot" style="left:1000px;top:750px"><div class="cap"><b>Pick queue</b><span>Warehouse Keeper, FIFO by dot</span></div><div class="phone" id="p3"></div></div>
+  <div class="slot" style="left:1430px;top:885px"><div class="cap"><b>Door confirm</b><span>Kitchen Runner</span></div><div class="phone" id="p4"></div></div>
+  <div class="slot" style="left:1860px;top:1020px"><div class="cap"><b>Daily balance</b><span>Custodian</span></div><div class="phone" id="p5"></div></div>
+
+  <div class="note" style="left:140px;top:1440px">
+    <h3>The week, on every lot</h3>
+    <div class="key"><span class="dd d-mon">Mon</span><span class="dd d-tue">Tue</span><span class="dd d-wed">Wed</span><span class="dd d-thu">Thu</span><span class="dd d-fri">Fri</span><span class="dd d-sat">Sat</span><span class="dd d-sun">Sun</span></div>
+    The dot is the day a lot arrived. Pick the oldest dot first. Amber means expiry is close. Red EXPIRED LOCK cannot be selected.
+  </div>
+  <div class="note" style="left:570px;top:1580px">
+    <h3>Nothing is edited</h3>
+    Every action appends a ledger row. Staging an issue drops book stock at once. The runner confirms, adjusts or declines at the door.
+  </div>
+  <div class="note" style="left:1000px;top:1715px">
+    <h3>Signal drops, no loops</h3>
+    Offline actions queue on the phone. One manual Retry button, tried once per tap. Try the signal switch on Stock and New request.
+  </div>
+  <div class="note" style="left:1430px;top:1850px;width:400px;font-size:15px;color:var(--grey)">
+    Sample data. Store IND-DEL-01. Issue window times, expiry warning days and par levels are samples, owner to set. Quantities only, kg and pieces.
+  </div>
+</div>
+
+<script>
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const r1=v=>Math.round(v*10)/10;
+const fmt=(v,u)=>u==='kg'?r1(v).toFixed(1)+' kg':Math.round(v)+' pcs';
+const num=(v,u)=>u==='kg'?r1(v).toFixed(1):String(Math.round(v));
+const sg=v=>(v>0?'+':v<0?'−':'')+num(Math.abs(v),'kg');
+const dd=(d,c='')=>`<span class="dd d-${d.toLowerCase()} ${c}">${d}</span>`;
+const stepOf=u=>u==='kg'?0.5:1;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const stepper=(u,v,a,id,cls='')=>`<div class="step ${cls}"><button data-a="${a}" data-v="${id}:-1" aria-label="Decrease">−</button><output>${num(v,u)}<small>${u}</small></output><button data-a="${a}" data-v="${id}:1" aria-label="Increase">+</button></div>`;
+const ROLES=[['Section Requester','Kitchen, Bar, Cheese'],['Warehouse Keeper','Admin'],['Kitchen Runner',''],['Custodian','']];
+
+function jump(id){const el=document.getElementById(id);el.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}
+
+function mount(id,def){
+  const el=document.getElementById(id);
+  el.innerHTML='<div class="screen"><header class="top"></header><main class="body"></main><footer class="bar"></footer><div class="layer"></div></div>';
+  const q=s=>el.querySelector(s);
+  def.sheet=null;def.note='';
+  const topH=()=>`<button class="l" data-a="_sheet" data-v="role" aria-label="Switch role"><span class="bars"></span>${def.role}</button><button class="r" data-a="_sheet" data-v="store">IND-DEL-01<span class="chev"></span></button>`;
+  const sheetH=()=>{
+    if(!def.sheet)return '';
+    let h='<div class="scrim" data-a="_sheet" data-v=""></div><div class="sheet">';
+    if(def.sheet==='role'){
+      h+='<h5>Role</h5><p>'+(def.note||'Roles granted to this login. Each role sees its own screen set.')+'</p>';
+      ROLES.forEach(r=>{const on=r[0]===def.role;h+=`<button class="opt ${on?'on':'off'}" data-a="_role" data-v="${r[0]}"><div>${r[0]}<small>${on?'Current role':'Not active in this draft'}</small></div></button>`});
+    }else{
+      h+='<h5>Store</h5><p>Only stores granted to this role are listed.</p><button class="opt on" data-a="_sheet" data-v=""><div>IND-DEL-01<small>Delhi store (sample)</small></div></button>';
+    }
+    return h+'<button class="x" data-a="_sheet" data-v="">Close</button></div>';
+  };
+  const render=()=>{const b=q('.body'),y=b.scrollTop;q('.top').innerHTML=topH();b.innerHTML=def.body();q('.bar').innerHTML=def.bar();q('.layer').innerHTML=sheetH();b.scrollTop=y};
+  el.addEventListener('click',e=>{
+    const t=e.target.closest('[data-a]');if(!t||t.disabled)return;
+    const a=t.dataset.a,v=t.dataset.v;
+    if(a==='_sheet'){def.sheet=v||null;def.note=''}
+    else if(a==='_role'){if(v!==def.role)def.note='Role comes from your login. Switching is off in this draft.'}
+    else def.act(a,v,t);
+    render();
+  });
+  el.addEventListener('input',e=>{def.input&&def.input(e.target,q);q('.bar').innerHTML=def.bar()});
+  def.render=render;render();
+}
+
+/* ---------- shared sync strip ---------- */
+function syncStrip(d){
+  if(!d.online||d.pending>0||d.retryMsg){
+    return `<div class="banner"><p>${d.online?'Signal ok. ':'No signal. '}${d.pending} action${d.pending===1?'':'s'} queued on this phone.${d.retryMsg?'<br><b>'+d.retryMsg+'</b>':''}</p><button data-a="retry">Retry</button></div>`;
+  }
+  return '';
+}
+function retry(d){
+  if(d.online){d.retryMsg=d.pending?('Sent '+d.pending+' queued.'):'';d.pending=0;if(!d.retryMsg)d.retryMsg=''}
+  else d.retryMsg='Still offline. Tried once, not retrying.';
+}
+
+/* ---------- P1 Stock ---------- */
+const stock=[
+ {n:'Mozzarella block',q:'42.5',u:'kg',d:'Mon',s:''},
+ {n:'Fresh basil',q:'3.2',u:'kg',d:'Sat',s:'reorder'},
+ {n:'Burrata',q:'18',u:'pcs',d:'Tue',s:'amber'},
+ {n:'Chicken breast',q:'26.0',u:'kg',d:'Thu',s:''},
+ {n:'Pizza dough ball',q:'140',u:'pcs',d:'Fri',s:''},
+ {n:'Salmon fillet',q:'9.4',u:'kg',d:'Wed',s:'red'}];
+const p1={role:'Warehouse Keeper',wh:'cold',online:true,pending:0,retryMsg:'',f:'',
+ body(){
+  const w=this.wh==='cold';
+  let list=stock.filter(i=>!this.f||(this.f==='exp'?(i.s==='amber'||i.s==='red'):i.s==='reorder'));
+  return `<div class="h">Stock</div><div class="sub">Book quantity, kg and pieces</div>
+  <div class="seg"><button class="${w?'on':''}" data-a="wh" data-v="cold">Cold Room<small>WH-DEL01-COLD</small></button><button class="${w?'':'on'}" data-a="wh" data-v="dry">Dry Store<small>WH-DEL01-DRY</small></button></div>
+  <div class="win"><span class="dot"></span><span>Window open, closes 11:30 (sample)</span><button class="sw ${this.online?'on':''}" data-a="sig" aria-label="Signal">${this.online?'Online':'Offline'}</button></div>
+  ${syncStrip(this)}
+  <div class="tiles">
+   <button class="tile" data-a="go" data-v="p3"><em>1 urgent</em><b>4</b><span>Pick queue</span></button>
+   <button class="tile" data-a="go" data-v="p4"><b>1</b><span>Awaiting runner</span></button>
+   <button class="tile ${this.f==='exp'?'on':''}" data-a="f" data-v="exp"><b>2</b><span>Expiry watch</span></button>
+   <button class="tile ${this.f==='re'?'on':''}" data-a="f" data-v="re"><b>3</b><span>Reorder</span></button>
+  </div>
+  <div class="sec">${w?'In the cold room':'In the dry store'}</div>
+  <div class="sub" style="padding-bottom:10px">Dot is the day the oldest lot arrived.</div>
+  ${!w?`<div class="empty"><b>Nothing in this draft</b>Dry Store has no sample rows. Switch back to Cold Room to see stock.</div>`
+   :list.map(i=>`<div class="slab">${dd(i.d)}<div class="t"><b>${i.n}</b>${i.s==='reorder'?'<span class="tag ink">Reorder</span>':i.s==='amber'?'<span class="tag amber">Expiry soon</span>':i.s==='red'?'<span class="tag red">Expired lot locked</span>':'<i>In stock</i>'}</div><div class="qty">${i.q}<small>${i.u}</small></div></div>`).join('')}
+  ${this.f&&w?'<div class="sub" style="padding-top:12px">Filtered to the sample list. Tap the tile again to clear.</div>':''}`;
+ },
+ bar(){return `<button class="giant" data-a="go" data-v="p3">Pick queue, 4 waiting</button>`},
+ act(a,v){
+  if(a==='wh')this.wh=v;
+  if(a==='sig'){this.online=!this.online;if(!this.online)this.pending=Math.max(this.pending,2);this.retryMsg=''}
+  if(a==='retry')retry(this);
+  if(a==='f')this.f=this.f===v?'':v;
+  if(a==='go')jump(v);
+ }};
+
+/* ---------- P2 New request ---------- */
+const ITEMS=[['Mozzarella block','kg'],['Fresh basil','kg'],['Burrata','pcs'],['Chicken breast','kg'],['Pizza dough ball','pcs'],['Salmon fillet','kg']];
+const TIMES=['11:00','11:30','12:00','12:30','13:00','13:30','14:00'];
+const p2={role:'Section Requester',inside:true,online:true,pending:0,retryMsg:'',q:'',reason:'',ti:0,
+ lines:[{n:'Mozzarella block',u:'kg',v:5},{n:'Fresh basil',u:'kg',v:2}],
+ reqs:[{id:'REQ-0187',st:'queued',l:[['Burrata',6,'pcs']]},{id:'REQ-0186',st:'locked',l:[['Chicken breast',8,'kg'],['Pizza dough ball',40,'pcs']]},{id:'REQ-0185',st:'cancelled',l:[['Fresh basil',1,'kg']]}],
+ res(){
+  const q=this.q.trim().toLowerCase();if(!q)return '';
+  const m=ITEMS.filter(i=>i[0].toLowerCase().includes(q));
+  return m.length?m.map(i=>`<button data-a="add" data-v="${i[0]}">${i[0]}<span>add, ${i[1]}</span></button>`).join(''):'<div class="sub" style="padding-top:12px">No item matches.</div>';
+ },
+ ok(){return this.lines.length>0&&(this.inside||this.reason.trim().length>=3)},
+ body(){
+  const ins=this.inside;
+  return `<div class="h">New request</div><div class="sub">Kitchen, to Cold Room</div>
+  <div class="win"><span class="dot ${ins?'':'out'}"></span><span>${ins?'Inside the issue window. Standard request.':'Window closed at 11:30 (sample). Urgent request.'}</span></div>
+  <div class="seg"><button class="${ins?'on':''}" data-a="win" data-v="in">Now 10:40<small>try inside window</small></button><button class="${ins?'':'on'}" data-a="win" data-v="out">Now 12:15<small>try outside window</small></button></div>
+  <div class="win"><span>Signal</span><button class="sw ${this.online?'on':''}" data-a="sig">${this.online?'Online':'Offline'}</button></div>
+  ${syncStrip(this)}
+  <div class="fld"><label for="q">Search item</label><input type="text" id="q" value="${esc(this.q)}" placeholder="Type mozzarella, burrata..." autocomplete="off"></div>
+  <div class="res" id="res">${this.res()}</div>
+  ${this.lines.length?this.lines.map((l,i)=>`<div class="ln"><div class="r1"><b>${l.n}</b><button class="ghost danger" data-a="rm" data-v="${i}">Remove</button></div>
+   <div class="row2">${stepper(l.u,l.v,'qty',i)}<div class="u"><button class="ghost ${l.u==='kg'?'on':''}" data-a="unit" data-v="${i}:kg">kg</button><button class="ghost ${l.u==='pcs'?'on':''}" data-a="unit" data-v="${i}:pcs">pcs</button></div></div></div>`).join(''):'<div class="empty"><b>No lines yet</b>Search an item above and tap it to add.</div>'}
+  <div class="fld"><label>Needed by</label><div class="row2"><div class="step sm" style="flex:1"><button data-a="time" data-v="-1" aria-label="Earlier">−</button><output style="font-size:28px">${TIMES[this.ti]}</output><button data-a="time" data-v="1" aria-label="Later">+</button></div></div></div>
+  ${ins?'':`<div class="fld"><div class="row2" style="margin-bottom:8px"><label for="why" style="margin:0">Reason, required</label><span class="urgent-badge">URGENT</span></div><textarea id="why" placeholder="Why is this outside the window?">${esc(this.reason)}</textarea></div>`}
+  <div class="sec">My requests</div>
+  ${this.reqs.map((r,i)=>`<div class="req ${r.st==='cancelled'?'cx':''}"><div class="r1"><span class="id">${r.id}</span>${r.st==='queued'?'<span class="tag ink" style="margin:0">Queued</span>':r.st==='locked'?'<span class="tag amber" style="margin:0">Picking-locked</span>':'<span class="tag grey" style="margin:0">Cancelled</span>'}${r.urgent?'<span class="urgent-badge">URGENT</span>':''}</div>
+   <p>${r.l.map(x=>fmt(x[1],x[2])+' '+x[0]).join(', ')}</p>
+   ${r.st==='queued'?`<div class="ac"><button class="ghost" data-a="edit" data-v="${i}">Edit</button><button class="ghost danger" data-a="cancel" data-v="${i}">Cancel</button></div>`:r.st==='locked'?'<p style="font-size:14px;color:var(--grey);margin-top:6px">Keeper started picking. Edit and cancel are locked.</p>':''}</div>`).join('')}`;
+ },
+ bar(){
+  const ok=this.ok(),ins=this.inside;
+  return `${!ok&&this.lines.length&&!ins?'<small>Enter a reason to send an urgent request.</small>':''}<button class="giant ${ins?'':'urgent'}" data-a="submit" ${ok?'':'disabled'}>${ins?'Submit request':'Submit as URGENT'}</button>`;
+ },
+ input(el,q){
+  if(el.id==='q'){this.q=el.value;q('#res').innerHTML=this.res()}
+  if(el.id==='why')this.reason=el.value;
+ },
+ act(a,v){
+  if(a==='win'){this.inside=v==='in';this.ti=this.inside?0:4;this.reason=''}
+  if(a==='sig'){this.online=!this.online;this.retryMsg=''}
+  if(a==='retry')retry(this);
+  if(a==='add'){const it=ITEMS.find(i=>i[0]===v);if(!this.lines.find(l=>l.n===v))this.lines.push({n:v,u:it[1],v:stepOf(it[1])*2});this.q=''}
+  if(a==='rm')this.lines.splice(+v,1);
+  if(a==='qty'){const[i,s]=v.split(':');const l=this.lines[+i];l.v=Math.max(stepOf(l.u),r1(l.v+s*stepOf(l.u)))}
+  if(a==='unit'){const[i,u]=v.split(':');const l=this.lines[+i];l.u=u;l.v=u==='pcs'?Math.max(1,Math.round(l.v)):l.v}
+  if(a==='time')this.ti=Math.min(TIMES.length-1,Math.max(0,this.ti+ +v));
+  if(a==='cancel')this.reqs[+v].st='cancelled';
+  if(a==='edit'){const r=this.reqs.splice(+v,1)[0];this.lines=r.l.map(x=>({n:x[0],v:x[1],u:x[2]}))}
+  if(a==='submit'){
+    const n=this.reqs.length+187-2;
+    this.reqs.unshift({id:'REQ-0'+(n+1),st:'queued',urgent:!this.inside,l:this.lines.map(l=>[l.n,l.v,l.u])});
+    if(!this.online)this.pending++;
+    this.lines=[];this.reason='';this.retryMsg='';
+  }
+ }};
+
+/* ---------- P3 Pick queue ---------- */
+function mkP3(){return [
+ {n:'Mozzarella block',u:'kg',need:5,stage:5,lots:[
+  {id:'LOT-1026-A',d:'Mon',dt:'26 Oct',ex:'9 Nov',qty:12,sel:true},
+  {id:'LOT-1030-B',d:'Fri',dt:'30 Oct',ex:'13 Nov',qty:30.5,sel:false}]},
+ {n:'Burrata',u:'pcs',need:6,stage:6,lots:[
+  {id:'LOT-1027-C',d:'Tue',dt:'27 Oct',ex:'4 Nov',qty:8,flag:'amber',sel:true},
+  {id:'LOT-1030-D',d:'Fri',dt:'30 Oct',ex:'11 Nov',qty:10,sel:false}]},
+ {n:'Salmon fillet',u:'kg',need:4,stage:4,lots:[
+  {id:'LOT-1028-S',d:'Wed',dt:'28 Oct',ex:'1 Nov',qty:2.4,flag:'red',sel:false},
+  {id:'LOT-1030-T',d:'Fri',dt:'30 Oct',ex:'4 Nov',qty:3,flag:'amber',sel:true},
+  {id:'LOT-1101-U',d:'Sun',dt:'1 Nov',ex:'8 Nov',qty:4,sel:true}]}];}
+function alloc(l){
+  let rem=l.stage;const rows=[];
+  l.lots.filter(x=>x.sel&&x.flag!=='red').forEach(x=>{const t=Math.min(rem,x.qty);if(t>0){rows.push([x.id,t]);rem=r1(rem-t)}});
+  return {rows,short:r1(rem)};
+}
+const p3={role:'Warehouse Keeper',lines:mkP3(),staged:false,warn:'',
+ body(){
+  const L=this.lines;
+  let h=`<div class="h">Pick queue</div><div class="sub">One request. Kitchen, 3 lines, needed by 11:00.</div>
+  <div class="win"><span class="urgent-badge">URGENT</span><span>Outside window, reason: oven order added late (sample)</span></div>`;
+  L.forEach((l,i)=>{
+    const full=l.stage===l.need,a=alloc(l);
+    h+=`<div class="ln" style="padding-bottom:0"><div class="r1"><b>${l.n}</b><span class="qty">${num(l.need,l.u)}<small>${l.u} asked</small></span></div>
+    <div class="row2" style="margin-bottom:12px">${stepper(l.u,l.stage,'stg',i,'sm')}<div class="u"><button class="ghost ${full?'on':''}" data-a="full" data-v="${i}">Full</button><button class="ghost ${full?'':'on'}" data-a="part" data-v="${i}">Partial</button></div></div>
+    ${a.short>0?`<div class="msg" style="margin:0 0 10px">Selected lots are short by ${num(a.short,l.u)} ${l.u}.</div>`:''}</div>`;
+    let fifoDone=false;
+    l.lots.forEach((x,j)=>{
+      const lock=x.flag==='red';const first=!lock&&!fifoDone;if(!lock)fifoDone=true;
+      h+=`<button class="lot ${x.sel?'sel':''} ${lock?'lock':''}" data-a="lot" data-v="${i}:${j}" ${this.staged?'disabled':''} aria-pressed="${x.sel}">
+       ${lock?'<span class="box">×</span>':`<span class="box">${x.sel?'✓':''}</span>`}${dd(x.d,'sm')}
+       <span class="t"><b>${x.id}</b>In ${x.dt}, expires ${x.ex}<br>${lock?'<span class="tag red">EXPIRED LOCK</span>':x.flag==='amber'?'<span class="tag amber">Expiry close</span>':''}${first?' <span class="tag ink">Oldest first</span>':''}</span>
+       <span class="q">${num(x.qty,l.u)}<small style="font-size:13px"> ${l.u}</small></span></button>`;
+    });
+    h+='<div style="border-top:var(--rule)"></div>';
+  });
+  if(this.warn)h+=`<div class="msg">${this.warn}</div>`;
+  h+=this.staged?`<div class="ledger"><div class="hd">Appended to ledger</div>${this.rows().map(r=>`<div>${r}</div>`).join('')}</div><div class="resultok">Staged. Book stock dropped. Now with the runner.</div><div style="padding:8px 14px 20px"><button class="reset" data-a="reset">Reset demo</button></div>`
+   :`<div class="ledger"><div class="hd">Will append when you stage</div>${this.rows().map(r=>`<div>${r}</div>`).join('')||'<div>Nothing to stage.</div>'}</div><div style="height:16px"></div>`;
+  return h;
+ },
+ rows(){const out=[];this.lines.forEach(l=>{alloc(l).rows.forEach(r=>out.push(`<b>ISSUE_PENDING −${num(r[1],l.u)} ${l.u}</b><br>${l.n}, ${r[0]}`))});return out},
+ can(){return this.lines.some(l=>l.stage>0)&&this.lines.every(l=>alloc(l).short<=0)},
+ bar(){return this.staged?'<button class="giant" disabled>Staged, with the runner</button>':`<button class="giant" data-a="stage" ${this.can()?'':'disabled'}>Stage &amp; hand to runner</button>`},
+ act(a,v){
+  this.warn='';
+  if(a==='stg'){const[i,s]=v.split(':');const l=this.lines[+i];l.stage=Math.min(l.need,Math.max(0,r1(l.stage+s*stepOf(l.u))))}
+  if(a==='full'){const l=this.lines[+v];l.stage=l.need}
+  if(a==='part'){const l=this.lines[+v];if(l.stage===l.need)l.stage=Math.max(0,l.need-stepOf(l.u)*2)}
+  if(a==='lot'){const[i,j]=v.split(':');const x=this.lines[+i].lots[+j];if(x.flag==='red')this.warn='Expired lots cannot be selected.';else x.sel=!x.sel}
+  if(a==='stage')this.staged=true;
+  if(a==='reset'){this.lines=mkP3();this.staged=false}
+ }};
+
+/* ---------- P4 Door confirm ---------- */
+function mkP4(){return [{n:'Mozzarella block',u:'kg',iss:5,acc:3},{n:'Burrata',u:'pcs',iss:6,acc:6},{n:'Salmon fillet',u:'kg',iss:4,acc:4}]}
+const p4={role:'Kitchen Runner',lines:mkP4(),done:false,
+ body(){
+  let h=`<div class="h">Door confirm</div><div class="sub">Check what arrived against what was issued.</div>
+  <div class="btnrow"><button class="ghost" data-a="all" ${this.done?'disabled':''}>Accept all</button><button class="ghost danger" data-a="none" ${this.done?'disabled':''}>Decline all</button></div>`;
+  this.lines.forEach((l,i)=>{
+    const back=r1(l.iss-l.acc);
+    const st=l.acc===l.iss?'<span class="tag" style="background:var(--thu)">Full</span>':l.acc===0?'<span class="tag red">Declined</span>':`<span class="tag amber">Partial, ${fmt(back,l.u)} back to shelf</span>`;
+    h+=`<div class="ln"><div class="r1"><b>${l.n}</b>${st}</div>
+     <div class="grid4" style="grid-template-columns:1fr 1fr"><div>Issued<b>${num(l.iss,l.u)} ${l.u}</b></div><div>Accepted<b>${num(l.acc,l.u)} ${l.u}</b></div></div>
+     ${this.done?'':stepper(l.u,l.acc,'acc',i)}</div>`;
+  });
+  if(this.done){
+    h+='<div class="ledger"><div class="hd">Appended to ledger</div>';
+    this.lines.forEach(l=>{
+      const back=r1(l.iss-l.acc);
+      if(l.acc===0)h+=`<div><b>ISSUE_REVERSAL +${num(l.iss,l.u)}</b><br>${l.n}, all back to shelf</div>`;
+      else h+=`<div><b>ISSUE_PENDING_OFFSET +${num(l.iss,l.u)}</b><br><b>ISSUE_CONFIRMED −${num(l.acc,l.u)}</b><br>${l.n}${back>0?`<br>Shelf +${num(back,l.u)} ${l.u}`:''}</div>`;
+    });
+    h+='</div><div class="resultok">Receipt confirmed. Kitchen holds the accepted quantity.</div><div style="padding:8px 14px 20px"><button class="reset" data-a="reset">Reset demo</button></div>';
+  }
+  return h;
+ },
+ bar(){return this.done?'<button class="giant" disabled>Receipt confirmed</button>':'<button class="giant" data-a="ok">Confirm receipt</button>'},
+ act(a,v){
+  if(a==='all')this.lines.forEach(l=>l.acc=l.iss);
+  if(a==='none')this.lines.forEach(l=>l.acc=0);
+  if(a==='acc'){const[i,s]=v.split(':');const l=this.lines[+i];l.acc=Math.min(l.iss,Math.max(0,r1(l.acc+s*stepOf(l.u))))}
+  if(a==='ok')this.done=true;
+  if(a==='reset'){this.lines=mkP4();this.done=false}
+ }};
+
+/* ---------- P5 Daily balance ---------- */
+const CAUSES=['Spoilage','Missed issue entry','Wrong unit','Other'];
+function mkP5(){return [
+ {n:'Mozzarella block',u:'kg',o:50,r:0,i:7.5,c:42.5},
+ {n:'Fresh basil',u:'kg',o:4,r:2,i:2.8,c:3,rc:3,cause:'',handled:false,recounted:false},
+ {n:'Pizza dough ball',u:'pcs',o:200,r:0,i:60,c:140}]}
+const exp=l=>r1(l.o+l.r-l.i);
+const dif=l=>r1(l.c-exp(l));
+const p5={role:'Custodian',lines:mkP5(),signed:false,
+ okAll(){return this.lines.every(l=>dif(l)===0||l.handled)},
+ body(){
+  let h=`<div class="h">Daily balance</div><div class="sub">Count the benchmark items. Expected = opening + received − issued.</div>`;
+  this.lines.forEach((l,i)=>{
+    const d=dif(l),z=d===0;
+    h+=`<div class="ln"><div class="r1"><b>${l.n}</b></div>
+    <div class="grid4"><div>Opening<b>${num(l.o,l.u)}</b></div><div>Received<b>${num(l.r,l.u)}</b></div><div>Issued<b>${num(l.i,l.u)}</b></div><div>Expected<b>${num(exp(l),l.u)}</b></div></div>
+    <div class="row2" style="align-items:flex-end"><div style="flex:1"><div style="font-size:13px;font-weight:800;margin-bottom:4px">Counted, ${l.u}</div>${this.signed?`<div class="qty" style="text-align:left;font-size:34px">${num(l.c,l.u)}</div>`:stepper(l.u,l.c,'cnt',i,'sm')}</div>
+     <span class="diff ${z?'z':l.handled?'ok2':'nz'}"><small>Diff</small>${z?'0'+(l.u==='kg'?'.0':''):sg(d)}</span></div>
+    ${!z&&!this.signed?this.panel(l,i,d):''}</div>`;
+  });
+  if(this.signed)h+='<div class="resultok">Signed by Custodian. Balance for 2 Nov (sample) is closed.</div><div style="padding:8px 14px 20px"><button class="reset" data-a="reset">Reset demo</button></div>';
+  return h;
+ },
+ panel(l,i,d){
+  if(l.handled)return `<div class="panel"><div class="done-pill">Cause documented: ${l.cause}. Alert to Finance Lead / RM is queued.</div></div>`;
+  let p='<div class="panel"><div class="p"><h4>1 Recount</h4>';
+  if(!l.recounted)p+=`<div class="row2">${stepper(l.u,l.rc,'rc',i,'sm')}<button class="ghost on" data-a="rcok" data-v="${i}" style="min-height:52px">Use recount</button></div>`;
+  else p+='<div style="font-size:15px">Recount entered. Still off by '+sg(d)+' '+l.u+'.</div>';
+  p+='</div>';
+  p+=`<div class="p"><h4>2 Cause</h4>${l.recounted?`<div class="causes">${CAUSES.map(c=>`<button class="ghost ${l.cause===c?'on':''}" data-a="cause" data-v="${i}:${c}">${c}</button>`).join('')}</div>`:'<div style="font-size:15px;color:var(--grey)">Recount first.</div>'}</div>`;
+  p+=`<div class="p"><h4>3 Alert</h4><button class="ghost on" style="width:100%;min-height:56px" data-a="alert" data-v="${i}" ${l.recounted&&l.cause?'':'disabled'}>Document cause and alert Finance Lead / RM</button></div></div>`;
+  return p;
+ },
+ bar(){
+  if(this.signed)return '<button class="giant" disabled>Signed</button>';
+  const ok=this.okAll();
+  return `${ok?'':'<small>Fresh basil needs a recount and a documented cause before you can sign.</small>'}<button class="giant" data-a="sign" ${ok?'':'disabled'}>Sign off balance</button>`;
+ },
+ act(a,v){
+  if(a==='cnt'){const[i,s]=v.split(':');const l=this.lines[+i];l.c=Math.max(0,r1(l.c+s*(l.u==='kg'?0.1:1)));l.handled=false;l.recounted=false;l.cause='';l.rc=l.c}
+  if(a==='rc'){const[i,s]=v.split(':');const l=this.lines[+i];l.rc=Math.max(0,r1(l.rc+s*(l.u==='kg'?0.1:1)))}
+  if(a==='rcok'){const l=this.lines[+v];l.c=l.rc;l.recounted=true}
+  if(a==='cause'){const[i,c]=v.split(':');this.lines[+i].cause=c}
+  if(a==='alert')this.lines[+v].handled=true;
+  if(a==='sign')this.signed=true;
+  if(a==='reset'){this.lines=mkP5();this.signed=false}
+ }};
+
+[['p1',p1],['p2',p2],['p3',p3],['p4',p4],['p5',p5]].forEach(([id,d])=>mount(id,d));
+</script>
+</body>
+</html>

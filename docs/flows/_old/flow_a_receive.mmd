@@ -1,0 +1,27 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+
+  subgraph Admin["Admin / Warehouse Keeper"]
+    A1((Start)):::startNode --> A2{A2: Delivery arrives within scheduled Receiving Window?}:::decisionNode
+    A2 -- "No" --> A3[A3: Hold truck at dock or SCM reschedules delivery]:::actionNode
+    A2 -- "Yes" --> A4[A4: Check Delivery Note against open Purchase Order in SAP]:::actionNode
+    A4 --> A5{A5: Valid open PO exists for delivery?}:::decisionNode
+    A5 -- "No" --> A6[A6: Hold delivery at door; contact SCM to investigate or refuse]:::actionNode
+    A5 -- "Yes" --> A7[A7: Inspect delivery line by line: count, temp, quality, expiry]:::actionNode
+    A7 --> A8{A8: Delivery lines pass physical and temperature QC inspection?}:::decisionNode
+    A8 -- "No" --> A9[A9: Endorse difference on note; return failed lines to driver]:::actionNode
+    A8 -- "Yes" --> A10[A10: Put away accepted lines into room; label received date]:::actionNode
+    A9 --> A10
+    A10 --> A11[A11: Key accepted lines into SAP GRPO today; export data file]:::actionNode
+    A11 --> A12[A12: Upload SAP file to App; auto-detect header, map & append to ledger]:::actionNode
+  end
+
+  subgraph System["App / SCM"]
+    A3 --> A13((End)):::endNode
+    A6 --> A13
+    A12 --> A13
+  end

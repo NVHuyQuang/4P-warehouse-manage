@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Pizza 4P's Inventory Control Tool — Desktop prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Noto+Serif+Display:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#242E52; --blue:#02499D; --cream:#F4F2EF; --sand:#EAE6DC; --rule:#DDD6C5; --paper:#FFFFFF;
+  --terra:#A9581A; --forest:#28473D; --err:#B32E16; --amber:#7A4B00; --amber-bg:#FBEFD0;
+  --ink-2:#4B5470; --ink-3:#5F6785; --ph:#756F62;
+  --ok-bg:#E3EDE7; --err-bg:#F8E3DE; --info-bg:#E2E9F5;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --disp:"Archivo Narrow","Be Vietnam Pro",Arial Narrow,sans-serif;
+  --body:"Be Vietnam Pro",system-ui,Segoe UI,sans-serif;
+  --serif:"Noto Serif Display",Georgia,serif;
+}
+*{box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased}
+body{margin:0;background:#DFDACE;font-family:var(--body);color:var(--navy);font-size:14px;line-height:1.55}
+button,input,select,textarea{font:inherit;color:inherit}
+.frame{width:1440px;margin:0 auto;background:var(--cream);min-height:100vh;position:relative;display:flex;flex-direction:column}
+.demo{background:#332F23;color:#E9E4D6;font-family:var(--mono);font-size:12px;letter-spacing:.06em;display:flex;align-items:center;gap:14px;padding:6px 72px}
+.demo select{background:#4A4533;color:#fff;border:1px solid #6A6350;border-radius:3px;font:inherit;padding:2px 6px}
+.demo .sp{flex:1}
+/* ticket paper */
+.tk{background:var(--paper);position:relative}
+.perf{height:9px;background:var(--paper);-webkit-mask-image:radial-gradient(circle at 6px 0px,transparent 0 5px,#000 5.4px);mask-image:radial-gradient(circle at 6px 0px,transparent 0 5px,#000 5.4px);-webkit-mask-size:12px 9px;mask-size:12px 9px;-webkit-mask-repeat:repeat-x;mask-repeat:repeat-x}
+.perf-b{transform:rotate(180deg)}
+.tk-head{display:flex;align-items:baseline;gap:10px;padding:12px 24px 10px;border-bottom:1px dashed var(--rule);font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.tk-head .no{color:var(--navy);font-weight:600}
+.tk-head .fill{flex:1;border-bottom:1px dotted #BDB5A5;transform:translateY(-3px)}
+.tk-body{padding:18px 24px}
+/* rail */
+.rail{display:flex;align-items:center;gap:18px;padding:20px 72px 16px;border-bottom:1px solid var(--rule)}
+.logo{width:150px;color:var(--navy);display:block;flex:none}
+.rail .div{width:1px;height:26px;background:var(--rule);flex:none}
+.tag-line{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);line-height:1.35;width:96px}
+.rail .sp{flex:1}
+.rail nav{display:flex;gap:16px;font-family:var(--disp);font-size:14.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.rail nav a{text-decoration:none;color:inherit;padding-bottom:2px;border-bottom:2px solid transparent}
+.rail nav a.on{color:var(--navy);border-bottom-color:var(--terra)}
+.rail nav a:hover{color:var(--navy)}
+.sw{display:flex;flex-direction:column;font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.sw span{letter-spacing:.12em;text-transform:uppercase;font-size:11px;color:var(--ink-3)}
+.sw select{border:1px solid var(--rule);background:var(--paper);border-radius:4px;padding:3px 6px;font-family:var(--mono);font-size:13px;font-weight:600;color:var(--navy)}
+.who{font-family:var(--mono);font-size:12px;color:var(--ink-2);text-align:right;line-height:1.4;max-width:170px}
+.who b{color:var(--navy);font-weight:600;font-size:13px}
+/* type */
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--terra);font-weight:500}
+.h1{font-family:var(--disp);font-weight:600;font-size:46px;line-height:1.04;letter-spacing:-.005em;text-transform:uppercase;margin:6px 0 0}
+.h1 em{font-family:var(--serif);font-style:italic;font-weight:400;text-transform:none;letter-spacing:0;font-size:40px}
+.h3{font-family:var(--disp);font-weight:600;font-size:18px;letter-spacing:.06em;text-transform:uppercase;margin:0}
+.lbl{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2);font-weight:500}
+.meta{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.sub{color:var(--ink-2);font-size:14px;max-width:760px;margin:8px 0 0}
+.gloss{color:var(--ink-3);font-size:13px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+/* layout */
+main{flex:1;padding:28px 72px 56px}
+.head{display:flex;align-items:flex-end;gap:32px;margin-bottom:22px}
+.head>div:first-child{flex:1}
+.cols{display:grid;gap:28px;align-items:start}.cols>*{min-width:0}
+.c-ov{grid-template-columns:1fr 330px}
+.c-rq{grid-template-columns:280px 1fr 310px}
+.c-is{grid-template-columns:360px 1fr}
+.c-bal{grid-template-columns:1fr 330px}
+.c-imp{grid-template-columns:1fr 340px}
+.c-ap{grid-template-columns:380px 1fr 300px}
+.c-us{grid-template-columns:1fr 360px}
+.stack>*+*{margin-top:16px}
+.stub{background:var(--sand);border:1px solid var(--rule);border-radius:4px;padding:16px 18px}
+.stub.w{background:var(--paper)}
+.stub .lbl{display:block;margin-bottom:8px}
+/* buttons / chips */
+.btn{font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:.12em;text-transform:uppercase;background:var(--terra);color:#fff;border:1px solid var(--terra);border-radius:4px;padding:11px 22px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#94490F}
+.btn.ghost{background:transparent;color:var(--navy);border-color:#B9B09B}
+.btn.ghost:hover{background:var(--sand)}
+.btn.sm{font-size:13px;padding:6px 12px;letter-spacing:.1em}
+.btn:disabled{background:#D6D0C2;border-color:#D6D0C2;color:#5B5547;cursor:not-allowed}
+.btn.ghost:disabled{background:transparent;border-color:var(--rule);color:#6B6556}
+.btn:focus-visible,.chip:focus-visible,a:focus-visible,.row:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:12px;letter-spacing:.06em;border:1px solid var(--rule);border-radius:999px;padding:4px 12px;color:var(--ink-2);background:var(--cream);cursor:pointer}
+.chip:hover{border-color:var(--ink-3)}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.chip .n{opacity:.8;margin-left:4px}
+.b{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:3px;padding:1px 7px;border:1px solid transparent;white-space:nowrap}
+.b.ok{background:var(--ok-bg);color:var(--forest);border-color:#B8CFC2}
+.b.am{background:var(--amber-bg);color:var(--amber);border-color:#E4C987}
+.b.er{background:var(--err);color:#fff}
+.b.re{background:var(--info-bg);color:#0A3B80;border-color:#B5C7E6}
+.b.mu{background:var(--sand);color:var(--ink-2);border-color:var(--rule)}
+.b.ur{background:transparent;color:var(--err);border:1.5px solid var(--err);border-radius:4px;transform:rotate(-1.5deg)}
+.stamp{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);border:1.5px solid var(--terra);border-radius:4px;padding:3px 9px;transform:rotate(-1.5deg)}
+/* tables */
+table{border-collapse:collapse;width:100%}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);text-align:left;padding:0 12px 8px 0;border-bottom:1px solid var(--rule);font-weight:500;white-space:nowrap}
+th.num{text-align:right}
+td{padding:9px 12px 9px 0;border-bottom:1px dotted var(--rule);vertical-align:middle;font-size:14px}
+td.m{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+tr.row{cursor:pointer}
+tr.row:hover td{background:#FBFAF6}
+tr.sel td{background:#F3EEE2}
+tr.sel td:first-child{box-shadow:inset 2px 0 0 var(--terra)}
+tr.dim td{color:var(--ink-3)}
+table.dense td,table.dense th{padding-right:8px;font-size:13px}table.dense td.m{font-size:12px}
+table.tick td{padding:5px 0;font-family:var(--mono);font-size:13px;vertical-align:top}
+table.tick td:first-child{color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase;font-size:12px;width:112px}
+table.tick td:last-child{text-align:right;color:var(--navy);font-weight:500}
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.tile{background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:12px 16px 14px;text-align:left;cursor:pointer;display:block}
+.tile:hover{border-color:var(--ink-3)}
+.tile.on{border-color:var(--navy);box-shadow:0 0 0 1px var(--navy)}
+.tile .big{font-family:var(--disp);font-weight:600;font-size:42px;line-height:1.05;display:block;margin-top:2px}
+.tile .s{font-size:13px;color:var(--ink-2);display:block}
+.win{display:flex;align-items:center;gap:14px;border:1px dashed #B9B09B;border-radius:4px;padding:8px 14px;margin-bottom:16px;background:var(--paper);flex-wrap:wrap}
+/* forms */
+.fld{margin-bottom:14px}
+.in,select.in,textarea.in{display:block;width:100%;border:1px solid #BDB5A5;border-radius:4px;background:var(--paper);padding:8px 10px;font-size:14px;color:var(--navy);margin-top:5px}
+.in::placeholder{color:var(--ph)}
+.in.err{border-color:var(--err)}
+.step{display:inline-flex;align-items:center;border:1px solid #BDB5A5;border-radius:4px;background:var(--paper)}
+.step button{width:30px;height:30px;border:0;background:transparent;cursor:pointer;font-size:18px;color:var(--navy)}
+.step button:hover{background:var(--sand)}
+.step button:disabled{color:#9a9486;cursor:not-allowed}
+.step b{min-width:56px;text-align:center;font-family:var(--mono);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;border:1px solid #BDB5A5;border-radius:4px;overflow:hidden}
+.seg button{border:0;border-right:1px solid #BDB5A5;background:var(--paper);padding:6px 12px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--navy);color:#fff}
+.note{border:1px solid var(--rule);background:var(--sand);border-radius:4px;padding:10px 14px;font-size:14px}
+.note.am{background:var(--amber-bg);border-color:#E4C987;color:#4D2F00}
+.note.er{background:var(--err-bg);border-color:#E8B8AD;color:#6D1A0A}
+.note.ok{background:var(--ok-bg);border-color:#B8CFC2;color:var(--forest)}
+.note b{font-weight:600}
+.dash{border-top:1px dashed var(--rule);margin:14px 0}
+.ledrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;font-family:var(--mono);font-size:13px;padding:7px 0;border-bottom:1px dotted var(--rule);align-items:baseline}
+.ledrow .t{font-size:12px;font-weight:600;letter-spacing:.04em}
+.neg{color:var(--err)} .pos{color:var(--forest)}
+/* timeline */
+.tl{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:6px 0 16px}
+.tl>div{position:relative;padding:0 10px 0 0}
+.tl .dot{width:14px;height:14px;border-radius:50%;border:2px solid #9A9382;background:var(--paper);margin-bottom:8px;position:relative}
+.tl .done .dot{background:var(--forest);border-color:var(--forest)}
+.tl .cur .dot{background:var(--paper);border-color:var(--terra);box-shadow:0 0 0 3px #F0DCCB}
+.tl>div:not(:last-child):before{content:"";position:absolute;left:18px;right:6px;top:6px;border-top:1px dashed #9A9382}
+.tl .done:not(:last-child):before{border-top:2px solid var(--forest)}
+.tl .tt{font-family:var(--disp);font-weight:600;font-size:17px;text-transform:uppercase;letter-spacing:.05em}
+.tl .ts{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.drop{border:1.5px dashed var(--terra);border-radius:4px;background:#FBF6F1;padding:26px 24px;text-align:center}
+.drop .big{font-family:var(--disp);font-size:24px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin:4px 0}
+.list>.item{display:block;width:100%;text-align:left;background:var(--paper);border:1px solid var(--rule);border-radius:4px;padding:12px 14px;cursor:pointer;margin-bottom:8px}
+.list>.item:hover{border-color:var(--ink-3)}
+.list>.item.sel{border-color:var(--navy);box-shadow:0 0 0 1px var(--navy)}
+.list .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.list .id{font-family:var(--mono);font-weight:600;font-size:13px}
+.lot{display:grid;grid-template-columns:18px 104px 88px 86px 74px 1fr;gap:6px;white-space:nowrap;align-items:center;padding:7px 8px;border:1px solid var(--rule);border-radius:4px;margin-top:6px;background:var(--paper);font-family:var(--mono);font-size:13px;width:100%;text-align:left;cursor:pointer}
+.lot.sel{border-color:var(--navy);background:#F6F3EA}
+.lot.lock{background:var(--err-bg);border-color:#E8B8AD;cursor:not-allowed}
+.rd{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--ink-3);display:inline-block}
+.lot.sel .rd{background:radial-gradient(var(--terra) 0 4px,#fff 4.5px);border-color:var(--terra)}
+.lot.lock .rd{border-color:#B9806F;background:repeating-linear-gradient(45deg,#E8B8AD 0 2px,#fff 2px 4px)}
+.line{padding:14px 0;border-bottom:1px dashed var(--rule)}
+.line:last-child{border-bottom:0}
+.line .ln{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.line .nm{font-family:var(--disp);font-size:20px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.toast{position:fixed;right:24px;bottom:22px;pointer-events:none;background:#242E52;color:#fff;font-family:var(--mono);font-size:13px;padding:10px 18px;border-radius:4px;z-index:9;box-shadow:0 4px 18px rgba(0,0,0,.25);max-width:380px}
+.foot{padding:20px 72px 26px;border-top:1px solid var(--rule);display:flex;gap:16px;align-items:center}
+.foot .sp{flex:1}
+.mat td,.mat th{text-align:center;padding:7px 6px}
+.mat td:first-child,.mat th:first-child{text-align:left}
+.ro{color:var(--ink-2);font-style:italic}
+.sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div class="frame" id="frame">
+  <div class="demo"><b>PROTOTYPE</b><span>Sample data. Windows and thresholds are [Owner to set].</span><span class="sp"></span><label for="viewas">View as</label>
+    <select id="viewas" data-i="role"></select></div>
+  <header class="rail" id="rail"></header>
+  <main id="app"></main>
+  <footer class="foot"><span class="meta">Pizza 4P's</span><span class="sp"></span><span class="meta">Internal use only · Quantities in kg and pcs · No prices or costs are stored</span></footer>
+</div>
+<div id="toast" class="toast" style="display:none" role="status"></div>
+
+<script>
+/* ============ DATA ============ */
+const LOGO='<svg class="logo" role="img" aria-label="Pizza 4P\'s" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 151.129 21.376" fill="currentColor"><title>PIZZA 4P\'S</title><defs><clipPath id="a"><path fill="none" d="M0 0h151.129v21.376H0z"/></clipPath></defs><g clip-path="url(#a)"><path d="M5.495 12.218H2.566V4.799h3c2.665 0 3.961 1.2 3.961 3.674 0 2.45-1.395 3.745-4.033 3.745m.193-9.554H0v18.695h2.566v-7.008h2.929c4.177 0 6.67-2.2 6.67-5.878S9.8 2.664 5.687 2.664"/><path d="M18.598 2.666h2.565v18.693h-2.565z"/><path d="m42.49 4.634.031-.043V2.664h-13.2v2.3h9.9L28.976 19.392l-.031.043v1.929h13.773v-2.3H32.261Z"/><path d="m62.972 4.634.031-.043V2.664h-13.2v2.3h9.9l-10.25 14.428-.031.043v1.929h13.773v-2.3H52.743Z"/><path d="M77.297 5.564v-.005c.134.443.355 1.161.594 1.845l2.226 6.354H74.49l2.2-6.354c.235-.675.465-1.4.6-1.84m-1.372-2.9-6.647 18.693h2.587l1.9-5.472h7.107l1.92 5.472h2.731L78.791 2.664Z"/><path d="m100.245 14.687 4.9-7.14c.39-.579.671-1.06.854-1.4v8.54Zm8.236-11.938h-2.672l-8.366 12.176v1.994h8.559v4.44h2.479v-4.44h2.393v-2.257h-2.392Z"/><path d="M123.167 12.218h-2.929V4.799h3c2.665 0 3.961 1.2 3.961 3.674 0 2.45-1.395 3.745-4.034 3.745m.195-9.554h-5.687v18.695h2.565v-7.008h2.929c4.177 0 6.671-2.2 6.671-5.878s-2.361-5.809-6.478-5.809"/><path d="M132.803 5.637h1.851L136.975 0h-3.054Z"/><path d="m146.302 10.802-2.518-.443c-2-.378-2.851-1.215-2.851-2.8 0-1.77 1.4-2.913 3.567-2.913a3.3 3.3 0 0 1 3.544 3.167l.018.147h2.54l-.009-.176c-.178-3.3-2.39-5.2-6.07-5.2-3.656 0-6.21 2.122-6.21 5.16 0 2.725 1.639 4.414 4.874 5.017l2.5.444c1.975.336 2.895 1.233 2.895 2.822 0 2.166-1.365 3.263-4.057 3.263-3.453 0-4.152-2.428-4.292-3.472l-.019-.144h-2.586l.01.176c.2 3.407 2.823 5.523 6.839 5.523 4.228 0 6.653-2.017 6.653-5.533 0-2.842-1.534-4.444-4.827-5.041"/></g></svg>';
+
+const ROLES={
+ admin:{l:'System Admin',nav:['users'],stores:['IND-DEL-01','IND-DEL-02','IND-BLR-01'],scope:'Global'},
+ keeper:{l:'Warehouse Keeper',nav:['overview','requests','issues','balance','import','count','transfers'],stores:['IND-DEL-01'],scope:'Cold Room + Dry Store'},
+ rm:{l:'Restaurant Manager',nav:['overview','issues','balance','transfers','approvals'],stores:['IND-DEL-01'],scope:'Store'},
+ req:{l:'Section Requester',nav:['request'],stores:['IND-DEL-01'],scope:'Section: Kitchen'},
+ cust:{l:'Custodian',nav:['overview','balance','count','transfers','issues'],stores:['IND-DEL-01'],scope:'Room: Cold Room'},
+ acct:{l:'Store Accountant',nav:['overview','count','issues'],stores:['IND-DEL-01'],scope:'Store'},
+ fc:{l:'Financial Controller',nav:['approvals','count','transfers','issues','balance','overview'],stores:['IND-DEL-01','IND-DEL-02','IND-BLR-01'],scope:'Multi-store'},
+ viewer:{l:'Viewer',nav:['overview','issues','count','transfers'],stores:['IND-DEL-01','IND-DEL-02'],scope:'Read-only'}
+};
+const NAV={overview:'Stock',requests:'Pick queue',request:'New request',issues:'Issues & ledger',balance:'Daily balance',import:'GRPO import',count:'Count',transfers:'Transfers',approvals:'Approvals',users:'Users & access'};
+const STORE_NAME={'IND-DEL-01':'Delhi store 1','IND-DEL-02':'Delhi store 2','IND-BLR-01':'Bengaluru store 1'};
+
+const L=(id,recv,exp,qty,st)=>({id,recv,exp,qty,st:st||'ok'});
+const ITEMS=[
+ {c:'RM-MOZ-01',n:'Mozzarella block',u:'kg',wh:'COLD',cat:'Dairy',book:42.5,rp:10,par:60,po:0,lots:[L('L-MOZ-1019','19 Oct','16 Nov',12.0),L('L-MOZ-1026','26 Oct','23 Nov',30.5)]},
+ {c:'RM-BAS-01',n:'Fresh basil',u:'kg',wh:'COLD',cat:'Produce',book:3.2,rp:4,par:10,po:2,lots:[L('L-BAS-1101','01 Nov','06 Nov',3.2)]},
+ {c:'RM-BUR-01',n:'Burrata',u:'pcs',wh:'COLD',cat:'Dairy',book:18,rp:6,par:48,po:0,lots:[L('L-BUR-1029','29 Oct','04 Nov',6,'am'),L('L-BUR-1031','31 Oct','12 Nov',12)]},
+ {c:'RM-CHK-01',n:'Chicken breast',u:'kg',wh:'COLD',cat:'Meat',book:26.0,rp:8,par:40,po:0,lots:[L('L-CHK-1030','30 Oct','07 Nov',26.0)]},
+ {c:'RM-DOU-01',n:'Pizza dough ball',u:'pcs',wh:'COLD',cat:'Bakery',book:140,rp:60,par:300,po:0,lots:[L('L-DOU-1102','02 Nov','09 Nov',140)]},
+ {c:'RM-SAL-01',n:'Salmon fillet',u:'kg',wh:'COLD',cat:'Seafood',book:9.4,rp:3,par:20,po:0,lots:[L('L-SAL-1027','27 Oct','31 Oct',3.1,'lk'),L('L-SAL-1031','31 Oct','10 Nov',6.3)]},
+ {c:'RM-PAR-01',n:'Parma ham',u:'kg',wh:'COLD',cat:'Meat',book:4.1,rp:5,par:12,po:0,lots:[L('L-PAR-1020','20 Oct','20 Nov',4.1)]},
+ {c:'RM-GOR-01',n:'Gorgonzola',u:'kg',wh:'COLD',cat:'Dairy',book:3.6,rp:4,par:9,po:0,lots:[L('L-GOR-1018','18 Oct','18 Nov',3.6)]},
+ {c:'RM-RIC-01',n:'Ricotta',u:'kg',wh:'COLD',cat:'Dairy',book:7.5,rp:3,par:14,po:0,lots:[L('L-RIC-1024','24 Oct','14 Nov',7.5)]},
+ {c:'DS-FLO-00',n:'Flour 00',u:'kg',wh:'DRY',cat:'Dry Grocery',book:85.0,rp:40,par:200,po:0,lots:[L('L-FLO-1015','15 Oct','15 Apr',85.0)]},
+ {c:'DS-PAS-01',n:'Tomato passata 2.5 kg tin',u:'pcs',wh:'DRY',cat:'Dry Grocery',book:36,rp:12,par:80,po:0,lots:[L('L-PAS-1008','08 Oct','08 Oct+1y',36)]},
+ {c:'DS-BOX-12',n:'Pizza box 12 in',u:'pcs',wh:'DRY',cat:'Packaging',book:400,rp:150,par:900,po:0,lots:[L('L-BOX-1022','22 Oct','none',400)]}
+];
+const IT=c=>ITEMS.find(i=>i.c===c);
+const fq=(it,n)=>(it.u==='kg'?n.toFixed(1):String(Math.round(n)))+' '+it.u;
+const sg=(it,n)=>n===0?'0 '+it.u:(n>0?'+':'−')+(it.u==='kg'?Math.abs(n).toFixed(1):Math.abs(Math.round(n)))+' '+it.u;
+const stepOf=it=>it.u==='kg'?0.5:1;
+function chipsFor(it){const r=[];const lk=it.lots.some(l=>l.st==='lk'&&l.qty>0),am=it.lots.some(l=>l.st==='am'&&l.qty>0);
+  if(lk)r.push(['er','EXPIRED LOCK']);if(am)r.push(['am','Expiry amber']);if(it.book<=it.rp)r.push(['re','Reorder']);if(!r.length)r.push(['ok','In stock']);return r}
+const badge=(t,c)=>`<span class="b ${c}">${t}</span>`;
+
+/* ledger seed: rows are history; opening derived so that final == book */
+const LED=[];let lseq=0;
+function seed(t,time,c,q,ref,who,lot){LED.push({id:'LED-'+String(2090+(++lseq)),dt:'02 Nov '+time,t,c,q,lot:lot||'',ref,who})}
+seed('TRANSFER_OUT_INTRANSIT','06:10','RM-CHK-01',-10.0,'TRF-0100','Warehouse Keeper');
+seed('TRANSFER_OUT_INTRANSIT','06:50','RM-MOZ-01',-12.0,'TRF-0102','Warehouse Keeper');
+seed('TRANSFER_OUT_INTRANSIT','07:20','RM-RIC-01',-4.0,'TRF-0103','Warehouse Keeper');
+seed('GRPO_RECEIPT','07:42','RM-BUR-01',24,'GRPO 5104412','Warehouse Keeper','L-BUR-1031');
+seed('GRPO_RECEIPT','07:44','RM-MOZ-01',20.0,'GRPO 5104412','Warehouse Keeper','L-MOZ-1026');
+seed('ISSUE_PENDING','08:40','RM-CHK-01',-6.0,'ISS-0413','Warehouse Keeper','L-CHK-1030');
+seed('ISSUE_PENDING','08:55','RM-MOZ-01',-5.0,'ISS-0412','Warehouse Keeper','L-MOZ-1019');
+seed('ISSUE_PENDING_OFFSET','09:05','RM-CHK-01',6.0,'ISS-0413','Kitchen Runner');
+seed('ISSUE_CONFIRMED','09:05','RM-CHK-01',-6.0,'ISS-0413','Kitchen Runner');
+seed('ISSUE_PENDING_OFFSET','09:20','RM-MOZ-01',3.0,'ISS-0412','Kitchen Runner');
+seed('ISSUE_CONFIRMED','09:20','RM-MOZ-01',-3.0,'ISS-0412','Kitchen Runner');
+seed('ISSUE_REVERSAL','09:20','RM-MOZ-01',2.0,'ISS-0412','Kitchen Runner','L-MOZ-1019');
+seed('ISSUE_PENDING','09:30','RM-BAS-01',-0.8,'ISS-0414','Warehouse Keeper','L-BAS-1101');
+seed('ISSUE_REVERSAL','09:41','RM-BAS-01',0.8,'ISS-0414','Kitchen Runner','L-BAS-1101');
+seed('ISSUE_PENDING','10:05','RM-RIC-01',-2.0,'ISS-0416','Warehouse Keeper','L-RIC-1024');
+(function(){const run={};ITEMS.forEach(i=>run[i.c]=i.book-LED.filter(r=>r.c===i.c).reduce((a,r)=>a+r.q,0));
+ LED.forEach(r=>{run[r.c]+=r.q;r.after=Math.round(run[r.c]*100)/100})})();
+LED.unshift({id:'LED-2089',dt:'01 Nov 23:10',t:'COUNT_ADJUSTMENT',c:'RM-GOR-01',q:-0.4,lot:'L-GOR-1018',ref:'ADJ-0006 (approved)',who:'Financial Controller',after:3.6});
+LED.forEach((r,i)=>{if(r.id==='LED-2089')return});
+let ledNo=2090+lseq;
+
+const S={
+ role:'keeper',store:'IND-DEL-01',wh:'COLD',clock:'10:15',
+ ovFilter:'all',ovSel:'RM-BAS-01',
+ reqs:[
+  {id:'REQ-0416',sec:'Kitchen',urgent:0,st:'awaiting',time:'09:58',needed:'10:30',lines:[['RM-RIC-01',2.0]]},
+  {id:'REQ-0417',sec:'Kitchen',urgent:0,st:'picking',time:'09:50',needed:'11:00',lines:[['RM-CHK-01',6.0],['RM-DOU-01',40]],lockT:'10:02'},
+  {id:'REQ-0418',sec:'Kitchen',urgent:0,st:'queued',time:'10:04',needed:'11:15',lines:[['RM-MOZ-01',5.0],['RM-BUR-01',6],['RM-SAL-01',4.0]]},
+  {id:'REQ-0419',sec:'Bar',urgent:0,st:'queued',time:'10:09',needed:'11:30',lines:[['RM-BAS-01',0.5]]},
+  {id:'REQ-0420',sec:'Cheese',urgent:1,reason:'Cheese counter ran short after a catering order',st:'queued',time:'10:12',needed:'10:45',lines:[['RM-MOZ-01',8.0],['RM-GOR-01',1.0]]}
+ ],
+ rqF:'all',rqSel:'REQ-0418',pick:{},
+ issues:[
+  {id:'ISS-0412',req:'REQ-0409',sec:'Cheese',c:'RM-MOZ-01',q:5.0,lot:'L-MOZ-1019',st:'done',acc:3.0,t:['08:55','09:20']},
+  {id:'ISS-0413',req:'REQ-0411',sec:'Kitchen',c:'RM-CHK-01',q:6.0,lot:'L-CHK-1030',st:'done',acc:6.0,t:['08:40','09:05']},
+  {id:'ISS-0414',req:'REQ-0413',sec:'Bar',c:'RM-BAS-01',q:0.8,lot:'L-BAS-1101',st:'done',acc:0,t:['09:30','09:41']},
+  {id:'ISS-0416',req:'REQ-0416',sec:'Kitchen',c:'RM-RIC-01',q:2.0,lot:'L-RIC-1024',st:'staged',acc:null,t:['10:05','']}
+ ],
+ isSel:'ISS-0412',ledF:'all',ledQ:'',
+ // new request
+ nr:{lines:[],needed:'11:30',at:'in',reason:'',q:'',editing:null},
+ myExtra:[],
+ // balance
+ bal:[
+  {c:'RM-MOZ-01',o:50.0,r:0.0,i:7.5,cnt:42.5},
+  {c:'RM-BAS-01',o:4.0,r:2.0,i:2.8,cnt:3.0},
+  {c:'RM-BUR-01',o:30,r:0,i:12,cnt:18},
+  {c:'RM-CHK-01',o:40.0,r:0.0,i:14.0,cnt:26.0},
+  {c:'RM-DOU-01',o:200,r:0,i:60,cnt:140}
+ ],
+ rec:{},cause:{},cnote:{},signed:false,ack:false,
+ // import
+ imp:{file:null,posted:'4',filter:'all',sel:null,committed:false,pending2:{}},
+ audit:[
+  {id:'IMP-0039',dt:'30 Oct 08:40',file:'GRPO_20261029.xlsx',hash:'7c4e91…a91',rows:14,res:'12 imported · 2 refreshed · 0 quarantined',by:'Warehouse Keeper',late:'No'},
+  {id:'IMP-0040',dt:'31 Oct 09:02',file:'GRPO_20261030.xlsx',hash:'b02f6d…3e7',rows:9,res:'6 imported · 1 refreshed · 2 quarantined',by:'Warehouse Keeper',late:'No'},
+  {id:'IMP-0041',dt:'02 Nov 07:55',file:'GRPO_20261028.xlsx',hash:'19d8a0…c52',rows:5,res:'4 imported · 1 needs 2nd approval',by:'Warehouse Keeper',late:'Yes (3 working days)'}
+ ],
+ // approvals
+ apF:'open',apSel:'ADJ-0007',
+ aps:[
+  {id:'ADJ-0007',cat:'adj',title:'Count adjustment voucher',item:'RM-GOR-01',q:-0.4,by:'acct',ref:'Weekly cycle count CC-1030',note:'Book 4.0 kg, counted 3.6 kg after recount.',st:'open',sz:'minor'},
+  {id:'ADJ-0008',cat:'adj',title:'Count adjustment voucher',item:'RM-BAS-01',q:-0.2,by:'keeper',ref:'Daily balance 01 Nov',note:'Recounted twice, cause: trimming loss.',st:'open',sz:'minor'},
+  {id:'WST-0031',cat:'waste',title:'Waste claim, expired lot',item:'RM-SAL-01',q:-3.1,by:'keeper',ref:'Lot L-SAL-1027 expired 31 Oct',note:'Above sample minor threshold (2.0 kg). Financial Controller approves.',st:'open',sz:'major'},
+  {id:'WST-0032',cat:'waste',title:'Waste claim, spoilage',item:'RM-BAS-01',q:-0.6,by:'keeper',ref:'Lot L-BAS-1101 wilted',note:'Below sample minor threshold (2.0 kg). Restaurant Manager may approve.',st:'open',sz:'minor'},
+  {id:'RET-0009',cat:'waste',title:'Supplier return claim',item:'RM-CHK-01',q:-2.0,by:'keeper',ref:'GRPO 5104398, failed temperature check',note:'Returned to driver on delivery note.',st:'open',sz:'major'},
+  {id:'TRF-0102',tid:'TRF-0102',hook:'trf',cat:'trf',title:'Transfer variance',item:'RM-MOZ-01',q:-0.6,by:'keeper',ref:'IND-DEL-01 to IND-DEL-02',note:'Dispatched 12.0 kg / 48 pcs. Received 11.4 kg / 46 pcs. Dispatch keeper cannot approve.',st:'open',sz:'major'},
+  {id:'STR-0003',cat:'str',title:'New store proposal',item:null,q:0,by:'rm',ref:'IND-BLR-01 Bengaluru store 1, Cold Room + Dry Store',note:'Requested by Restaurant Manager. Go-live checklist 9 of 11 complete.',st:'open',sz:'major'},
+  {id:'USR-0052',cat:'usr',title:'Approver account, second approval',item:null,q:0,by:'fc',ref:'Approver (secondary), Global scope',note:'Requested for your own role. An independent executive must approve.',st:'open',sz:'major',self:1}
+ ],
+ // users
+ users:[
+  {id:'U-001',role:'System Admin',scope:'Global',st:'active',last:'02 Nov 08:11'},
+  {id:'U-005',role:'Financial Controller',scope:'IND-DEL-01, IND-DEL-02, IND-BLR-01',st:'active',last:'01 Nov 19:40'},
+  {id:'U-014',role:'Warehouse Keeper',scope:'IND-DEL-01 / WH-DEL01-COLD, WH-DEL01-DRY',st:'active',last:'02 Nov 06:32'},
+  {id:'U-021',role:'Restaurant Manager',scope:'IND-DEL-01',st:'active',last:'02 Nov 09:50'},
+  {id:'U-033',role:'Section Requester',scope:'IND-DEL-01 / Kitchen',st:'active',last:'02 Nov 10:04'},
+  {id:'U-034',role:'Section Requester',scope:'IND-DEL-01 / Bar',st:'locked',last:'02 Nov 09:12'},
+  {id:'U-040',role:'Custodian',scope:'IND-DEL-01 / WH-DEL01-COLD',st:'pending',last:'invite sent 01 Nov'},
+  {id:'U-052',role:'Approver (secondary)',scope:'Global',st:'pending2',last:'awaiting 2nd approval'},
+  {id:'U-009',role:'Store Accountant',scope:'IND-DEL-01',st:'deactivated',last:'18 Oct 17:20'}
+ ],
+ uF:'all',uSel:'U-034',
+ inv:{email:'',role:'Warehouse Keeper',stores:['IND-DEL-01'],wh:'Both',sec:'All',err:''},
+ sec:[
+  {dt:'02 Nov 09:12',ev:'ACCOUNT_LOCKED',u:'U-034',d:'5 failed attempts (limit 5, sample)',ip:'Alert sent to System Admin'},
+  {dt:'02 Nov 09:11',ev:'LOGIN_FAILED',u:'U-034',d:'attempt 5 of 5',ip:'Android Chrome'},
+  {dt:'02 Nov 08:11',ev:'LOGIN_OK',u:'U-001',d:'role and scope applied',ip:'Windows Chrome'},
+  {dt:'01 Nov 17:30',ev:'INVITE_SENT',u:'U-040',d:'Custodian, IND-DEL-01, expires in 48 h (sample)',ip:'by System Admin'},
+  {dt:'01 Nov 17:31',ev:'SECOND_APPROVAL_REQUIRED',u:'U-052',d:'Approver role needs independent executive',ip:'by System Admin'},
+  {dt:'31 Oct 14:02',ev:'SYNC_FAILED',u:'U-033',d:'offline queue: 1 action, manual retry pressed',ip:'logged once, no auto-retry'},
+  {dt:'18 Oct 17:20',ev:'ACCOUNT_DEACTIVATED',u:'U-009',d:'leaver, access revoked',ip:'by System Admin'}
+ ],
+ // import rows
+ impRows:[
+  {k:'5104412-RM-MOZ-01#1',d:'02 Nov',c:'RM-MOZ-01',q:20.0,u:'KG',s:'IND-DEL-01',o:'C',res:'imp',why:'New line key. Store, item and UoM mapped.'},
+  {k:'5104412-RM-MOZ-01#2',d:'02 Nov',c:'RM-MOZ-01',q:12.0,u:'KG',s:'IND-DEL-01',o:'C',res:'imp',why:'Second occurrence of the same GRPO + item gets its own key.'},
+  {k:'5104412-RM-BUR-01#1',d:'02 Nov',c:'RM-BUR-01',q:24,u:'PC',s:'IND-DEL-01',o:'C',res:'imp',why:'New line key. Store, item and UoM mapped.'},
+  {k:'5104398-RM-CHK-01#1',d:'30 Oct',c:'RM-CHK-01',q:30.0,u:'KG',s:'IND-DEL-01',o:'C',res:'ref',why:'Line key already imported. Status changed O to C. Reference fields refreshed, zero stock change.'},
+  {k:'5104398-RM-BAS-01#1',d:'30 Oct',c:'RM-BAS-01',q:6.0,u:'KG',s:'IND-DEL-01',o:'C',res:'ref',why:'Line key already imported. Status O to C only. Zero stock change.'},
+  {k:'5104401-RM-SAL-01#1',d:'31 Oct',c:'RM-SAL-01',q:10.0,u:'KG',s:'IND-DEL-01',o:'C',res:'sec',why:'Quantity changed 12.0 to 10.0 kg. Needs SCM Lead or Finance Lead approval before an offsetting reversal is appended.'},
+  {k:'5104405-RM-GOR-01#1',d:'31 Oct',c:'RM-GOR-02',q:4.0,u:'KG',s:'IND-DEL-01',o:'C',res:'sec',why:'Item Code changed RM-GOR-01 to RM-GOR-02. Needs second approval.'},
+  {k:'5104412-RM-PAR-01#1',d:'02 Nov',c:'RM-PAR-01',q:5.0,u:'KG',s:'IND-DEL-09',o:'O',res:'qua',why:'Store code IND-DEL-09 is not in Master Data. Add the store, then re-import.'},
+  {k:'5104412-NEW-4471#1',d:'02 Nov',c:'NEW-4471',q:10.0,u:'KG',s:'IND-DEL-01',o:'O',res:'qua',why:'Item code NEW-4471 is not in the item master.'},
+  {k:'5104412-RM-RIC-01#1',d:'02 Nov',c:'RM-RIC-01',q:3.0,u:'BOX',s:'IND-DEL-01',o:'O',res:'qua',why:'UoM BOX has no conversion to base KG in Master Data.'}
+ ]
+};
+const RES={imp:['Imported','ok'],ref:['Refreshed','re'],sec:['Needs 2nd approval','am'],qua:['Quarantined','er']};
+const CAUSES=['Select cause','Trimming or prep loss','Spillage or breakage','Unrecorded issue','Mis-picked unit (kg vs pcs)','Receiving error','Unknown, escalate'];
+const CAN_ISSUE_ROLES={keeper:1,cust:1};
+
+/* ============ HELPERS ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+let toastT;function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>t.style.display='none',3600)}
+const R=()=>ROLES[S.role];
+function route(){const h=(location.hash||'').replace('#/','');return h}
+function cur(){let r=route();if(!R().nav.includes(r))r=R().nav[0];return r}
+function go(r){location.hash='#/'+r}
+function append(t,c,q,ref,who,lot,other){const it=IT(c);if(!other)it.book=Math.round((it.book+q)*100)/100;
+  if(!other&&lot&&t!=='ISSUE_PENDING_OFFSET'&&t!=='ISSUE_CONFIRMED'){const l=it.lots.find(x=>x.id===lot);if(l)l.qty=Math.round((l.qty+q)*100)/100}
+  const row={id:'LED-'+(++ledNo),dt:'02 Nov '+S.clock,t,c,q,lot:lot||'',ref,who,after:other?null:it.book,fresh:1};LED.push(row);return row}
+const ledSorted=()=>[...LED].reverse();
+const secOf=r=>r.sec;
+function reqMine(r){return r.sec==='Kitchen'}
+const pend=()=>S.reqs.filter(r=>r.st==='queued'||r.st==='picking');
+
+/* ============ SHELL ============ */
+function shell(){
+  const r=R(),page=cur();
+  $('#rail').innerHTML=`${LOGO}<div class="div"></div><div class="tag-line">Inventory Control<br>Internal</div><div class="sp"></div>
+   <nav aria-label="Primary">${r.nav.map(n=>`<a href="#/${n}" class="${n===page?'on':''}" ${n===page?'aria-current="page"':''}>${NAV[n]}</a>`).join('')}</nav><div class="div"></div>
+   <label class="sw"><span>Store</span><select data-i="store" aria-label="Store switcher">${r.stores.map(s=>`<option ${s===S.store?'selected':''}>${s}</option>`).join('')}</select></label>
+   <div class="who"><b>${r.l}</b><br><span title="${r.scope}">${r.scope.length>26?r.scope.slice(0,24)+'…':r.scope}</span></div>`;
+}
+function head(kick,h1,sub,primary){
+  return `<div class="head"><div><div class="kicker">${kick}</div><h1 class="h1">${h1}</h1>${sub?`<p class="sub">${sub}</p>`:''}</div>${primary||''}</div>`;
+}
+const tkS=(no,right,body,pad)=>`<div class="tk"><div class="perf"></div><div class="tk-head"><span class="no">${no}</span><span class="fill"></span><span>${right||''}</span></div>${pad===0?body:`<div class="tk-body">${body}</div>`}<div class="perf perf-b"></div></div>`;
+const roNote=(extra)=>`<div class="note" style="max-width:420px">Read-only for ${R().l}. ${extra||'No primary action on this screen.'}</div>`;
+const chipRow=(arr,cur,act,key)=>`<div class="chips">${arr.map(([v,l,n])=>`<button class="chip ${cur===v?'on':''}" data-a="${act}" data-v="${v}" aria-pressed="${cur===v}">${l}${n!=null?`<span class="n">${n}</span>`:''}</button>`).join('')}</div>`;
+const storeNote=()=>S.store!=='IND-DEL-01'?`<div class="note am" style="margin-bottom:16px">Prototype shows the IND-DEL-01 data set for ${S.store}.</div>`:'';
+
+/* ============ 1 OVERVIEW ============ */
+function vOverview(){
+  const its=ITEMS.filter(i=>i.wh===S.wh);
+  const nExp=its.filter(i=>chipsFor(i).some(c=>c[0]==='er'||c[0]==='am')).length;
+  const nRe=its.filter(i=>chipsFor(i).some(c=>c[0]==='re')).length;
+  const pq=pend(),urg=pq.filter(r=>r.urgent).length,aw=S.reqs.filter(r=>r.st==='awaiting').length;
+  const f=S.ovFilter;
+  const rows=its.filter(i=>f==='all'||(f==='re'&&chipsFor(i).some(c=>c[0]==='re'))||(f==='ex'&&chipsFor(i).some(c=>c[0]==='er'||c[0]==='am')));
+  const sel=IT(S.ovSel)||its[0];
+  const sug=sel&&Math.max(0,sel.par-sel.book-sel.po);
+  const pr={keeper:['Open pick queue','go','requests'],cust:['Start daily balance','go','balance'],rm:['Review daily balance','go','balance'],fc:['Open approvals inbox','go','approvals']}[S.role];
+  const prim=pr?`<button class="btn" data-a="${pr[1]}" data-v="${pr[2]}">${pr[0]}</button>`:roNote();
+  const wh=S.wh==='COLD'?['WH-DEL01-COLD','Cold Room','Ground floor']:['WH-DEL01-DRY','Dry Store','Ground floor'];
+  return storeNote()+freezeBar()+head('Store '+S.store+' · '+STORE_NAME[S.store],`${wh[1]}, <em>as of ${S.clock}.</em>`,'Book stock is derived from the append-only ledger. It is never typed in or edited.',prim)+
+  `<div class="win"><span class="lbl">Issue window (sample)</span>${badge('Open','ok')}<span class="meta">Morning 06:00–11:30 · closes in 1 h 15 min · Afternoon 14:00–17:00</span><span class="meta" style="margin-left:auto">Requests outside the window are accepted and flagged URGENT with a reason.</span></div>
+  <div class="cols c-ov"><div>
+   <div class="tiles">
+    <button class="tile" data-a="go" data-v="requests"><span class="lbl">Pick queue</span><span class="big">${pq.length}</span><span class="s">${urg} urgent · ${pq.length-urg} standard</span></button>
+    <button class="tile" data-a="go" data-v="issues"><span class="lbl">Awaiting runner</span><span class="big">${aw}</span><span class="s">staged, not yet at the door</span></button>
+    <button class="tile ${f==='ex'?'on':''}" data-a="ovf" data-v="${f==='ex'?'all':'ex'}"><span class="lbl">Expiry watch</span><span class="big">${nExp}</span><span class="s">amber or EXPIRED LOCK lots</span></button>
+    <button class="tile ${f==='re'?'on':''}" data-a="ovf" data-v="${f==='re'?'all':'re'}"><span class="lbl">Reorder</span><span class="big">${nRe}</span><span class="s">at or below reorder point</span></button>
+   </div>
+   ${tkS('STOCK · '+wh[0],'Derived from ledger',`
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:12px;flex-wrap:wrap"><div class="seg" role="group" aria-label="Warehouse">${[['COLD','Cold Room'],['DRY','Dry Store']].map(([v,l])=>`<button class="${S.wh===v?'on':''}" data-a="wh" data-v="${v}">${l}</button>`).join('')}</div>
+    ${chipRow([['all','All',its.length],['ex','Expiry',nExp],['re','Reorder',nRe]],f,'ovf')}</div>
+    <table><thead><tr><th>Item</th><th>Code</th><th>Category</th><th class="num">Book qty</th><th>UoM</th><th>Status</th></tr></thead><tbody>
+    ${rows.map(i=>`<tr class="row ${i.c===sel.c?'sel':''}" data-a="ovsel" data-v="${i.c}" tabindex="0"><td><b>${i.n}</b></td><td class="m">${i.c}</td><td>${i.cat}</td><td class="num"><b>${i.u==='kg'?i.book.toFixed(1):i.book}</b></td><td class="m">${i.u}</td><td>${chipsFor(i).map(c=>badge(c[1],c[0])).join(' ')}</td></tr>`).join('')}
+    </tbody></table>`)}
+  </div>
+  <aside class="stack">
+   <div class="stub w"><span class="lbl">Store and warehouse</span><table class="tick">
+    <tr><td>Store</td><td>${S.store}</td></tr><tr><td>Warehouse</td><td>${wh[0]}</td></tr><tr><td>Type</td><td>${wh[1]}</td></tr><tr><td>Status</td><td>${frozen()?'FROZEN_FOR_COUNT':'ACTIVE'}</td></tr><tr><td>Your scope</td><td>${R().scope}</td></tr><tr><td>Backup sync</td><td>02 Nov 03:00</td></tr></table></div>
+   <div class="stub"><span class="lbl">Selected: ${sel.n}</span>
+    ${sel.lots.map(l=>`<div class="ledrow"><span class="t">${l.id}</span><span>exp ${l.exp}</span><span>${fq(sel,l.qty)} ${l.st==='lk'?badge('LOCK','er'):l.st==='am'?badge('Amber','am'):''}</span></div>`).join('')}
+    <p class="gloss" style="margin:8px 0 0">Lots ordered oldest first (FIFO). Locked lots cannot be issued.</p></div>
+   <div class="stub w"><span class="lbl">Reorder suggestion (sample rule)</span>
+    <div class="meta" style="color:var(--navy)">suggested = max(0, par − book − open PO)</div>
+    <table class="tick" style="margin-top:6px"><tr><td>Par</td><td>${fq(sel,sel.par)}</td></tr><tr><td>Book</td><td>${fq(sel,sel.book)}</td></tr><tr><td>Open PO</td><td>${fq(sel,sel.po)}</td></tr><tr><td>Reorder pt</td><td>${fq(sel,sel.rp)}</td></tr></table>
+    <div class="dash"></div><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Suggest</span><b class="num" style="font-size:20px">${fq(sel,sug)}</b></div>
+    <p class="gloss" style="margin:6px 0 0">${sel.book<=sel.rp?'Book is at or below the reorder point.':'Above reorder point, no action needed.'} Par and reorder point are [Owner to set]; values shown are sample.</p></div>
+  </aside></div>`;
+}
+
+/* ============ 2 PICK QUEUE ============ */
+function pickState(r){
+  if(S.pick[r.id])return S.pick[r.id];
+  const p=r.lines.map(([c,q])=>{const it=IT(c);const lot=it.lots.find(l=>l.st!=='lk'&&l.qty>0);return {lot:lot?lot.id:null,q:lot?Math.min(q,lot.qty):0}});
+  return S.pick[r.id]=p;
+}
+function vRequests(){
+  const list=S.reqs.filter(r=>S.rqF==='all'||(S.rqF==='urgent'?r.urgent:r.sec===S.rqF));
+  const r=S.reqs.find(x=>x.id===S.rqSel)||pend()[0];
+  const stLbl={queued:['Queued','mu'],picking:['Picking · locked','am'],awaiting:['Awaiting runner','re'],done:['Confirmed','ok'],cancelled:['Cancelled','mu']};
+  const left=`<aside><div class="chips" style="margin-bottom:12px">${[['all','All'],['Kitchen','Kitchen'],['Bar','Bar'],['Cheese','Cheese'],['urgent','Urgent']].map(([v,l])=>`<button class="chip ${S.rqF===v?'on':''}" data-a="rqf" data-v="${v}">${l}</button>`).join('')}</div>
+   <div class="list">${list.map(q=>`<button class="item ${q.id===r.id?'sel':''}" data-a="rqsel" data-v="${q.id}"><div class="top"><span class="id">${q.id}</span>${q.urgent?badge('URGENT','ur'):badge('Standard','mu')}<span style="margin-left:auto">${badge(...stLbl[q.st])}</span></div>
+    <div style="margin-top:6px"><b>${q.sec}</b> · ${q.lines.length} line${q.lines.length>1?'s':''} · needed ${q.needed}</div>${q.urgent?`<div class="gloss" style="margin-top:2px">Reason: ${esc(q.reason)}</div>`:''}<div class="meta" style="margin-top:2px">submitted ${q.time}</div></button>`).join('')||'<div class="note">No requests match this filter.</div>'}</div></aside>`;
+  if(!r)return head('Pick queue','Nothing <em>waiting.</em>','')+left;
+  const can=r.st==='queued'||r.st==='picking';
+  const ps=pickState(r);
+  const lock=r.st==='queued'?`<div class="note"><b>Requester edit lock.</b> ${r.sec} requester can still edit quantities or cancel while this is Queued. <button class="btn ghost sm" data-a="begin" style="margin-left:8px">Begin picking</button> locks it for the requester.</div>`
+   :r.st==='picking'?`<div class="note am"><b>Locked for requester since ${r.lockT||S.clock}.</b> Edit and cancel are disabled on the requester's side. Quantity changes now go through you.</div>`
+   :`<div class="note">${r.st==='awaiting'?'Staged. Waiting for the runner to confirm at the door (phone).':'Closed.'}</div>`;
+  const lines=r.lines.map(([c,q],i)=>{const it=IT(c),p=ps[i];const part=p.q>0&&p.q<q;
+    return `<div class="line"><div class="ln"><span class="nm">${it.n}</span><span class="meta">${c}</span><span class="b mu">Requested ${fq(it,q)}</span>${p.q<=0?badge('Not staged','mu'):part?badge('Partial','am'):badge('Full','ok')}<span style="margin-left:auto" class="step"><button data-a="pq" data-i="${i}" data-d="-1" ${!can||p.q<=0?'disabled':''} aria-label="Less">−</button><b>${it.u==='kg'?p.q.toFixed(1):p.q} ${it.u}</b><button data-a="pq" data-i="${i}" data-d="1" ${!can||p.q>=q||(it.lots.find(l=>l.id===p.lot)||{qty:0}).qty<=p.q?'disabled':''} aria-label="More">+</button></span></div>
+     ${it.lots.map(l=>{const lk=l.st==='lk',s=l.id===p.lot;return `<button class="lot ${s?'sel':''} ${lk?'lock':''}" data-a="lot" data-i="${i}" data-v="${l.id}" ${lk||!can?'disabled':''} aria-pressed="${s}"><span class="rd"></span><span><b>${l.id}</b></span><span>recv ${l.recv}</span><span>exp ${l.exp}</span><span style="text-align:right">${fq(it,l.qty)}</span><span>${lk?badge('EXPIRED LOCK','er'):l.st==='am'?badge('Expiry amber','am'):badge('FIFO ok','ok')}</span></button>`}).join('')}</div>`}).join('');
+  const rows=r.lines.map(([c],i)=>({c,p:ps[i]})).filter(x=>x.p.q>0);
+  const any=can&&rows.length>0&&!frozen();
+  const ticket=tkS(r.id+' · '+r.sec.toUpperCase()+' · '+(r.urgent?'URGENT':'STANDARD'),'needed by '+r.needed,`
+    ${r.urgent?`<div class="note er" style="margin-bottom:12px"><b>URGENT.</b> Submitted outside the issue window. Reason: ${esc(r.reason)}.</div>`:''}${lock}<div style="margin-top:6px">${lines}</div>
+    <div class="dash"></div><div style="display:flex;align-items:center;gap:16px"><span class="meta" style="flex:1">FIFO: oldest eligible lot is pre-selected. Staging drops book stock at once (ISSUE_PENDING). The runner confirms at the door.</span><button class="btn" data-a="stage" ${any?'':'disabled'}>Stage &amp; hand to runner</button></div>`);
+  const right=`<aside class="stack"><div class="stub w"><span class="lbl">Ledger rows this will append</span>
+    ${rows.length&&can?rows.map(x=>{const it=IT(x.c);return `<div class="ledrow"><span class="t">ISSUE_PENDING</span><span>${it.n}</span><span class="neg">${sg(it,-x.p.q)}</span></div>`}).join(''):'<p class="gloss" style="margin:0">Nothing to append yet.</p>'}
+    <p class="gloss" style="margin:8px 0 0">Append-only. Each row carries who, when and the reference ${r.id}.</p></div>
+   <div class="stub"><span class="lbl">Live derived stock</span><table class="tick">
+    ${r.lines.map(([c],i)=>{const it=IT(c),p=ps[i];const a=can?it.book-p.q:it.book;return `<tr><td style="width:auto">${it.n}</td><td>${fq(it,it.book)} → <b>${fq(it,Math.round(a*100)/100)}</b></td></tr>`}).join('')}</table>
+    <p class="gloss" style="margin:8px 0 0">Book now → after staging.</p></div></aside>`;
+  return freezeBar()+head('Requests and pick queue','Pick <em>ticket.</em>','Select a request, confirm the FIFO lot, stage full or partial. Stock is never edited, only appended.')+`<div class="cols c-rq">${left}<div>${ticket}</div>${right}</div>`;
+}
+
+/* ============ 3 NEW REQUEST ============ */
+function vRequest(){
+  const nr=S.nr,out=nr.at==='out';
+  const matches=nr.q.trim()?ITEMS.filter(i=>(i.n+i.c).toLowerCase().includes(nr.q.toLowerCase())&&!nr.lines.find(l=>l.c===i.c)).slice(0,5):[];
+  const ok=nr.lines.length>0&&nr.lines.every(l=>l.q>0)&&(!out||nr.reason.trim().length>2);
+  const mine=[...S.reqs.filter(reqMine)].reverse();
+  const stLbl={queued:['Queued','mu'],picking:['Picking · locked','am'],awaiting:['Awaiting runner · locked','re'],done:['Confirmed','ok'],cancelled:['Cancelled','mu']};
+  const prim=`<button class="btn" data-a="submit" ${ok?'':'disabled'}>${nr.editing?'Save changes':'Submit request'}</button>`;
+  return head('Section Requester · Kitchen · IND-DEL-01','New <em>request.</em>','Quantities only. You will never see price or cost. You may change or cancel until the keeper starts picking.',prim)+
+  `<div class="cols c-bal"><div class="stack">
+  ${tkS(nr.editing?'EDITING '+nr.editing:'DRAFT REQUEST · KITCHEN','submitting at '+(out?'12:40':'10:15')+' (sample clock)',`
+   <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end">
+    <div><span class="lbl">Sample clock</span><br><div class="seg" style="margin-top:5px"><button class="${!out?'on':''}" data-a="at" data-v="in">10:15 inside window</button><button class="${out?'on':''}" data-a="at" data-v="out">12:40 outside window</button></div></div>
+    <div><label class="lbl" for="needed">Needed by</label><select id="needed" class="in" style="width:120px" data-i="needed">${['10:45','11:00','11:30','15:00','16:30'].map(t=>`<option ${t===nr.needed?'selected':''}>${t}</option>`).join('')}</select></div></div>
+   ${out?`<div class="note er" style="margin-bottom:12px"><b>Outside the issue window (sample 06:00–11:30, 14:00–17:00).</b> Your request is still accepted but is flagged ${badge('URGENT','ur')}. A reason is required.<label class="lbl" for="reason" style="display:block;margin-top:8px">Reason for urgent request</label><input id="reason" class="in ${nr.reason.trim()?'':'err'}" data-i="reason" value="${esc(nr.reason)}" placeholder="e.g. Banquet booking added after cut-off"></div>`
+     :`<div class="note ok" style="margin-bottom:12px"><b>Inside the issue window.</b> Standard request, picked in order.</div>`}
+   <label class="lbl" for="isearch">Add item</label><input id="isearch" class="in" data-i="isearch" value="${esc(nr.q)}" placeholder="Search item name or code, e.g. mozz" autocomplete="off">
+   ${matches.length?`<div class="stub w" style="margin-top:6px;padding:6px 12px">${matches.map(i=>`<button class="chip" style="margin:4px 6px 4px 0" data-a="add" data-v="${i.c}">${i.n} <span class="n">${i.u}</span></button>`).join('')}</div>`:nr.q.trim()?'<p class="gloss">No matching item.</p>':''}
+   <div class="dash"></div><span class="lbl">Lines (${nr.lines.length})</span>
+   ${nr.lines.length?nr.lines.map((l,i)=>{const it=IT(l.c);return `<div class="line"><div class="ln"><span class="nm">${it.n}</span><span class="meta">${it.c} · ${it.wh==='COLD'?'Cold Room':'Dry Store'}</span><span style="margin-left:auto" class="step"><button data-a="nq" data-i="${i}" data-d="-1" aria-label="Less">−</button><b>${it.u==='kg'?l.q.toFixed(1):l.q}</b><button data-a="nq" data-i="${i}" data-d="1" aria-label="More">+</button></span><span class="meta" style="width:30px">${it.u}</span><button class="btn ghost sm" data-a="rmline" data-i="${i}">Remove</button></div></div>`}).join(''):'<div class="note" style="margin-top:8px">No lines yet. Search an item above.</div>'}
+   `)}
+  </div>
+  <aside><div class="stub w"><span class="lbl">My requests (Kitchen)</span>
+   ${mine.map(q=>{const ed=q.st==='queued';return `<div style="padding:10px 0;border-bottom:1px dotted var(--rule)"><div class="top" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b class="meta" style="color:var(--navy)">${q.id}</b>${q.urgent?badge('URGENT','ur'):''}<span style="margin-left:auto">${badge(...stLbl[q.st])}</span></div>
+    <div style="margin:4px 0">${q.lines.map(([c,n])=>IT(c).n+' '+fq(IT(c),n)).join(', ')}</div><div class="meta">needed ${q.needed}</div>
+    <div style="margin-top:6px;display:flex;gap:8px;align-items:center">${ed?`<button class="btn ghost sm" data-a="edit" data-v="${q.id}">Edit</button><button class="btn ghost sm" data-a="cancel" data-v="${q.id}">Cancel request</button>`:`<span class="gloss">${q.st==='cancelled'?'Cancelled, kept in history.':q.st==='done'?'Closed, confirmed at the door.':'Locked: the keeper has started picking. Edit and cancel are off.'}</span>`}</div></div>`}).join('')}
+  </div>
+  <div class="stub" style="margin-top:16px"><span class="lbl">Phone note</span><p style="margin:0;font-size:13.5px">Requests made on the phone while offline queue there and send once. This desktop view is for office and kitchen-office use.</p></div></aside></div>`;
+}
+
+/* ============ 4 ISSUES & LEDGER ============ */
+const TYPES=['GRPO_RECEIPT','ISSUE_PENDING','ISSUE_PENDING_OFFSET','ISSUE_CONFIRMED','ISSUE_REVERSAL','COUNT_ADJUSTMENT','TRANSFER_OUT_INTRANSIT','TRANSFER_IN_RECEIVED'];
+function vIssues(){
+  const iss=S.issues.find(i=>i.id===S.isSel)||S.issues[0];
+  const it=IT(iss.c);
+  const rows=LED.filter(r=>r.ref===iss.id||r.ref.startsWith(iss.id));
+  const stText=iss.st==='staged'?['Awaiting runner','re']:iss.acc===iss.q?['Confirmed','ok']:iss.acc===0?['Declined','er']:['Partial','am'];
+  const rejected=iss.q-(iss.acc||0);
+  const step=(n,t,ts,state)=>`<div class="${state}"><div class="dot"></div><div class="tt">${t}</div><div class="ts">${ts}</div></div>`;
+  const done=iss.st==='done';
+  const tl=`<div class="tl">${step(1,'Staged',iss.t[0]+' · keeper','done')}${step(2,'At door',done?iss.t[1]+' · runner':'waiting for runner',done?'done':'cur')}${step(3,done?(iss.acc===iss.q?'Confirmed':iss.acc===0?'Declined':'Partial'):'Outcome',done?(iss.acc===iss.q?'full qty accepted':iss.acc===0?'0 accepted, all back to shelf':fq(it,iss.acc)+' accepted · '+fq(it,rejected)+' back'):'pending',done?'done':'')}</div>`;
+  const filt=LED.filter(r=>(S.ledF==='all'||r.t===S.ledF)&&(!S.ledQ||(IT(r.c).n+r.ref+r.id).toLowerCase().includes(S.ledQ.toLowerCase())));
+  const issBox=tkS('ISSUE '+iss.id+' · '+iss.sec.toUpperCase(),'request '+iss.req,`
+   <div style="display:flex;gap:14px;align-items:baseline;flex-wrap:wrap"><span class="nm" style="font-family:var(--disp);font-size:22px;font-weight:600;text-transform:uppercase">${it.n}</span><span class="meta">${fq(it,iss.q)} issued · lot ${iss.lot}</span>${badge(...stText)}</div>${tl}
+   <span class="lbl">Ledger rows for this issue</span>
+   ${rows.map(r=>`<div class="ledrow"><span class="t">${r.t}</span><span class="meta">${r.dt.slice(7)} · ${r.who}</span><span class="${r.q<0?'neg':'pos'}">${sg(it,r.q)}</span></div>`).join('')}
+   ${iss.st==='done'&&iss.acc!==iss.q&&iss.acc>0?`<p class="gloss" style="margin:8px 0 0">Partial accept: offset and confirmed rows equal the accepted ${fq(it,iss.acc)}. The ${fq(it,rejected)} not accepted returns to the shelf through ISSUE_REVERSAL.</p>`:''}
+   ${iss.st==='staged'?`<div class="dash"></div><div class="note"><b>At the door.</b> The runner confirms on the phone. Demo only, simulate the runner:<div style="margin-top:8px;display:flex;gap:8px"><button class="btn ghost sm" data-a="run" data-v="all">Accept all</button><button class="btn ghost sm" data-a="run" data-v="half">Accept half</button><button class="btn ghost sm" data-a="run" data-v="none">Decline</button></div></div>`:''}`);
+  const prim=`<button class="btn" data-a="export">Export ledger CSV</button>`;
+  return head('Issue tracking · '+S.store,'Issues <em>&amp; ledger.</em>','Two-stage issue: staged by the keeper, confirmed at the door by the runner. The ledger below is append-only.',prim)+
+  `<div class="cols c-is"><aside><span class="lbl" style="display:block;margin-bottom:8px">Recent issues</span><div class="list">${[...S.issues].reverse().map(i=>{const t=IT(i.c),s=i.st==='staged'?['Awaiting runner','re']:i.acc===i.q?['Confirmed','ok']:i.acc===0?['Declined','er']:['Partial','am'];
+    return `<button class="item ${i.id===iss.id?'sel':''}" data-a="issel" data-v="${i.id}"><div class="top"><span class="id">${i.id}</span><span style="margin-left:auto">${badge(...s)}</span></div><div style="margin-top:4px"><b>${t.n}</b> ${fq(t,i.q)}</div><div class="meta">${i.sec} · staged ${i.t[0]}</div></button>`}).join('')}</div></aside>
+   <div class="stack">${issBox}
+   ${tkS('LEDGER · '+S.store+' · IMMUTABLE','append-only',`
+    <div class="note" style="margin-bottom:12px">Rows cannot be edited or deleted. A mistake is corrected by a new row that references the old one.</div>
+    <div style="display:flex;gap:16px;align-items:center;margin-bottom:10px;flex-wrap:wrap">${chipRow([['all','All',LED.length],...TYPES.map(t=>[t,t.replace('ISSUE_','').replace('_',' '),LED.filter(r=>r.t===t).length])],S.ledF,'ledf')}
+     <label class="sr" for="lq">Search ledger</label><input id="lq" class="in" style="width:220px;margin:0;margin-left:auto" data-i="ledq" value="${esc(S.ledQ)}" placeholder="Search item or reference"></div>
+    <table class="dense"><thead><tr><th>Ledger ID</th><th>Time</th><th>Movement type</th><th>Item · lot</th><th class="num">Qty</th><th class="num">Stock after</th><th>Reference</th><th>Logged by</th></tr></thead><tbody>
+    ${[...filt].reverse().slice(0,40).map(r=>{const t=IT(r.c);return `<tr class="${r.fresh?'sel':''}"><td class="m">${r.id}</td><td class="m">${r.dt.replace('02 Nov ','')}</td><td class="m" style="color:var(--navy)"><b>${r.t}</b></td><td>${t.n}<div class="meta" style="font-size:12px">${r.lot||'no lot'}</div></td><td class="num ${r.q<0?'neg':'pos'}"><b>${sg(t,r.q)}</b></td><td class="num">${r.after==null?'—':fq(t,r.after)}</td><td class="m">${r.ref}</td><td style="font-size:13px">${r.who.replace('Warehouse Keeper','Keeper').replace('Financial Controller','Fin. Controller').replace('Kitchen Runner','Runner')}</td></tr>`}).join('')||'<tr><td colspan="9"><div class="note">No ledger rows match.</div></td></tr>'}
+    </tbody></table>`)}</div></div>`;
+}
+
+/* ============ 5 DAILY BALANCE ============ */
+function balCalc(b){const exp=Math.round((b.o+b.r-b.i)*100)/100;const diff=Math.round((b.cnt-exp)*100)/100;const rc=S.rec[b.c];
+  let st='ok';if(diff!==0){st='var';if(rc!==undefined&&rc!==''){if(Math.round((rc-exp)*100)/100===0)st='fixed';else if(S.cause[b.c]&&S.cause[b.c]!==CAUSES[0])st='esc'}}
+  return {exp,diff,st}}
+function vBalance(){
+  const canCount=CAN_ISSUE_ROLES[S.role];
+  const calc=S.bal.map(b=>({b,...balCalc(b)}));
+  const open=calc.filter(x=>x.st==='var').length;
+  const esc_=calc.filter(x=>x.st==='esc');
+  const allOk=open===0;
+  const prim=canCount?`<button class="btn" data-a="sign" ${allOk&&!S.signed?'':'disabled'}>${S.signed?'Signed off':'Sign off balance'}</button>`
+    :`<button class="btn" data-a="ack" ${S.signed&&!S.ack?'':'disabled'}>${S.ack?'Acknowledged':'Acknowledge sign-off'}</button>`;
+  const bmap={ok:badge('Balanced','ok'),var:badge('Variance · recount','er'),fixed:badge('Resolved by recount','ok'),esc:badge('Handled · escalated','am')};
+  return head('Daily close · business day 01 Nov 2026 · '+S.store,'Daily <em>balance.</em>','Expected = Opening + Received − Issued. Counted is typed in by the custodian. Difference is calculated, never entered.',prim)+
+  `<div class="cols c-bal"><div class="stack">${tkS('BALANCE SHEET · WH-DEL01-COLD','benchmark items (sample)',`
+   <table><thead><tr><th>Item</th><th class="num">Opening</th><th class="num">Received</th><th class="num">Issued</th><th class="num">Expected</th><th class="num">Counted</th><th class="num">Diff</th><th>State</th></tr></thead><tbody>
+   ${calc.map(({b,exp,diff,st})=>{const it=IT(b.c);const d=it.u==='kg'?1:0;return `<tr><td><b>${it.n}</b><div class="meta">${it.u}</div></td><td class="num">${b.o.toFixed(d)}</td><td class="num">${b.r.toFixed(d)}</td><td class="num">${b.i.toFixed(d)}</td><td class="num"><b>${exp.toFixed(d)}</b></td>
+    <td class="num">${canCount&&!S.signed?`<input class="in num" style="width:84px;margin:0;display:inline-block" type="number" step="${it.u==='kg'?0.1:1}" id="cnt-${b.c}" data-i="cnt" data-k="${b.c}" value="${b.cnt}" aria-label="Counted ${it.n}">`:b.cnt.toFixed(d)}</td>
+    <td class="num ${diff<0?'neg':diff>0?'pos':''}"><b>${diff===0?'0':(diff>0?'+':'−')+Math.abs(diff).toFixed(d)}</b></td><td>${bmap[st]}</td></tr>`}).join('')}</tbody></table>
+   ${calc.filter(x=>x.st!=='ok').map(({b,exp,diff,st})=>{const it=IT(b.c);return `<div class="dash"></div><div><span class="lbl">${it.n}: difference ${sg(it,diff)}</span>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;margin-top:6px"><div><label class="lbl" for="rc-${b.c}">Recount</label><input id="rc-${b.c}" class="in num" style="width:100px" type="number" step="0.1" data-i="rec" data-k="${b.c}" value="${S.rec[b.c]??''}" ${canCount&&!S.signed?'':'disabled'} placeholder="${it.u}"></div>
+    <div><label class="lbl" for="ca-${b.c}">Cause (if still different)</label><select id="ca-${b.c}" class="in" style="width:240px" data-i="cause" data-k="${b.c}" ${canCount&&!S.signed?'':'disabled'}>${CAUSES.map(c=>`<option ${S.cause[b.c]===c?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div style="flex:1;min-width:200px"><label class="lbl" for="no-${b.c}">Note</label><input id="no-${b.c}" class="in" data-i="cnote" data-k="${b.c}" value="${esc(S.cnote[b.c]||'')}" ${canCount&&!S.signed?'':'disabled'} placeholder="What was checked"></div></div>
+    ${st==='var'?`<p class="gloss" style="margin:6px 0 0">Recount first. If the recount matches expected, the variance clears. If not, choose a cause and it is escalated.</p>`:''}</div>`}).join('')}
+   <div class="dash"></div>
+   ${S.signed?`<div class="note ok"><b>Signed off by ${R().l} at ${S.clock}.</b> The sheet is locked.</div>`:`<div class="note ${allOk?'ok':'er'}">${allOk?'All differences are zero or handled. Sign-off is available.':`<b>Sign-off locked.</b> ${open} item${open>1?'s have':' has'} an unresolved difference. Recount and document the cause first.`}</div>`}
+  `)}</div>
+  <aside class="stack"><div class="stub w"><span class="lbl">Sheet</span><table class="tick"><tr><td>Day</td><td>01 Nov 2026</td></tr><tr><td>Room</td><td>WH-DEL01-COLD</td></tr><tr><td>Counted by</td><td>Custodian</td></tr><tr><td>Items</td><td>${S.bal.length}</td></tr><tr><td>Balanced</td><td>${calc.filter(x=>x.st==='ok'||x.st==='fixed').length} of ${S.bal.length}</td></tr></table></div>
+   ${esc_.length?`<div class="note am"><b>Escalation.</b> Alert raised to Finance Lead and Restaurant Manager for ${esc_.map(x=>IT(x.b.c).n).join(', ')}. If still open tomorrow, it is included in the next-morning escalation note to the central Financial Controller (09:00, sample).</div>`:`<div class="stub"><span class="lbl">If a difference remains</span><p style="margin:0;font-size:13.5px">Recount, document the cause, alert Finance Lead and Restaurant Manager. Unresolved items go to the central Financial Controller next morning.</p></div>`}
+   <div class="stub"><span class="lbl">Who can do what</span><p style="margin:0;font-size:13.5px">Custodian and Warehouse Keeper count and sign. Restaurant Manager and Financial Controller review and acknowledge. Nobody edits stock; adjustments go through Approvals.</p></div>
+   ${!canCount?`<div class="note">${R().l} has a read-only view of counts.</div>`:''}</aside></div>`;
+}
+
+/* ============ 6 SAP IMPORT ============ */
+function vImport(){
+  const im=S.imp,f=im.file;
+  const rows=f?S.impRows.filter(r=>im.filter==='all'||r.res===im.filter):[];
+  const cnt=k=>S.impRows.filter(r=>r.res===k).length;
+  const sel=S.impRows.find(r=>r.k===im.sel);
+  const late=+im.posted>1;
+  const nImp=cnt('imp');
+  const prim=`<button class="btn" data-a="commit" ${f&&!im.committed&&!frozen()?'':'disabled'}>${im.committed?'Import committed':'Commit import ('+nImp+' lines to ledger)'}</button>`;
+  return freezeBar()+head('SAP GRPO import · Warehouse Keeper','SAP GRPO <em>import.</em>','Upload the GRPO export from SAP. Only quantities and reference codes are kept. Prices, taxes and vendor names are dropped before anything is stored.',prim)+
+  `<div class="cols c-imp"><div class="stack">
+   <div class="drop">${f?`<span class="stamp">File parsed</span><div class="big">${f.name}</div><div class="meta">${f.size} · 1 sheet · header row 1 · ${S.impRows.length} data rows · 27 columns</div><div style="margin-top:12px;display:flex;gap:10px;justify-content:center"><button class="btn ghost sm" data-a="clearf" ${im.committed?'disabled':''}>Remove file</button></div>`
+    :`<span class="lbl">Drop zone</span><div class="big">Drop the SAP GRPO .xlsx here</div><div class="gloss">.xlsx only · header row 1 · 27 columns expected</div><div style="margin-top:12px;display:flex;gap:10px;justify-content:center"><button class="btn ghost" data-a="loadf">Use sample file</button></div>`}</div>
+   ${f?`<div class="note ${late?'am':'ok'}"><b>${late?'Late upload.':'Uploaded on time.'}</b> ${late?`SAP posting date was ${im.posted} working days ago (rule: within 1 working day). Import still proceeds. A warning is logged to Warehouse Keeper and Restaurant Manager.`:'Posting date within 1 working day.'} <label style="margin-left:10px">Sample posting age <select class="in" style="display:inline-block;width:auto;margin:0" data-i="posted" ${im.committed?'disabled':''}>${[['1','1 working day'],['4','4 working days']].map(([v,l])=>`<option value="${v}" ${im.posted===v?'selected':''}>${l}</option>`).join('')}</select></label></div>
+   ${tkS('PARSED PREVIEW · '+f.name,'allowlisted columns only',`
+    <div style="margin-bottom:10px">${chipRow([['all','All',S.impRows.length],['imp','Imported',cnt('imp')],['ref','Refreshed',cnt('ref')],['sec','Needs 2nd approval',cnt('sec')],['qua','Quarantined',cnt('qua')]],im.filter,'impf')}</div>
+    <table><thead><tr><th>Line key</th><th>Doc date</th><th>Item code</th><th class="num">Quantity</th><th>UoM</th><th>Store</th><th>Status</th><th>Result</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr class="row ${r.k===im.sel?'sel':''}" data-a="impsel" data-v="${r.k}" tabindex="0"><td class="m" style="color:var(--navy)">${r.k}</td><td class="m">${r.d}</td><td class="m">${r.c}</td><td class="num">${r.q.toFixed(r.u==='PC'?0:1)}</td><td class="m">${r.u}</td><td class="m">${r.s}</td><td class="m">${r.o}</td><td>${badge(...RES[r.res])}</td></tr>`).join('')}</tbody></table>
+    <p class="gloss" style="margin:10px 0 0">Line key = GRPO No. + Item Code + occurrence order, because the export has no line-number column. Status O/C is kept as a reference field.</p>`)}`:''}
+   ${tkS('IMPORT AUDIT','one row per upload',`<table><thead><tr><th>Import</th><th>When</th><th>File</th><th>File hash</th><th class="num">Rows</th><th>Result</th><th>By</th><th>Late</th></tr></thead><tbody>
+    ${[...S.audit].reverse().map(a=>`<tr class="${a.fresh?'sel':''}"><td class="m">${a.id}</td><td class="m">${a.dt}</td><td class="m">${a.file}</td><td class="m">${a.hash}</td><td class="num">${a.rows}</td><td>${a.res}</td><td>${a.by}</td><td>${a.late}</td></tr>`).join('')}</tbody></table><p class="gloss" style="margin:8px 0 0">File hash is a trace only. Corrected re-exports of the same file are allowed, rows are matched by line key.</p>`)}
+  </div>
+  <aside class="stack">
+   <div class="stub w"><span class="lbl">Selected line</span>${sel?`<div class="meta" style="color:var(--navy);word-break:break-all"><b>${sel.k}</b></div><div style="margin:8px 0">${badge(...RES[sel.res])}</div><p style="margin:0 0 10px">${sel.why}</p>
+     ${sel.res==='qua'?`<button class="btn ghost sm" data-a="fixmaster">Open master data fix</button>`:sel.res==='sec'?(im.pending2[sel.k]?`<span class="b ok">Second approval requested</span>`:`<button class="btn ghost sm" data-a="req2" data-v="${sel.k}">Request 2nd approval</button>`):sel.res==='imp'?`<p class="gloss" style="margin:0">Will append GRPO_RECEIPT +${sel.q.toFixed(sel.u==='PC'?0:1)} on commit.</p>`:`<p class="gloss" style="margin:0">No ledger row.</p>`}`:'<p class="gloss" style="margin:0">Select a row in the preview.</p>'}</div>
+   <div class="stub"><span class="lbl">Dropped at ingestion</span><div class="chips" style="margin-bottom:8px">${['Price','Total Tax','Net Tax Amount','Row Total','Gross Total','Vendor Name','Vendor Address'].map(c=>`<span class="b mu" style="text-decoration:line-through">${c}</span>`).join('')}</div><p class="gloss" style="margin:0">Confidential. Removed on the server before the file is staged. Version 1 stores quantities only. 11 further unused columns are ignored.</p></div>
+   <div class="stub w"><span class="lbl">Columns kept (allowlist)</span><p class="meta" style="margin:0;line-height:1.7">GRPO No. · Doc Date · Item Code · Quantity · UoM Code · Store Code · Vendor Code (reference) · Base Document · Row Status O/C. Line key is derived.</p></div>
+   <div class="stub"><span class="lbl">Re-upload rule</span><p style="margin:0;font-size:13.5px">Same line key with only O to C status change refreshes reference fields, zero stock change. A changed Quantity or Item Code needs a second person (SCM Lead or Finance Lead) before an offsetting reversal is appended.</p></div>
+  </aside></div>`;
+}
+
+/* ============ 7 APPROVALS ============ */
+const CANAP={fc:['adj','waste','trf','str','usr'],rm:['waste']};
+function canApprove(a){const c=CANAP[S.role];if(!c||!c.includes(a.cat))return {ok:false,why:S.role==='rm'?'Outside Restaurant Manager scope.':'Your role cannot approve this.'};
+  if(a.by===S.role||a.self&&S.role==='fc')return {ok:false,why:'Segregation of duties: logged by your role, you cannot approve it.'};
+  if(S.role==='rm'&&a.sz==='major')return {ok:false,why:'Above sample minor threshold. Financial Controller approves.'};
+  if(a.cat==='waste'&&S.role==='rm'&&a.by==='rm')return {ok:false,why:'Restaurant Manager cannot approve own claims.'};
+  return {ok:true}}
+const CATL={adj:'Count adjustment',waste:'Waste / return',trf:'Transfer variance',str:'New store / warehouse',usr:'Approver account'};
+function vApprovals(){
+  const visible=S.aps.filter(a=>S.role==='fc'||a.cat==='waste');
+  const f=S.apF;
+  const list=visible.filter(a=>f==='all'||(f==='open'?a.st==='open':f===a.cat));
+  const a=S.aps.find(x=>x.id===S.apSel&&visible.includes(x))||list[0];
+  const chipsA=[['open','Open',visible.filter(a=>a.st==='open').length],['all','All',visible.length],...(S.role==='fc'?Object.keys(CATL).map(k=>[k,CATL[k],visible.filter(a=>a.cat===k).length]):[])];
+  const left=`<aside><div style="margin-bottom:12px">${chipRow(chipsA,f,'apf')}</div><div class="list">${list.map(x=>{const c=canApprove(x);const sl={open:['Open','mu'],ok:['Approved','ok'],no:['Rejected','er']}[x.st];
+   return `<button class="item ${a&&x.id===a.id?'sel':''}" data-a="apsel" data-v="${x.id}"><div class="top"><span class="id">${x.id}</span>${badge(...sl)}<span style="margin-left:auto" class="gloss">${CATL[x.cat]}</span></div><div style="margin-top:4px"><b>${x.title}</b>${x.item?' · '+IT(x.item).n+' '+sg(IT(x.item),x.q):''}</div><div class="meta">logged by ${ROLES[x.by].l}${x.st==='open'&&!c.ok?' · <span style="color:var(--err)">not approvable by you</span>':''}</div></button>`}).join('')||'<div class="note">Inbox is empty for this filter.</div>'}</div></aside>`;
+  if(!a)return head('Approvals inbox','Nothing <em>to approve.</em>','')+`<div class="cols c-rq" style="grid-template-columns:420px 1fr">${left}<div></div></div>`;
+  const c=canApprove(a),it=a.item?IT(a.item):null;
+  const tgt=a.cat==='adj'?'count':a.cat==='trf'?'transfers':null;const lnk=tgt&&R().nav.includes(tgt)?`<p style="margin:10px 0 0"><button class="btn ghost sm" data-a="openap" data-v="${a.cat==='trf'?'trf':'cnt'}" data-sel="${a.tid||''}">Open in ${tgt==='count'?'Count':'Transfers'}</button></p>`:'';
+  const row=it&&a.q?`<div class="ledrow"><span class="t">${a.cat==='adj'?'COUNT_ADJUSTMENT':a.cat==='trf'?'TRANSFER_VARIANCE':'WASTE_DISPOSAL'}</span><span>${it.n} · ${a.id}</span><span class="neg">${sg(it,a.q)}</span></div><div class="meta" style="margin-top:6px">derived stock ${fq(it,it.book)} → <b>${fq(it,Math.round((it.book+a.q)*100)/100)}</b></div>`:`<p class="gloss" style="margin:0">${a.cat==='str'?'No stock row. Creates the store and warehouse master records (status ACTIVE) with this approval id.':'No stock row. Activates the account and issues the activation link.'}</p>`;
+  const mid=tkS(a.id+' · '+CATL[a.cat].toUpperCase(),a.st==='open'?'awaiting decision':a.st==='ok'?'approved':'rejected',`
+   <div style="display:flex;gap:12px;align-items:baseline;flex-wrap:wrap"><span style="font-family:var(--disp);font-size:26px;font-weight:600;text-transform:uppercase">${a.title}</span>${badge(a.sz==='minor'?'Minor (sample)':'Major','mu')}</div>
+   <table class="tick" style="margin-top:12px"><tr><td>Item</td><td>${it?it.n+' · '+it.c:'—'}</td></tr><tr><td>Quantity</td><td>${it?sg(it,a.q):'—'}</td></tr><tr><td>Reference</td><td>${a.ref}</td></tr><tr><td>Logged by</td><td>${ROLES[a.by].l}</td></tr><tr><td>Store</td><td>${S.store}</td></tr></table>
+   <p style="margin:12px 0 0">${a.note}</p>${lnk}<div class="dash"></div>
+   ${a.st!=='open'?`<div class="note ${a.st==='ok'?'ok':'er'}"><b>${a.st==='ok'?'Approved':'Rejected'} by ${R().l}.</b> ${a.st==='ok'?(a.q?'Ledger row appended.':'Recorded.'):'No ledger row. Rejection reason is stored with the decision.'}</div>`
+    :c.ok?`<div style="display:flex;gap:12px;align-items:center"><button class="btn" data-a="approve">Approve</button><button class="btn ghost" data-a="reject">Reject</button><span class="meta">Decision is recorded with your role and time.</span></div>`
+    :`<div class="note er"><b>Cannot approve.</b> ${c.why}</div><div style="margin-top:10px"><button class="btn" disabled>Approve</button> <button class="btn ghost" disabled>Reject</button></div>`}`);
+  const right=`<aside class="stack"><div class="stub w"><span class="lbl">${a.st==='ok'?'Ledger row appended':'Ledger row if approved'}</span>${row}<p class="gloss" style="margin:8px 0 0">Append-only. Nothing is edited in place.</p></div>
+   <div class="stub"><span class="lbl">Segregation of duties</span><p style="margin:0;font-size:13.5px">Whoever logs a claim, count voucher or variance cannot approve it. Count staff never approve book adjustments. Dispatch keepers never approve transit variances.</p></div>
+   ${S.role==='rm'?'<div class="note">Restaurant Manager sees only waste claims, and approves minor ones below the threshold [Owner to set].</div>':''}</aside>`;
+  return head('Approvals inbox · '+R().l,'Waiting <em>for you.</em>','Count adjustments, waste and return claims, transfer variances, new stores and approver accounts.')+`<div class="cols c-ap">${left}<div>${mid}</div>${right}</div>`;
+}
+
+/* ============ 8 USERS ============ */
+const USL={active:['Active','ok'],pending:['Pending invite','re'],pending2:['Pending 2nd approval','am'],locked:['Locked','er'],deactivated:['Deactivated','mu']};
+function vUsers(){
+  const list=S.users.filter(u=>S.uF==='all'||u.st===S.uF);
+  const sel=S.users.find(u=>u.id===S.uSel)||S.users[0];
+  const cnt=k=>S.users.filter(u=>u.st===k).length;
+  const inv=S.inv,apr=inv.role==='Approver';
+  const stores=['IND-DEL-01','IND-DEL-02','IND-BLR-01'];
+  const prim=`<button class="btn" data-a="invite">Send invite</button>`;
+  const mx=[['System Admin','Global','—','—','Invite users, unlock, deactivate'],['Warehouse Keeper','Store','Assigned','All','Import GRPO, pick, count, log waste'],['Restaurant Manager','Store','—','—','Review balance, approve minor waste'],['Section Requester','Store','—','One section','Create and edit requests'],['Kitchen Runner','Store','—','One section','Confirm at door'],['Custodian','Room','Assigned','—','Pick, count, sign handover'],['Store Accountant','Store','—','—','Count, submit adjustments'],['Financial Controller','Multi-store','—','—','Approve vouchers, transfers, stores'],['Viewer','Global or store','—','—','Read-only ledger']];
+  return head('System Admin · Global','Users <em>&amp; access.</em>','Permission = Role + Scope. Only System Admin invites users. Passwords are never shown, set or seen here; people set their own through the emailed link.',prim)+
+  `<div class="cols c-us"><div class="stack">
+   ${tkS('USERS · '+S.users.length,'lifecycle',`<div style="margin-bottom:10px">${chipRow([['all','All',S.users.length],...Object.keys(USL).map(k=>[k,USL[k][0],cnt(k)])],S.uF,'uf')}</div>
+    <table><thead><tr><th>User</th><th>Role</th><th>Scope</th><th>State</th><th>Last activity</th></tr></thead><tbody>
+    ${list.map(u=>`<tr class="row ${u.id===sel.id?'sel':''}" data-a="usel" data-v="${u.id}" tabindex="0"><td class="m" style="color:var(--navy)"><b>${u.id}</b></td><td>${u.role}</td><td class="m">${u.scope}</td><td>${badge(...USL[u.st])}</td><td class="m">${u.last}</td></tr>`).join('')}</tbody></table>
+    <div class="dash"></div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="lbl">${sel.id} · ${sel.role}</span>
+     ${sel.st==='locked'?`<button class="btn ghost sm" data-a="uact" data-v="unlock">Unlock and reset attempt counter</button>`:''}
+     ${sel.st==='active'?`<button class="btn ghost sm" data-a="uact" data-v="lock">Lock account</button><button class="btn ghost sm" data-a="uact" data-v="deact">Deactivate leaver</button>`:''}
+     ${sel.st==='pending'?`<button class="btn ghost sm" data-a="uact" data-v="resend">Resend invite</button>`:''}
+     ${sel.st==='pending2'?`<span class="b am">Waiting for an independent executive. No activation link issued yet.</span>`:''}
+     ${sel.st==='deactivated'?`<span class="meta">Access revoked. History is kept.</span>`:''}</div>`)}
+   ${tkS('ROLE AND SCOPE MATRIX','reference',`<table class="mat"><thead><tr><th>Role</th><th>Scope level</th><th>Warehouse</th><th>Section</th><th style="text-align:left">Can do</th></tr></thead><tbody>${mx.map(r=>`<tr><td><b>${r[0]}</b></td><td class="m">${r[1]}</td><td class="m">${r[2]}</td><td class="m">${r[3]}</td><td style="text-align:left">${r[4]}</td></tr>`).join('')}</tbody></table><p class="gloss" style="margin:8px 0 0">Price visibility: none of these roles sees prices in version 1, because none are stored.</p>`)}
+   ${tkS('SECURITY LOG','append-only',`<table><thead><tr><th>When</th><th>Event</th><th>User</th><th>Detail</th><th>Note</th></tr></thead><tbody>${S.sec.map(e=>`<tr class="${e.fresh?'sel':''}"><td class="m">${e.dt}</td><td class="m" style="color:var(--navy)"><b>${e.ev}</b></td><td class="m">${e.u}</td><td>${e.d}</td><td class="m">${e.ip}</td></tr>`).join('')}</tbody></table>`)}
+  </div>
+  <aside class="stack"><div class="stub w"><span class="lbl">Invite by email</span>
+   <div class="fld"><label class="lbl" for="iem">Email</label><input id="iem" class="in ${inv.err?'err':''}" data-i="iem" type="email" value="${esc(inv.email)}" placeholder="name@pizza4ps.com">${inv.err?`<div style="color:var(--err);font-size:13px;margin-top:4px">${inv.err}</div>`:''}</div>
+   <div class="fld"><label class="lbl" for="irole">Role</label><select id="irole" class="in" data-i="irole">${['Warehouse Keeper','Restaurant Manager','Section Requester','Kitchen Runner','Custodian','Store Accountant','Viewer','Approver'].map(r=>`<option ${r===inv.role?'selected':''}>${r}</option>`).join('')}</select></div>
+   <div class="fld"><span class="lbl">Stores</span><div class="chips" style="margin-top:6px">${stores.map(s=>`<button class="chip ${inv.stores.includes(s)?'on':''}" data-a="istore" data-v="${s}" aria-pressed="${inv.stores.includes(s)}">${s}</button>`).join('')}</div></div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="fld"><label class="lbl" for="iwh">Warehouse</label><select id="iwh" class="in" data-i="iwh">${['Both','WH-DEL01-COLD','WH-DEL01-DRY'].map(r=>`<option ${r===inv.wh?'selected':''}>${r}</option>`).join('')}</select></div>
+   <div class="fld"><label class="lbl" for="isec">Section</label><select id="isec" class="in" data-i="isec">${['All','Kitchen','Bar','Cheese'].map(r=>`<option ${r===inv.sec?'selected':''}>${r}</option>`).join('')}</select></div></div>
+   ${apr?`<div class="note am"><b>Approver role.</b> Needs a second approval by an independent executive before the activation link is sent. The account stays Pending 2nd approval until then.</div>`:`<p class="gloss" style="margin:0">The person receives an email link to set their own password. Link expiry [Owner to set].</p>`}</div>
+  <div class="stub"><span class="lbl">Lockout (sample)</span><p style="margin:0;font-size:13.5px">After 5 consecutive failed sign-ins the account locks and System Admin is alerted. Only System Admin unlocks. Limit is [Owner to set].</p></div>
+  <div class="stub w"><span class="lbl">Backups</span><table class="tick"><tr><td>Last export</td><td>02 Nov 03:00</td></tr><tr><td>Status</td><td>OK</td></tr><tr><td>Keep-alive</td><td>ON</td></tr></table></div></aside></div>`;
+}
+
+/* ============ 9 COUNT (Flow F) ============ */
+const COUNTERS={keeper:1,cust:1,acct:1};
+function initRows(demo){
+ const defs=[['CR-A1-R1','Shelf A1, right','RM-MOZ-01'],['CR-A1-L1','Shelf A1, left','RM-BUR-01'],['CR-A2-R1','Rack A2, right','RM-SAL-01'],['CR-A2-L1','Rack A2, left','RM-CHK-01'],['CR-B1-R1','Rack B1, right','RM-BAS-01'],['CR-B1-L1','Rack B1, left','RM-GOR-01'],['CR-C1-R1','Floor C1, right','RM-DOU-01']];
+ return defs.map(([bin,d,c])=>{const b=IT(c).book;let f=b;if(demo&&c==='RM-GOR-01')f=Math.round((b-0.4)*10)/10;if(demo&&c==='RM-DOU-01')f=b-2;return {bin,d,c,book:b,first:f,rec:null}})}
+S.cnt={type:'WEEKLY',st:'count',rows:initRows(true),firstBy:null,recBy:null,cause:'',note:'',vSeq:10,apId:null,cert:null,hadV:false};
+S.trf={tab:'trf',sel:'TRF-0104',nd:{c:'RM-MOZ-01',kg:5.0,pcs:20,to:'IND-DEL-02',seal:''},rx:{},
+ list:[
+  {id:'TRF-0102',dir:'out',from:'IND-DEL-01',to:'IND-DEL-02',c:'RM-MOZ-01',kg:12.0,pcs:48,seal:'SL-884102',st:'variance',rk:11.4,rp:46,sealOk:true,t:'06:50'},
+  {id:'TRF-0103',dir:'out',from:'IND-DEL-01',to:'IND-DEL-02',c:'RM-RIC-01',kg:4.0,pcs:8,seal:'SL-884117',st:'transit',t:'07:20'},
+  {id:'TRF-0104',dir:'in',from:'IND-DEL-02',to:'IND-DEL-01',c:'RM-PAR-01',kg:6.0,pcs:24,seal:'SL-771903',st:'transit',t:'08:05'},
+  {id:'TRF-0100',dir:'out',from:'IND-DEL-01',to:'IND-DEL-02',c:'RM-CHK-01',kg:10.0,pcs:20,seal:'SL-884090',st:'received',rk:10.0,rp:20,sealOk:true,t:'06:10'}
+ ]};
+S.wasteNew=false;S.wf={type:'waste',c:'RM-BAS-01',q:0.5,reason:'',photo:false,ref:''};
+const frozen=()=>S.cnt.type==='MONTH'&&S.cnt.st!=='closed';
+const freezeBar=()=>frozen()?`<div class="note er" style="margin-bottom:16px"><b>System freeze.</b> Month-end full count in progress. Receipts and issues are blocked until the certificate is archived. WH-DEL01-COLD status: FROZEN_FOR_COUNT.</div>`:'';
+const r2=n=>Math.round(n*100)/100;
+const cD=r=>r2(r.first-r.book);
+function cState(r){if(cD(r)===0)return 'ok';if(r.rec==null)return 'need';return r2(r.rec-r.book)===0?'fixed':'diff'}
+const dq=(it,n)=>n===0?'0':(n>0?'+':'−')+(it.u==='kg'?Math.abs(n).toFixed(1):Math.abs(Math.round(n)));
+function cntClose(kind){const C=S.cnt;C.st='closed';C.cert={id:'CERT-'+(C.type==='MONTH'?'ME':'WC')+'-1102',at:S.clock,kind}}
+function countDecision(ok){const C=S.cnt;
+ if(ok){C.rows.filter(r=>cState(r)==='diff').forEach(r=>{const l=IT(r.c).lots.find(x=>x.qty>0&&x.st!=='lk');append('COUNT_ADJUSTMENT',r.c,r2(r.rec-r.book),'ADJ-0'+C.vSeq,'Financial Controller',l?l.id:null)});cntClose('voucher')}
+ else{C.st='voucher';C.cause='';C.note=''}}
+function vCount(){
+ const C=S.cnt,st=C.st,cnt=!!COUNTERS[S.role],R_=C.rows;
+ const flagged=R_.filter(r=>cD(r)!==0),unres=flagged.filter(r=>cState(r)==='diff');
+ const sub=st!=='count';
+ const canRec=st==='recount'&&cnt&&S.role!==C.firstBy;
+ const recAll=flagged.every(r=>r.rec!=null);
+ let prim='';
+ if(st==='count')prim=cnt?`<button class="btn" data-a="cfirst1">Submit first count</button>`:roNote('Counting is done by Warehouse Keeper, Custodian and Store Accountant.');
+ else if(st==='recount')prim=canRec?`<button class="btn" data-a="crec1" ${recAll?'':'disabled'}>Submit recount</button>`:(cnt?`<div class="note am" style="max-width:420px"><b>Second person required.</b> The first count was submitted by ${ROLES[C.firstBy].l}. A different counter must recount. Use View as to switch.</div>`:roNote('Waiting for a second counter.'));
+ else if(st==='sign')prim=cnt?`<button class="btn" data-a="csign">Sign count sheet as balanced</button>`:roNote('Counters sign the sheet.');
+ else if(st==='voucher')prim=S.role==='acct'?`<button class="btn" data-a="cvoucher" ${C.cause&&C.cause!==CAUSES[0]?'':'disabled'}>Submit adjustment voucher</button>`:`<div class="note am" style="max-width:420px"><b>Root cause by Store Accountant.</b> ${cnt?'Counters recount but do not write the voucher.':'Waiting for the Store Accountant.'}</div>`;
+ else if(st==='fc')prim=S.role==='fc'?`<span style="display:flex;gap:10px"><button class="btn" data-a="capprove">Approve voucher</button><button class="btn ghost" data-a="creject">Reject</button></span>`:`<div class="note" style="max-width:420px"><b>Waiting for Financial Controller.</b> ${cnt?'Counters cannot approve their own adjustment.':''}</div>`;
+ else prim=cnt?`<button class="btn" data-a="cnew">Start new count</button>`:roNote('Count closed. Certificate archived.');
+ const idx={count:0,recount:2,voucher:3,fc:4,sign:5,closed:6}[st];
+ const skipV=(st==='sign'||(st==='closed'&&C.cert.kind==='sign'));
+ const steps=[['Count','bins in order'],['Compare','app vs book'],['Recount','second person'],['Voucher','root cause'],['FC approval','Financial Controller'],['Certificate','archived']];
+ const tl=`<div class="tl" style="grid-template-columns:repeat(6,1fr)">${steps.map(([t,s],i)=>`<div class="${i<idx?'done':i===idx?'cur':''}"><div class="dot"></div><div class="tt" style="font-size:15px">${t}</div><div class="ts">${(skipV&&(i===3||i===4))||(i===2&&!flagged.length&&sub)?'not needed':s}</div></div>`).join('')}</div>`;
+ const bmap={ok:badge('Balanced','ok'),need:badge('Needs recount','er'),fixed:badge('Resolved by recount','ok'),diff:badge('Still differs','am')};
+ const tbl=`<table><thead><tr><th>#</th><th>Bin</th><th>Item</th><th class="num">Book qty</th><th class="num">First count</th><th class="num">Diff</th><th class="num">Recount</th><th>State</th></tr></thead><tbody>
+ ${R_.map((r,i)=>{const it=IT(r.c),d=cD(r);return `<tr><td class="m">${i+1}</td><td class="m" style="color:var(--navy)"><b>${r.bin}</b><div style="font-weight:400">${r.d}</div></td><td><b>${it.n}</b><div class="meta">${it.u}</div></td>
+  <td class="num">${st==='count'?'<span class="gloss">hidden</span>':fq(it,r.book)}</td>
+  <td class="num">${st==='count'&&cnt?`<input id="cf-${r.bin}" class="in num" style="width:92px;margin:0;display:inline-block" type="number" step="${it.u==='kg'?0.1:1}" data-i="cfirst" data-k="${r.bin}" value="${r.first}" aria-label="First count ${it.n}">`:fq(it,r.first)}</td>
+  <td class="num ${d<0?'neg':d>0?'pos':''}"><b>${st==='count'?'—':dq(it,d)}</b></td>
+  <td class="num">${st==='count'||cD(r)===0?'—':canRec?`<input id="cr-${r.bin}" class="in num" style="width:92px;margin:0;display:inline-block" type="number" step="${it.u==='kg'?0.1:1}" data-i="crec" data-k="${r.bin}" value="${r.rec==null?'':r.rec}" placeholder="${it.u}" aria-label="Recount ${it.n}">`:(r.rec==null?'waiting':fq(it,r.rec))}</td>
+  <td>${st==='count'?badge('Not compared','mu'):bmap[cState(r)]}</td></tr>`}).join('')}</tbody></table>
+  <p class="gloss" style="margin:10px 0 0">Bins are listed in spatial order, top to bottom and right to left. Book quantity is hidden during the first count.</p>`;
+ const vShow=(st==='voucher'||st==='fc'||(st==='closed'&&C.hadV));
+ const vch=vShow?`<div class="dash"></div><span class="lbl">Adjustment voucher ADJ-0${C.vSeq} · ${st==='fc'?'submitted':st==='closed'?'approved':'draft'}</span>
+  <table style="margin-top:8px"><thead><tr><th>Item</th><th class="num">Book</th><th class="num">Recount</th><th class="num">Adjustment</th></tr></thead><tbody>${unres.map(r=>{const it=IT(r.c);return `<tr><td>${it.n}</td><td class="num">${fq(it,r.book)}</td><td class="num">${fq(it,r.rec)}</td><td class="num neg"><b>${sg(it,r2(r.rec-r.book))}</b></td></tr>`}).join('')}</tbody></table>
+  <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap"><div><label class="lbl" for="cause">Root cause (Store Accountant)</label><select id="cause" class="in" style="width:260px" data-i="ccause" ${st==='voucher'&&S.role==='acct'?'':'disabled'}>${CAUSES.map(c=>`<option ${C.cause===c?'selected':''}>${c}</option>`).join('')}</select></div>
+  <div style="flex:1;min-width:220px"><label class="lbl" for="cnote">Note</label><input id="cnote" class="in" data-i="cnote2" value="${esc(C.note)}" ${st==='voucher'&&S.role==='acct'?'':'disabled'} placeholder="What was checked, who recounted"></div></div>`:'';
+ const body=tl+tbl+vch;
+ const typeSeg=`<div class="seg" role="group" aria-label="Count type">${[['WEEKLY','WEEKLY_CYCLE'],['MONTH','MONTH_END_FULL']].map(([v,l])=>`<button class="${C.type===v?'on':''}" data-a="ctype" data-v="${v}" ${st==='count'&&cnt?'':'disabled'}>${l}</button>`).join('')}</div>`;
+ const closedV=st==='closed'&&C.cert.kind==='voucher';
+ const adjRows=unres.map(r=>{const it=IT(r.c);return `<div class="ledrow"><span class="t">COUNT_ADJUSTMENT</span><span>${it.n}</span><span class="neg">${sg(it,r2(r.rec-r.book))}</span></div><div class="meta" style="margin:-2px 0 6px">stock ${fq(it,closedV?r.rec:r.book)}${closedV?'':' → <b>'+fq(it,r.rec)+'</b>'}</div>`}).join('');
+ const right=`<aside class="stack">
+  <div class="stub w"><span class="lbl">Sheet</span><table class="tick"><tr><td>Type</td><td>${C.type==='MONTH'?'MONTH_END_FULL':'WEEKLY_CYCLE'}</td></tr><tr><td>Room</td><td>WH-DEL01-COLD</td></tr><tr><td>Status</td><td>${frozen()?'FROZEN_FOR_COUNT':'ACTIVE'}</td></tr><tr><td>First count</td><td>${C.firstBy?ROLES[C.firstBy].l:'—'}</td></tr><tr><td>Recount</td><td>${C.recBy?ROLES[C.recBy].l:'—'}</td></tr><tr><td>Bins</td><td>${R_.length} · ${flagged.length} flagged</td></tr></table></div>
+  <div class="stub w"><span class="lbl">${closedV?'Ledger rows appended':'Ledger rows on approval'}</span>${unres.length&&sub&&st!=='recount'?adjRows:`<p class="gloss" style="margin:0">${st==='closed'?'No adjustment needed. Nothing appended.':'Appended only after Financial Controller approval, one row per line that still differs after recount.'}</p>`}</div>
+  ${st==='closed'?`<div class="note ok"><b>Certificate ${C.cert.id} archived at ${C.cert.at}.</b> Freeze lifted. Counters: ${C.firstBy?ROLES[C.firstBy].l:''}${C.recBy?' and '+ROLES[C.recBy].l:''}.${closedV?' Approved by Financial Controller.':''}</div>`:''}
+  <div class="stub"><span class="lbl">Segregation of duties</span><p style="margin:0;font-size:13.5px">Whoever counts cannot approve a book adjustment. The recount must be done by a second person. Only the Financial Controller approves the voucher.</p></div></aside>`;
+ return head('Count and reconciliation · '+S.store,'Stock <em>count.</em>','First count, app compares with book, second-person recount, root cause on a voucher, Financial Controller approval, then the certificate is archived.',`<div style="display:flex;flex-direction:column;gap:10px;align-items:flex-end">${typeSeg}${prim}</div>`)+freezeBar()+
+  `<div class="cols c-bal"><div>${tkS('COUNT SHEET · WH-DEL01-COLD',C.type==='MONTH'?'month-end full inventory':'weekly cycle count',body)}</div>${right}</div>`;
+}
+
+/* ============ 10 TRANSFERS & WASTE (Flow G) ============ */
+const TST={draft:['Draft','mu'],transit:['In transit','re'],received:['Received','ok'],variance:['Variance · with FC','am'],held:['Closed · shrinkage held','er']};
+const rxOf=t=>S.trf.rx[t.id]||(S.trf.rx[t.id]={seal:false,kg:'',pcs:''});
+const tOther=t=>t.dir==='out';
+function trfDecision(a,ok){const t=S.trf.list.find(x=>x.id===a.tid),o=tOther(t);
+ append('TRANSFER_IN_RECEIVED',t.c,t.rk,t.id+(o?' @'+t.to:''),ok?'Financial Controller':'Receiving Keeper',null,o);
+ if(ok)append('TRANSFER_VARIANCE_ADJ',t.c,r2(-(t.kg-t.rk)),t.id+' (approved)','Financial Controller',null,true);
+ else append('TRANSFER_SHRINKAGE_HELD',t.c,0,t.id+' held '+fq(IT(t.c),t.kg-t.rk)+' / '+(t.pcs-t.rp)+' pcs','Financial Controller',null,true);
+ t.st=ok?'received':'held'}
+function vTransfers(){
+ const T=S.trf,tab=T.tab;
+ const tabs=`<div class="seg" role="tablist"><button class="${tab==='trf'?'on':''}" data-a="ttab" data-v="trf">Inter-store transfers</button><button class="${tab==='waste'?'on':''}" data-a="ttab" data-v="waste">Waste and supplier returns</button></div>`;
+ const keep=(S.role==='keeper'||S.role==='cust');
+ return head('Other movements · '+S.store,'Transfers <em>&amp; waste.</em>','Two units on every transfer (kg and pcs). The receiving side counts both. A mismatch goes to the Financial Controller, never to the dispatching keeper.',tabs)+freezeBar()+(tab==='trf'?vTrf(keep):vWaste());
+}
+function vTrf(keep){
+ const T=S.trf,isNew=T.sel==='NEW'&&keep;const t=T.list.find(x=>x.id===T.sel)||T.list[0];
+ const left=`<aside><div class="list">${keep?`<button class="item ${isNew?'sel':''}" data-a="tsel" data-v="NEW"><div class="top"><span class="id">New dispatch</span>${badge('Draft','mu')}</div><div class="meta" style="margin-top:4px">${S.store} to another store</div></button>`:''}
+  ${T.list.map(x=>{const it=IT(x.c);return `<button class="item ${!isNew&&x.id===t.id?'sel':''}" data-a="tsel" data-v="${x.id}"><div class="top"><span class="id">${x.id}</span>${badge(x.dir==='out'?'OUT':'IN','mu')}<span style="margin-left:auto">${badge(...TST[x.st])}</span></div><div style="margin-top:4px"><b>${it.n}</b> · ${x.kg.toFixed(1)} kg / ${x.pcs} pcs</div><div class="meta">${x.from} to ${x.to}</div></button>`}).join('')}</div></aside>`;
+ let mid,right;
+ if(isNew){const d=T.nd,it=IT(d.c);const ok=d.kg>0&&d.pcs>0&&d.seal.trim().length>2&&!frozen();
+  mid=tkS('NEW TRANSFER · DISPATCH','Dispatching keeper, '+S.store,`<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+   <div><label class="lbl" for="nd-c">Item</label><select id="nd-c" class="in" data-i="ndc">${['RM-MOZ-01','RM-RIC-01','RM-CHK-01','RM-PAR-01'].map(c=>`<option value="${c}" ${c===d.c?'selected':''}>${IT(c).n}</option>`).join('')}</select></div>
+   <div><label class="lbl" for="nd-to">To store</label><select id="nd-to" class="in" data-i="ndto">${['IND-DEL-02','IND-BLR-01'].map(c=>`<option ${c===d.to?'selected':''}>${c}</option>`).join('')}</select></div>
+   <div><label class="lbl" for="nd-kg">Weight, kg (signed)</label><input id="nd-kg" class="in num" type="number" step="0.1" data-i="ndkg" value="${d.kg}"></div>
+   <div><label class="lbl" for="nd-pcs">Pieces, pcs (signed)</label><input id="nd-pcs" class="in num" type="number" step="1" data-i="ndpcs" value="${d.pcs}"></div>
+   <div style="grid-column:span 2"><label class="lbl" for="nd-seal">Vehicle seal no.</label><input id="nd-seal" class="in" data-i="ndseal" value="${esc(d.seal)}" placeholder="e.g. SL-884130"></div></div>
+   <p class="gloss">Both units are required: weight and pieces together remove cutting-shrinkage disputes.</p><div class="dash"></div>
+   <div style="display:flex;align-items:center;gap:16px"><span class="meta" style="flex:1">Book stock leaves ${S.store} at once and sits in transit. ${frozen()?'Blocked: system freeze.':''}</span><button class="btn" data-a="tdispatch" ${ok?'':'disabled'}>Sign both units &amp; dispatch</button></div>`);
+  right=`<aside class="stack"><div class="stub w"><span class="lbl">Ledger rows this will append</span><div class="ledrow"><span class="t">TRANSFER_OUT_INTRANSIT</span><span>${it.n}</span><span class="neg">${sg(it,-d.kg)}</span></div><p class="gloss" style="margin:8px 0 0">Reference: ${d.pcs} pcs, seal ${esc(d.seal)||'—'}. Status becomes IN_TRANSIT.</p></div>
+   <div class="stub"><span class="lbl">Live derived stock</span><table class="tick"><tr><td style="width:auto">${it.n}</td><td>${fq(it,it.book)} → <b>${fq(it,r2(it.book-d.kg))}</b></td></tr></table></div></aside>`;
+ }else{
+  const it=IT(t.c),rx=rxOf(t);
+  const canRx=t.dir==='in'&&t.st==='transit'&&keep;
+  const rk=rx.kg===''?null:+rx.kg,rp=rx.pcs===''?null:+rx.pcs;
+  const match=rk!==null&&rp!==null&&rk===t.kg&&rp===t.pcs&&rx.seal;
+  const step=(tt,ts,s)=>`<div class="${s}"><div class="dot"></div><div class="tt">${tt}</div><div class="ts">${ts}</div></div>`;
+  const tl=`<div class="tl">${step('Dispatched','both units + seal, '+t.t,'done')}${step('In transit','TRANSFER_OUT_INTRANSIT',t.st==='transit'?'cur':'done')}${step(t.st==='variance'?'Variance':t.st==='held'?'Closed, held':'Received',t.st==='transit'?'receiving keeper counts':t.st==='variance'?'with Financial Controller':'signed',t.st==='transit'?'':(t.st==='variance'?'cur':'done'))}</div>`;
+  let noteBlock;
+  if(t.st==='transit'){
+   noteBlock=canRx?`<div class="dash"></div><span class="lbl">Receiving count at ${t.to} (both units)</span>
+   <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-top:6px"><label style="display:flex;gap:8px;align-items:center;padding-bottom:10px"><input type="checkbox" id="rxs" data-i="rxseal" ${rx.seal?'checked':''}> Seal ${t.seal} intact and matches</label>
+   <div><label class="lbl" for="rx-kg">Counted kg</label><input id="rx-kg" class="in num" style="width:100px" type="number" step="0.1" data-i="rxkg" value="${rx.kg}"></div>
+   <div><label class="lbl" for="rx-pcs">Counted pcs</label><input id="rx-pcs" class="in num" style="width:100px" type="number" step="1" data-i="rxpcs" value="${rx.pcs}"></div></div>
+   <div class="note ${rk===null||rp===null?'':match?'ok':'er'}" style="margin-top:10px">${rk===null||rp===null?'Enter both counts to compare against the dispatch note.':match?'Matches the dispatch note in both units and the seal is intact. Receipt can be signed.':`<b>Mismatch.</b> kg ${dq(it,r2(rk-t.kg))}, pcs ${rp-t.pcs>0?'+':'−'}${Math.abs(rp-t.pcs)}${rx.seal?'':', seal not confirmed'}. This goes to the Financial Controller as a transit variance.`}</div>
+   <div style="margin-top:12px;display:flex;justify-content:flex-end"><button class="btn" data-a="trecv" ${rk===null||rp===null?'disabled':''}>${match?'Sign receipt':'Send variance to Financial Controller'}</button></div>`
+   :`<div class="dash"></div><div class="note">${t.dir==='out'?`<b>Waiting at ${t.to}.</b> The receiving keeper there verifies the seal and counts both units. Your scope ends at dispatch.`:`<b>Receiving is for Warehouse Keeper or Custodian.</b>`}</div>`;
+  }else if(t.st==='variance'){
+   const ap=S.aps.find(a=>a.tid===t.id);const c=ap?canApprove(ap):{ok:false,why:''};
+   noteBlock=`<div class="dash"></div><div class="note am"><b>Transit variance.</b> Dispatched ${t.kg.toFixed(1)} kg / ${t.pcs} pcs, received ${t.rk.toFixed(1)} kg / ${t.rp} pcs. Short ${r2(t.kg-t.rk).toFixed(1)} kg / ${t.pcs-t.rp} pcs. Approve: book the voucher and close. Reject: book what was received, close transit, hold the difference as shrinkage.</div>
+   <div style="margin-top:12px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">${c.ok?`<button class="btn" data-a="tapprove" data-id="${ap.id}">Approve variance voucher</button><button class="btn ghost" data-a="treject" data-id="${ap.id}">Reject, hold shrinkage</button>`:`<button class="btn" disabled>Approve variance voucher</button><span class="gloss" style="color:var(--err)">${S.role==='fc'?c.why:'Only the Financial Controller approves. Neither the dispatching keeper nor the receiving keeper who counted can.'}</span>`}</div>`;
+  }else noteBlock=`<div class="dash"></div><div class="note ${t.st==='received'?'ok':'er'}"><b>${t.st==='received'?'Closed. Received in full or by approved voucher.':'Closed. Received quantity booked, difference held as shrinkage.'}</b></div>`;
+  mid=tkS(t.id+' · '+(t.dir==='out'?'OUT':'IN')+' · '+t.from+' to '+t.to,TST[t.st][0],`
+   <div style="display:flex;gap:14px;align-items:baseline;flex-wrap:wrap"><span style="font-family:var(--disp);font-size:24px;font-weight:600;text-transform:uppercase">${it.n}</span>${badge(...TST[t.st])}</div>${tl}
+   <table><thead><tr><th></th><th class="num">kg</th><th class="num">pcs</th><th>Seal</th></tr></thead><tbody><tr><td>Dispatch note</td><td class="num"><b>${t.kg.toFixed(1)}</b></td><td class="num"><b>${t.pcs}</b></td><td class="m">${t.seal}</td></tr>
+   ${t.rk!=null?`<tr><td>Received count</td><td class="num"><b>${t.rk.toFixed(1)}</b></td><td class="num"><b>${t.rp}</b></td><td class="m">${t.sealOk?'intact':'not confirmed'}</td></tr>`:''}</tbody></table>${noteBlock}`);
+  const done=LED.filter(r=>r.ref.startsWith(t.id));
+  const plan=t.st==='transit'&&t.dir==='in'?(match?[['TRANSFER_IN_RECEIVED',r2(rk),false]]:[]):t.st==='variance'?[['TRANSFER_IN_RECEIVED',t.rk,t.dir==='out'],['TRANSFER_VARIANCE_ADJ',r2(-(t.kg-t.rk)),true]]:[];
+  right=`<aside class="stack"><div class="stub w"><span class="lbl">Ledger rows so far</span>${done.map(r=>`<div class="ledrow"><span class="t">${r.t}</span><span class="meta">${r.dt.replace('02 Nov ','')}</span><span class="${r.q<0?'neg':'pos'}">${sg(it,r.q)}</span></div>`).join('')||'<p class="gloss" style="margin:0">None yet.</p>'}</div>
+   <div class="stub w"><span class="lbl">${t.st==='variance'?'Rows if approved':'Row on next step'}</span>${plan.length?plan.map(p=>`<div class="ledrow"><span class="t">${p[0]}</span><span class="meta">${p[2]?'other store':'this store'}</span><span class="${p[1]<0?'neg':'pos'}">${sg(it,p[1])}</span></div>`).join(''):`<p class="gloss" style="margin:0">${t.st==='transit'&&t.dir==='in'?'On a mismatch nothing is booked until the Financial Controller decides.':'Nothing further.'}</p>`}
+   ${t.st==='variance'?`<p class="gloss" style="margin:8px 0 0">If rejected: TRANSFER_IN_RECEIVED ${sg(it,t.rk)} and TRANSFER_SHRINKAGE_HELD for the difference (no stock effect).</p>`:''}</div>
+   <div class="stub"><span class="lbl">Rules</span><p style="margin:0;font-size:13.5px">Both units signed at dispatch. The receiver verifies the seal first. The dispatching keeper cannot approve a transit variance.</p></div></aside>`;
+ }
+ return `<div class="cols c-rq">${left}<div>${mid}</div>${right}</div>`;
+}
+const REASONS=['Select reason','EXPIRED','SPOILAGE','DAMAGED','PREP_LOSS','SUPPLIER_FAIL_QC'];
+function vWaste(){
+ const W=S.wf,log=['keeper','req','cust'].includes(S.role),claims=S.aps.filter(a=>a.cat==='waste'&&(S.role==='fc'||S.role==='rm'||log||true));
+ const isNew=S.wasteNew&&log;const a=isNew?null:(claims.find(x=>x.id===S.apSel)||claims[0]);
+ const left=`<aside><div class="list">${log?`<button class="item ${isNew?'sel':''}" data-a="wnew"><div class="top"><span class="id">Log a claim</span>${badge('New','mu')}</div><div class="meta" style="margin-top:4px">waste or supplier return</div></button>`:''}
+  ${claims.map(x=>{const sl={open:['Open','mu'],ok:['Approved','ok'],no:['Rejected','er']}[x.st],it=IT(x.item);return `<button class="item ${!isNew&&a&&x.id===a.id?'sel':''}" data-a="wsel" data-v="${x.id}"><div class="top"><span class="id">${x.id}</span>${badge(x.sz==='minor'?'Minor':'Major','mu')}<span style="margin-left:auto">${badge(...sl)}</span></div><div style="margin-top:4px"><b>${x.title}</b></div><div class="meta">${it.n} ${sg(it,x.q)} · logged by ${ROLES[x.by].l}</div></button>`}).join('')}</div></aside>`;
+ let mid;
+ if(isNew){const it=IT(W.c);const ok=W.q>0&&W.reason&&W.reason!==REASONS[0]&&W.photo&&(W.type==='waste'||W.ref.trim());
+  mid=tkS('LOG CLAIM · '+(W.type==='waste'?'WASTE':'SUPPLIER RETURN'),'logged by '+R().l,`<div class="seg" style="margin-bottom:12px">${[['waste','Waste'],['return','Supplier return']].map(([v,l])=>`<button class="${W.type===v?'on':''}" data-a="wtype" data-v="${v}">${l}</button>`).join('')}</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px"><div><label class="lbl" for="w-c">Item</label><select id="w-c" class="in" data-i="wc">${ITEMS.filter(i=>i.wh==='COLD').map(i=>`<option value="${i.c}" ${i.c===W.c?'selected':''}>${i.n}</option>`).join('')}</select></div>
+  <div><label class="lbl" for="w-q">Quantity (${it.u})</label><input id="w-q" class="in num" type="number" step="${it.u==='kg'?0.1:1}" data-i="wq" value="${W.q}"></div>
+  <div><label class="lbl" for="w-r">Reason code</label><select id="w-r" class="in" data-i="wr">${REASONS.map(r=>`<option ${r===W.reason||(!W.reason&&r===REASONS[0])?'selected':''}>${r}</option>`).join('')}</select></div>
+  ${W.type==='return'?`<div><label class="lbl" for="w-ref">PO or GRPO matched</label><input id="w-ref" class="in" data-i="wref" value="${esc(W.ref)}" placeholder="e.g. GRPO 5104398"></div>`:'<div></div>'}</div>
+  <div style="margin-top:14px;border:1.5px dashed #B9B09B;border-radius:4px;padding:14px;display:flex;align-items:center;gap:14px;background:var(--cream)"><span class="meta" style="flex:1">${W.photo?'photo_001.jpg attached (placeholder)':'Photo evidence is required. Placeholder only in this prototype.'}</span><button class="btn ghost sm" data-a="wphoto">${W.photo?'Remove photo':'Attach photo'}</button></div>
+  <div class="dash"></div><div style="display:flex;align-items:center;gap:16px"><span class="meta" style="flex:1">Quantity ${W.q>2?'is above':'is within'} the sample minor limit of 2.0. ${W.q>2?'Financial Controller':'Restaurant Manager'} approves. You cannot approve your own claim.</span><button class="btn" data-a="wsubmit" ${ok?'':'disabled'}>Submit claim</button></div>`);
+ }else if(a){const it=IT(a.item),c=canApprove(a);
+  mid=tkS(a.id+' · '+a.title.toUpperCase(),a.st==='open'?'awaiting approver':a.st==='ok'?'approved':'rejected',`<table class="tick"><tr><td>Item</td><td>${it.n}</td></tr><tr><td>Quantity</td><td>${sg(it,a.q)}</td></tr><tr><td>Reference</td><td>${a.ref}</td></tr><tr><td>Logged by</td><td>${ROLES[a.by].l}</td></tr><tr><td>Evidence</td><td>photo attached (placeholder)</td></tr><tr><td>Size</td><td>${a.sz==='minor'?'Minor (sample): Restaurant Manager':'Major: Financial Controller'}</td></tr></table><p style="margin:12px 0 0">${a.note}</p><div class="dash"></div>
+  ${a.st!=='open'?`<div class="note ${a.st==='ok'?'ok':'er'}"><b>${a.st==='ok'?'Approved. Ledger row appended.':'Rejected. No stock change.'}</b></div>`:c.ok?`<div style="display:flex;gap:12px"><button class="btn" data-a="approve">Approve claim</button><button class="btn ghost" data-a="reject">Reject</button></div>`:`<div class="note er"><b>Cannot approve.</b> ${c.why}</div>`}`);
+ }else mid='<div class="note">No claims.</div>';
+ const right=`<aside class="stack"><div class="stub w"><span class="lbl">Who does what</span><p style="margin:0;font-size:13.5px">Keeper, section staff and custodian log claims. Restaurant Manager approves minor claims below the threshold [Owner to set]. Financial Controller approves major claims. Logger and approver are never the same.</p></div>
+  <div class="stub"><span class="lbl">Evidence and reason</span><p style="margin:0;font-size:13.5px">Every waste claim needs a reason code and a photo. A supplier return needs the matched PO or GRPO and a driver signature on the return document.</p></div></aside>`;
+ return `<div class="cols c-rq">${left}<div>${mid}</div>${right}</div>`;
+}
+
+/* ============ RENDER ============ */
+const VIEWS={count:()=>vCount(),transfers:()=>vTransfers(),overview:vOverview,requests:vRequests,request:vRequest,issues:vIssues,balance:vBalance,import:vImport,approvals:vApprovals,users:vUsers};
+let lastFocus=null;
+function render(){
+  const a=document.activeElement;
+  lastFocus=a&&a.id?{id:a.id,s:a.selectionStart,t:a.type}:null;
+  shell();
+  const p=cur();
+  $('#app').innerHTML=VIEWS[p]();
+  const sel=$('#viewas');if(sel.options.length===0)sel.innerHTML=Object.keys(ROLES).map(k=>`<option value="${k}">${ROLES[k].l}</option>`).join('');
+  sel.value=S.role;
+  if(lastFocus){const e=document.getElementById(lastFocus.id);if(e){e.focus();try{if(lastFocus.t==='text'||lastFocus.t==='search')e.setSelectionRange(lastFocus.s,lastFocus.s)}catch(x){}}}
+}
+function setRole(r){S.role=r;if(!ROLES[r].stores.includes(S.store))S.store=ROLES[r].stores[0];
+  // keep route if allowed, else jump home
+  if(!ROLES[r].nav.includes(route()))location.hash='#/'+ROLES[r].nav[0];render()}
+
+/* ============ ACTIONS ============ */
+const A={
+ go:d=>go(d.v),
+ ovf:d=>{S.ovFilter=d.v},
+ wh:d=>{S.wh=d.v;S.ovFilter='all'},
+ ovsel:d=>{S.ovSel=d.v},
+ rqf:d=>{S.rqF=d.v},
+ rqsel:d=>{S.rqSel=d.v},
+ begin:()=>{const r=S.reqs.find(x=>x.id===S.rqSel);r.st='picking';r.lockT=S.clock;toast(r.id+' locked for requester edits')},
+ pq:d=>{const r=S.reqs.find(x=>x.id===S.rqSel),p=pickState(r)[d.i],it=IT(r.lines[d.i][0]);const lot=it.lots.find(l=>l.id===p.lot);
+   p.q=Math.max(0,Math.min(r.lines[d.i][1],lot?lot.qty:0,Math.round((p.q+(+d.d)*stepOf(it))*10)/10))},
+ lot:d=>{const r=S.reqs.find(x=>x.id===S.rqSel),p=pickState(r)[d.i],it=IT(r.lines[d.i][0]);p.lot=d.v;const l=it.lots.find(x=>x.id===d.v);p.q=Math.min(r.lines[d.i][1],l.qty)},
+ stage:()=>{const r=S.reqs.find(x=>x.id===S.rqSel),ps=pickState(r);let n=0;
+   r.lines.forEach(([c],i)=>{const p=ps[i];if(p.q>0){n++;const id='ISS-04'+(17+S.issues.length-4+1);const it=IT(c);
+     append('ISSUE_PENDING',c,-p.q,id,'Warehouse Keeper',p.lot);S.issues.push({id,req:r.id,sec:r.sec,c,q:p.q,lot:p.lot,st:'staged',acc:null,t:[S.clock,'']})}});
+   r.st='awaiting';delete S.pick[r.id];const nx=pend()[0];S.rqSel=nx?nx.id:r.id;toast(n+' ISSUE_PENDING row'+(n>1?'s':'')+' appended for '+r.id+'. Handed to runner.')},
+ at:d=>{S.nr.at=d.v},
+ add:d=>{const it=IT(d.v);S.nr.lines.push({c:d.v,q:it.u==='kg'?1:1});S.nr.q=''},
+ nq:d=>{const l=S.nr.lines[d.i],it=IT(l.c);l.q=Math.max(0,Math.round((l.q+(+d.d)*stepOf(it))*10)/10)},
+ rmline:d=>{S.nr.lines.splice(+d.i,1)},
+ submit:()=>{const nr=S.nr,out=nr.at==='out';
+   if(nr.editing){const r=S.reqs.find(x=>x.id===nr.editing);r.lines=nr.lines.map(l=>[l.c,l.q]);r.needed=nr.needed;toast(r.id+' updated')}
+   else{const id='REQ-04'+(21+S.reqs.length-5);S.reqs.push({id,sec:'Kitchen',urgent:out?1:0,reason:nr.reason,st:'queued',time:out?'12:40':S.clock,needed:nr.needed,lines:nr.lines.map(l=>[l.c,l.q])});toast(id+(out?' submitted as URGENT':' submitted')+', now in the pick queue')}
+   S.nr={lines:[],needed:'11:30',at:nr.at,reason:'',q:'',editing:null}},
+ edit:d=>{const r=S.reqs.find(x=>x.id===d.v);S.nr={lines:r.lines.map(([c,q])=>({c,q})),needed:r.needed,at:r.urgent?'out':'in',reason:r.reason||'',q:'',editing:r.id}},
+ cancel:d=>{const r=S.reqs.find(x=>x.id===d.v);r.st='cancelled';toast(r.id+' cancelled')},
+ issel:d=>{S.isSel=d.v},
+ ledf:d=>{S.ledF=d.v},
+ export:()=>toast('Ledger CSV prepared (demo): quantities only, no prices'),
+ run:d=>{const iss=S.issues.find(i=>i.id===S.isSel),it=IT(iss.c);const q=iss.q;const acc=d.v==='all'?q:d.v==='half'?Math.round(q/2*10)/10:0;
+   if(acc>0){append('ISSUE_PENDING_OFFSET',iss.c,acc,iss.id,'Kitchen Runner');append('ISSUE_CONFIRMED',iss.c,-acc,iss.id,'Kitchen Runner')}
+   if(q-acc>0)append('ISSUE_REVERSAL',iss.c,q-acc,iss.id,'Kitchen Runner',iss.lot);
+   iss.st='done';iss.acc=acc;iss.t[1]=S.clock;const r=S.reqs.find(x=>x.id===iss.req);if(r)r.st='done';toast('Runner outcome appended to ledger')},
+ sign:()=>{S.signed=true;toast('Daily balance signed off. Sheet locked.')},
+ ack:()=>{S.ack=true;toast('Acknowledged by '+R().l)},
+ loadf:()=>{S.imp.file={name:'GRPO_20261102.xlsx',size:'46 KB'};S.imp.committed=false},
+ clearf:()=>{S.imp.file=null;S.imp.sel=null},
+ impf:d=>{S.imp.filter=d.v},
+ impsel:d=>{S.imp.sel=d.v},
+ req2:d=>{S.imp.pending2[d.v]=1;toast('Second approval requested from SCM Lead or Finance Lead')},
+ fixmaster:()=>toast('Master data is edited in the master-data tool, then re-upload the file'),
+ commit:()=>{let n=0;S.impRows.filter(r=>r.res==='imp').forEach(r=>{append('GRPO_RECEIPT',r.c,r.q,'GRPO '+r.k.split('-')[0],'Warehouse Keeper','L-'+r.c.slice(3,6)+'-1102');n++});
+   S.imp.committed=true;S.audit.push({id:'IMP-0042',dt:'02 Nov '+S.clock,file:S.imp.file.name,hash:'e5a317…0bd',rows:S.impRows.length,res:`${n} imported · ${S.impRows.filter(r=>r.res==='ref').length} refreshed · ${S.impRows.filter(r=>r.res==='sec').length} pending approval · ${S.impRows.filter(r=>r.res==='qua').length} quarantined`,by:'Warehouse Keeper',late:+S.imp.posted>1?'Yes (4 working days)':'No',fresh:1});
+   toast(n+' GRPO_RECEIPT rows appended. Quarantined lines wait for master data.')},
+ apf:d=>{S.apF=d.v},apsel:d=>{S.apSel=d.v},
+ approve:()=>{const a=S.aps.find(x=>x.id===S.apSel);if(!canApprove(a).ok)return;a.st='ok';
+   if(a.hook==='count'){countDecision(true);toast(a.id+' approved. COUNT_ADJUSTMENT appended, freeze lifted, certificate archived');return}
+   if(a.hook==='trf'){trfDecision(a,true);toast(a.id+' approved. Transfer booked');return}
+   if(a.item&&a.q)append(a.cat==='adj'?'COUNT_ADJUSTMENT':a.cat==='trf'?'TRANSFER_VARIANCE':'WASTE_DISPOSAL',a.item,a.q,a.id,R().l);toast(a.id+' approved'+(a.q?', ledger row appended':''))},
+ reject:()=>{const a=S.aps.find(x=>x.id===S.apSel);if(!canApprove(a).ok)return;a.st='no';if(a.hook==='count')countDecision(false);if(a.hook==='trf')trfDecision(a,false);toast(a.id+' rejected'+(a.hook==='trf'?'. Received qty booked, shrinkage held.':a.hook==='count'?'. Back to the accountant.':'. No stock change.'))},
+ uf:d=>{S.uF=d.v},usel:d=>{S.uSel=d.v},
+ uact:d=>{const u=S.users.find(x=>x.id===S.uSel);const m={unlock:['active','ACCOUNT_UNLOCKED','attempt counter reset'],lock:['locked','ACCOUNT_LOCKED','locked by System Admin'],deact:['deactivated','ACCOUNT_DEACTIVATED','access revoked'],resend:['pending','INVITE_RESENT','new link, expiry [Owner to set]']}[d.v];
+   u.st=m[0];S.sec.unshift({dt:'02 Nov '+S.clock,ev:m[1],u:u.id,d:m[2],ip:'by System Admin',fresh:1});toast(u.id+': '+m[1].toLowerCase().replace('_',' '))},
+ istore:d=>{const s=S.inv.stores;const i=s.indexOf(d.v);i>=0?s.splice(i,1):s.push(d.v)},
+ invite:()=>{const v=S.inv;if(!/^\S+@\S+\.\S+$/.test(v.email)){v.err='Enter a valid email address.';return}if(!v.stores.length){v.err='Pick at least one store.';return}
+   const apr=v.role==='Approver';const id='U-0'+(60+S.users.length);S.users.push({id,role:apr?'Approver (secondary)':v.role,scope:v.stores.join(', ')+(v.sec!=='All'?' / '+v.sec:''),st:apr?'pending2':'pending',last:apr?'awaiting 2nd approval':'invite sent 02 Nov'});
+   S.sec.unshift({dt:'02 Nov '+S.clock,ev:apr?'SECOND_APPROVAL_REQUIRED':'INVITE_SENT',u:id,d:v.role+', '+v.stores.join(', '),ip:'by System Admin',fresh:1});
+   S.uSel=id;S.inv={email:'',role:'Warehouse Keeper',stores:['IND-DEL-01'],wh:'Both',sec:'All',err:''};toast(apr?'Invite held: Approver needs a second approval':'Invite sent to the address entered')}
+};
+const I={
+ role:v=>{setRole(v);return 1},store:v=>{S.store=v},
+ needed:v=>{S.nr.needed=v},reason:v=>{S.nr.reason=v},isearch:v=>{S.nr.q=v},ledq:v=>{S.ledQ=v},
+ cnt:(v,k)=>{S.bal.find(b=>b.c===k).cnt=v===''?0:+v},rec:(v,k)=>{if(v==='')delete S.rec[k];else S.rec[k]=+v},cause:(v,k)=>{S.cause[k]=v},cnote:(v,k)=>{S.cnote[k]=v},
+ posted:v=>{S.imp.posted=v},iem:v=>{S.inv.email=v;S.inv.err=''},irole:v=>{S.inv.role=v},iwh:v=>{S.inv.wh=v},isec:v=>{S.inv.sec=v}
+};
+Object.assign(A,{
+ ctype:d=>{S.cnt.type=d.v},
+ cfirst1:()=>{const C=S.cnt;C.firstBy=S.role;C.st=C.rows.some(r=>cD(r)!==0)?'recount':'sign';toast(C.st==='sign'?'All bins match book. Ready to sign.':C.rows.filter(r=>cD(r)!==0).length+' bin(s) differ. A second person must recount.')},
+ crec1:()=>{const C=S.cnt;if(S.role===C.firstBy)return;C.recBy=S.role;C.st=C.rows.filter(r=>cState(r)==='diff').length?'voucher':'sign';toast(C.st==='sign'?'Recount resolved every difference.':'Still differs after recount. Store Accountant writes the root cause.')},
+ csign:()=>{cntClose('sign');toast('Count sheet signed balanced. Certificate archived, freeze lifted.')},
+ cvoucher:()=>{const C=S.cnt;const un=C.rows.filter(r=>cState(r)==='diff');C.apId='ADJ-0'+C.vSeq;C.hadV=true;
+   S.aps.push({id:C.apId,cat:'adj',hook:'count',title:'Count adjustment voucher ('+un.length+' line'+(un.length>1?'s':'')+')',item:un[0].c,q:r2(un[0].rec-un[0].book),by:'acct',ref:'Count sheet '+(C.type==='MONTH'?'MONTH_END_FULL':'WEEKLY_CYCLE')+', cause: '+C.cause,note:'Recounted by a second person. '+un.map(r=>IT(r.c).n+' '+sg(IT(r.c),r2(r.rec-r.book))).join('; ')+'. '+C.note,st:'open',sz:'major'});
+   C.st='fc';toast('Voucher '+C.apId+' sent to Financial Controller')},
+ capprove:()=>{S.apSel=S.cnt.apId;A.approve()},creject:()=>{S.apSel=S.cnt.apId;A.reject()},
+ cnew:()=>{const C=S.cnt;Object.assign(C,{st:'count',rows:initRows(false),firstBy:null,recBy:null,cause:'',note:'',vSeq:C.vSeq+1,apId:null,cert:null,hadV:false});toast('New count sheet opened')},
+ openap:d=>{if(d.v==='trf'){S.trf.tab='trf';if(d.sel)S.trf.sel=d.sel}go(d.v==='trf'?'transfers':'count')},
+ ttab:d=>{S.trf.tab=d.v},tsel:d=>{S.trf.sel=d.v},
+ tdispatch:()=>{const d=S.trf.nd,n=S.trf.list.length+1,id='TRF-0'+(105+n-5);append('TRANSFER_OUT_INTRANSIT',d.c,-d.kg,id,'Warehouse Keeper');
+   S.trf.list.unshift({id,dir:'out',from:S.store,to:d.to,c:d.c,kg:d.kg,pcs:d.pcs,seal:d.seal,st:'transit',t:S.clock});S.trf.sel=id;S.trf.nd.seal='';toast(id+' dispatched. TRANSFER_OUT_INTRANSIT appended.')},
+ trecv:()=>{const t=S.trf.list.find(x=>x.id===S.trf.sel),rx=rxOf(t),rk=+rx.kg,rp=+rx.pcs;t.rk=rk;t.rp=rp;t.sealOk=rx.seal;
+   if(rk===t.kg&&rp===t.pcs&&rx.seal){append('TRANSFER_IN_RECEIVED',t.c,rk,t.id,'Receiving Keeper',null,tOther(t));t.st='received';toast('Receipt signed. TRANSFER_IN_RECEIVED appended.')}
+   else{t.st='variance';S.aps.push({id:t.id+'-V',tid:t.id,hook:'trf',cat:'trf',title:'Transfer variance',item:t.c,q:r2(rk-t.kg),by:'keeper',ref:t.from+' to '+t.to,note:'Dispatched '+t.kg.toFixed(1)+' kg / '+t.pcs+' pcs. Received '+rk.toFixed(1)+' kg / '+rp+' pcs.'+(rx.seal?'':' Seal not confirmed.')+' Dispatch keeper cannot approve.',st:'open',sz:'major'});toast('Variance sent to Financial Controller')}},
+ tapprove:d=>{S.apSel=d.id;A.approve()},treject:d=>{S.apSel=d.id;A.reject()},
+ wnew:()=>{S.wasteNew=true},wsel:d=>{S.wasteNew=false;S.apSel=d.v},wtype:d=>{S.wf.type=d.v},wphoto:()=>{S.wf.photo=!S.wf.photo},
+ wsubmit:()=>{const W=S.wf;const id='WST-00'+(33+S.aps.filter(a=>a.cat==='waste').length-3);
+   S.aps.push({id,cat:'waste',title:W.type==='waste'?'Waste claim, '+W.reason.toLowerCase():'Supplier return claim',item:W.c,q:-W.q,by:S.role,ref:W.reason+(W.type==='return'?', '+W.ref:''),note:'Logged with photo evidence.',st:'open',sz:W.q>2?'major':'minor'});
+   S.apSel=id;S.wasteNew=false;S.wf={type:'waste',c:'RM-BAS-01',q:0.5,reason:'',photo:false,ref:''};toast(id+' submitted for approval')}
+});
+Object.assign(I,{
+ cfirst:(v,k)=>{S.cnt.rows.find(r=>r.bin===k).first=v===''?0:+v},crec:(v,k)=>{S.cnt.rows.find(r=>r.bin===k).rec=v===''?null:+v},ccause:v=>{S.cnt.cause=v},cnote2:v=>{S.cnt.note=v},
+ ndc:v=>{S.trf.nd.c=v},ndto:v=>{S.trf.nd.to=v},ndkg:v=>{S.trf.nd.kg=+v},ndpcs:v=>{S.trf.nd.pcs=+v},ndseal:v=>{S.trf.nd.seal=v},
+ rxseal:(v,k,el)=>{rxOf(S.trf.list.find(x=>x.id===S.trf.sel)).seal=el.checked},rxkg:v=>{rxOf(S.trf.list.find(x=>x.id===S.trf.sel)).kg=v},rxpcs:v=>{rxOf(S.trf.list.find(x=>x.id===S.trf.sel)).pcs=v},
+ wc:v=>{S.wf.c=v},wq:v=>{S.wf.q=+v},wr:v=>{S.wf.reason=v},wref:v=>{S.wf.ref=v}
+});
+document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t||t.disabled)return;A[t.dataset.a](t.dataset);render()});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr.row')){e.preventDefault();e.target.click()}});
+document.addEventListener('input',e=>{const t=e.target;if(!t.dataset.i||t.tagName==='SELECT')return;I[t.dataset.i](t.value,t.dataset.k,t);render()});
+document.addEventListener('change',e=>{const t=e.target;if(!t.dataset.i||t.tagName!=='SELECT')return;I[t.dataset.i](t.value,t.dataset.k,t);if(t.dataset.i!=='role')render()});
+window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0)});
+render();
+</script>
+</body>
+</html>

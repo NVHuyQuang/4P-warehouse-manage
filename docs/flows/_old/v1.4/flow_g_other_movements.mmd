@@ -1,0 +1,36 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+
+  subgraph Dispatch["Dispatching Keeper (Store A)"]
+    G1((Start)):::startNode --> G2{G2: Is movement an Inter-Store Transfer?}:::decisionNode
+    G2 -- "Yes" --> G3[G3: Dispatch keeper signs BOTH units; App marks In-Transit]:::actionNode
+    G2 -- "No" --> G9{G9: Is outflow a Supplier Return?}:::decisionNode
+    G9 -- "Yes" --> G10[G10: Match PO/GRPO; generate return document & driver sign]:::actionNode
+    G9 -- "No" --> G11[G11: Enter item, waste quantity, photo evidence & reason]:::actionNode
+  end
+
+  subgraph Receiving["Receiving Keeper (Store B)"]
+    G3 --> G4[G4: Receiving keeper verifies seal; counts in BOTH units]:::actionNode
+    G4 --> G5{G5: Counted quantities match dispatch note in BOTH units?}:::decisionNode
+    G5 -- "Yes" --> G6[G6: Receiving keeper signs; App appends Transfer In to ledger]:::actionNode
+  end
+
+  subgraph Approver["Approver (RM / FC)"]
+    G5 -- "No" --> G7{G7: FC approves transit variance adjustment voucher?}:::decisionNode
+    G7 -- "Yes" --> G6
+    G7 -- "No" --> G8[G8: Book received qty; close transit; book diff as held shrinkage]:::actionNode
+    G10 --> G12{G12: Approver authorizes waste or supplier return document?}:::decisionNode
+    G11 --> G12
+    G12 -- "No" --> G13[G13: Reject claim; retain physical goods in warehouse]:::actionNode
+    G12 -- "Yes" --> G6
+  end
+
+  subgraph Outcome["Movement Outcome"]
+    G6 --> G14((End)):::endNode
+    G8 --> G14
+    G13 --> G14
+  end

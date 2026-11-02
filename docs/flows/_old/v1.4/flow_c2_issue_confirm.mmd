@@ -1,0 +1,36 @@
+flowchart TD
+  classDef startNode fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef endNode fill:#dc3545,stroke:#bd2130,stroke-width:2px,color:#fff,font-weight:bold;
+  classDef recordNode fill:#fff3cd,stroke:#d39e00,stroke-width:2px,color:#856404,font-weight:bold;
+  classDef actionNode fill:#f8f9fa,stroke:#495057,stroke-width:1.5px;
+  classDef decisionNode fill:#e9ecef,stroke:#343a40,stroke-width:2px;
+  classDef pendingNode fill:#fff2e8,stroke:#fa8c16,stroke-width:2px,stroke-dasharray: 5 5;
+
+  subgraph Admin["Warehouse Keeper"]
+    C21((Start)):::startNode --> C22[C22: Admin retrieves items from pick queue following FIFO]:::actionNode
+    C22 --> C23{C23: Candidate lot valid and unexpired?}:::decisionNode
+    C23 -- "No" --> C24[C24: Route expired lot to quarantine in Flow G]:::actionNode
+    C24 --> C22
+    C23 -- "Yes" --> C25[C25: Stage quantity full or partial; App appends pending deduction]:::actionNode
+  end
+
+  subgraph Evening["Evening Scenario"]
+    C22 -. "Admin departed" .-> C26["C26: Evening issue when Admin left [Owner to define]"]:::pendingNode
+    C26 --> C27
+  end
+
+  subgraph Runner["Kitchen Runner"]
+    C25 --> C27{C27: Does runner inspect & accept goods matched to ISSUED qty?}:::decisionNode
+    C27 -- "No" --> C28{C28: Does runner actively decline the issued goods?}:::decisionNode
+    C28 -- "Yes" --> C29[C29: Runner declines; goods to shelf; App appends reversal; alert staff]:::actionNode
+    C28 -- "No" --> C30[C30: Day ends unconfirmed; App dispatches alert to RM]:::actionNode
+    C29 --> C22
+    C27 -- "Yes" --> C31[C31: Runner confirms; App appends offset & confirmed issue]:::actionNode
+    C31 --> C32{C32: For partial issue, keep remaining balance open in queue?}:::decisionNode
+    C32 -- "Yes" --> C22
+  end
+
+  subgraph System["App / System"]
+    C30 --> C33((End)):::endNode
+    C32 -- "No" --> C33
+  end

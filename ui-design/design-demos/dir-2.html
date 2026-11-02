@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cold Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Schibsted+Grotesk:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#050a10; --deep:#08111b; --card:#0e1b29; --card2:#13253a; --line:#22384f;
+  --ice:#d9ebf7; --ice-dim:#9bb3c7; --ice-hi:#9fd4f5; --on-ice:#06121c;
+  --amber:#f3b43f; --red:#ff6e66; --mint:#5fe3b2;
+  --amber-bg:#3a2d0f; --red-bg:#3d1a1a; --mint-bg:#0f3427;
+  --ui:'Schibsted Grotesk',system-ui,sans-serif; --mono:'Martian Mono',ui-monospace,monospace; --serif:'Instrument Serif',Georgia,serif;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--void);color:var(--ice);font-family:var(--ui);font-size:16px}
+body{min-height:100vh;overflow-x:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--ice-hi);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* board */
+#fit{transform-origin:0 0}
+.board{position:relative;width:2590px;padding:72px 60px 80px;background:
+  radial-gradient(1200px 700px at 12% -10%,#12304a 0%,transparent 60%),
+  radial-gradient(1400px 800px at 100% 110%,#0b2236 0%,transparent 60%),var(--deep);overflow:hidden}
+.board::before{content:"";position:absolute;inset:0;opacity:.2;mix-blend-mode:screen;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .75 0 0 0 0 .9 0 0 0 0 1 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")}
+.head{position:relative;display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:56px}
+.head h1{font:400 150px/.9 var(--serif);letter-spacing:-.02em;color:var(--ice)}
+.head h1 em{font-style:italic;color:var(--ice-hi)}
+.head p{max-width:760px;font-size:24px;line-height:1.4;color:var(--ice-dim);margin-top:22px}
+.legend{display:flex;flex-direction:column;gap:14px;font-size:16px;color:var(--ice-dim);min-width:430px}
+.legend div{display:flex;align-items:center;gap:12px}
+.legend i{width:14px;height:14px;border-radius:50%;flex:none}
+.legend small{font-size:14px;color:var(--ice-dim);opacity:.85;margin-top:6px}
+.legend button{align-self:flex-start;min-height:48px;padding:0 20px;border:1px solid var(--line);border-radius:24px;color:var(--ice)}
+.wordmark{font:600 22px var(--ui);letter-spacing:-.01em}
+.row{position:relative;display:flex}
+.slot{position:relative;width:506px;flex:none}
+.slot::before{content:"";position:absolute;left:0;width:453px;top:442px;height:3px;background:var(--line);border-radius:2px;z-index:0}
+.slot.lit::before{background:linear-gradient(90deg,var(--ice-hi),var(--ice-hi));box-shadow:0 0 18px #6fb8e688}
+.row .start{position:absolute;left:-60px;width:60px;top:442px;height:3px;background:var(--ice-hi);box-shadow:0 0 18px #6fb8e688}
+.node{position:absolute;left:453px;top:431px;width:26px;height:26px;margin-left:-3px;border-radius:50%;background:var(--deep);border:3px solid var(--line);z-index:1;transition:.4s}
+.slot.lit .node{border-color:var(--ice-hi);background:var(--ice-hi);box-shadow:0 0 0 7px #9fd4f522,0 0 22px #6fb8e6}
+.slot:last-child.lit .node{border-color:var(--mint);background:var(--mint);box-shadow:0 0 0 7px #5fe3b222,0 0 22px var(--mint)}
+.nlabel{position:absolute;left:408px;width:116px;text-align:center;top:392px;font-size:14px;font-weight:500;color:var(--ice-dim)}
+.slot.lit .nlabel{color:var(--ice)}
+.cap{position:relative;margin-top:30px;width:406px}
+.cap b{display:block;font:400 34px/1 var(--serif)}
+.cap span{display:block;margin-top:6px;font-size:16px;color:var(--ice-dim)}
+
+/* phone */
+.phone{position:relative;z-index:2;width:406px;height:864px;padding:10px;border-radius:50px;background:#02060a;border:1px solid #2a4560;box-shadow:0 40px 90px #000a,0 0 0 1px #000}
+.screen{position:relative;width:386px;height:844px;border-radius:40px;overflow:hidden;background:var(--void);display:flex;flex-direction:column}
+.top{padding:16px 16px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.chipbtn{display:flex;align-items:center;gap:8px;min-height:48px;padding:0 14px;border-radius:24px;background:var(--card);border:1px solid var(--line);font-weight:600;font-size:16px}
+.chipbtn svg{width:14px;height:14px;stroke:var(--ice-dim);fill:none;stroke-width:2}
+.role{font-size:14px;color:var(--ice-dim);text-align:right;line-height:1.2}
+.seg{display:flex;margin:0 16px 10px;padding:4px;background:var(--card);border-radius:16px;border:1px solid var(--line)}
+.seg button{flex:1;min-height:48px;border-radius:12px;font-weight:600;color:var(--ice-dim)}
+.seg button[aria-selected=true]{background:var(--ice);color:var(--on-ice)}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
+.body{flex:1;overflow-y:auto;padding:4px 16px 24px;display:flex;flex-direction:column;gap:12px;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+.banner{margin:0 16px 8px;padding:8px 8px 8px 14px;border-radius:14px;background:var(--card2);border:1px dashed #4b6a86;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;line-height:1.3}
+.banner button{flex:none;min-height:48px;padding:0 18px;border-radius:12px;background:var(--ice);color:var(--on-ice);font-weight:700}
+.banner.off{border-color:var(--red)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px}
+.h{font:400 28px/1.05 var(--serif)}
+.sub{font-size:14px;color:var(--ice-dim)}
+.mono{font-family:var(--mono);font-size:12px;line-height:1.7;color:var(--ice-dim);letter-spacing:-.01em}
+.mono b{font-weight:500;color:var(--ice)}
+.ledger{margin-top:10px;padding:8px 10px;border-radius:10px;background:#07121d;border:1px solid #17293b}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 12px;border-radius:14px;font-weight:700;font-size:14px;border:1px solid var(--line);color:var(--ice);white-space:nowrap}
+.chip.big{min-height:34px;font-size:15px;padding:0 14px;border-radius:17px}
+.chip.amber{background:var(--amber-bg);border-color:#7a5a17;color:var(--amber)}
+.chip.red{background:var(--red-bg);border-color:#7d3434;color:var(--red)}
+.chip.mint{background:var(--mint-bg);border-color:#1f6d52;color:var(--mint)}
+.chip.solid{background:var(--ice);color:var(--on-ice);border-color:var(--ice)}
+.chip svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{min-height:78px;padding:10px 14px;border-radius:18px;background:var(--card);border:1px solid var(--line);text-align:left;display:flex;flex-direction:column;justify-content:space-between}
+.tile[aria-pressed=true]{background:var(--card2);border-color:var(--ice-hi)}
+.tile strong{font:400 38px/1 var(--serif)}
+.tile span{font-size:14px;color:var(--ice-dim)}
+.tile .u{font-size:13px;color:var(--ice);font-weight:700}
+.stock{display:flex;align-items:center;gap:12px;width:100%;text-align:left;min-height:76px;padding:12px 14px;border-radius:18px;background:var(--card);border:1px solid var(--line)}
+.stock .n{flex:1}.stock .n b{display:block;font-size:17px;font-weight:600}
+.stock .q{font:500 22px var(--ui);text-align:right;font-variant-numeric:tabular-nums}.stock .q small{font-size:14px;color:var(--ice-dim);margin-left:3px}
+.stock.amber{border-color:#6b5114}.stock.red{border-color:#733030}
+.lbl{font-size:14px;font-weight:600;color:var(--ice-dim);margin:6px 2px 0}
+.stepper{display:flex;align-items:center;gap:4px}
+.stepper button{width:48px;height:48px;border-radius:14px;background:var(--card2);border:1px solid var(--line);font-size:24px;line-height:1}
+.stepper button:disabled{opacity:.35}
+.stepper output{min-width:62px;text-align:center;font:500 22px var(--ui);font-variant-numeric:tabular-nums}
+.btn{min-height:56px;border-radius:18px;font-weight:700;font-size:17px;background:var(--ice);color:var(--on-ice);width:100%;padding:0 16px}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ice)}
+.btn.mint{background:var(--mint);color:#04241a}
+.btn.sm{min-height:48px;width:auto;font-size:15px;padding:0 16px;border-radius:14px}
+.btn.red{background:transparent;border:1px solid #7d3434;color:var(--red)}
+.btn:disabled{background:var(--card2);color:#6c859b;border:1px solid var(--line);cursor:not-allowed}
+.dock{padding:12px 16px 18px;background:linear-gradient(transparent,var(--void) 28%)}
+input[type=text],input[type=number],textarea{width:100%;min-height:52px;padding:0 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);color:var(--ice);font:500 17px var(--ui)}
+textarea{padding:12px 14px;min-height:84px;resize:none}
+input::placeholder,textarea::placeholder{color:#7f97ab}
+.opt{display:flex;flex-wrap:wrap;gap:8px}
+.opt button{min-height:48px;padding:0 16px;border-radius:24px;border:1px solid var(--line);background:var(--card);font-weight:600;font-variant-numeric:tabular-nums}
+.opt button[aria-pressed=true]{background:var(--ice);color:var(--on-ice);border-color:var(--ice)}
+.sugg{display:flex;flex-direction:column;gap:6px}
+.sugg button{min-height:48px;padding:0 14px;border-radius:14px;background:var(--card2);text-align:left;display:flex;justify-content:space-between;align-items:center}
+.line{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.line b{font-size:17px;font-weight:600}
+.unit{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.unit button{min-width:48px;min-height:48px;font-weight:600;color:var(--ice-dim)}
+.unit button[aria-pressed=true]{background:var(--card2);color:var(--ice)}
+.x{width:48px;height:48px;border-radius:14px;color:var(--ice-dim);font-size:22px}
+.mode{display:flex;gap:6px;align-items:center;padding:4px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.mode button{flex:1;min-height:48px;border-radius:10px;font-weight:600;font-size:14px;color:var(--ice-dim);line-height:1.15}
+.mode button[aria-pressed=true]{background:var(--card2);color:var(--ice);box-shadow:inset 0 0 0 1px var(--ice-hi)}
+.mode small{display:block;font-size:12px;font-weight:500}
+
+/* life rail */
+.rail{display:flex;margin:14px 0 4px}
+.stop{flex:1;position:relative;text-align:center;font-size:12px;font-weight:600;color:#7e97ab;padding-top:22px}
+.stop::before{content:"";position:absolute;top:6px;left:-50%;width:100%;height:3px;background:var(--line);border-radius:2px}
+.stop:first-child::before{display:none}
+.stop::after{content:"";position:absolute;top:0;left:50%;margin-left:-8px;width:16px;height:16px;border-radius:50%;background:var(--void);border:3px solid var(--line)}
+.stop.on{color:var(--ice)}
+.stop.on::before{background:var(--ice-hi)}
+.stop.on::after{background:var(--ice-hi);border-color:var(--ice-hi)}
+.stop.cur::after{box-shadow:0 0 0 5px #9fd4f533}
+.stop.next::after{border-color:var(--ice-hi);border-style:dashed}
+.rail.done .stop.on::before,.rail.done .stop.on::after{background:var(--mint);border-color:var(--mint)}
+.rail.done .stop.on{color:var(--mint)}
+.rail.done .stop.cur::after{box-shadow:0 0 0 5px #5fe3b233}
+.rail.bad .stop.on:last-child::before,.rail.bad .stop.on:last-child::after{background:var(--red);border-color:var(--red)}
+.rail.bad .stop.cur::after{box-shadow:0 0 0 5px #ff6e6633}
+.rail.bad .stop.on:last-child{color:var(--red)}
+
+/* lots */
+.lot{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:8px 12px;border-radius:14px;background:#0a1623;border:1px solid var(--line);text-align:left}
+.lot[aria-checked=true]{border-color:var(--ice-hi);background:var(--card2)}
+.lot .r{width:22px;height:22px;flex:none;border-radius:50%;border:2px solid #587590}
+.lot[aria-checked=true] .r{border:7px solid var(--ice-hi)}
+.lot .t{flex:1;font-size:14px;color:var(--ice-dim);line-height:1.35}
+.lot .t b{font:500 13px var(--mono);color:var(--ice)}
+.lot.red{opacity:.9;cursor:not-allowed;background:repeating-linear-gradient(135deg,#1b0e10,#1b0e10 8px,#241114 8px,#241114 16px);border-color:#6a2c2c}
+.lot.red .r{border-color:#6a2c2c;background:#3d1a1a}
+.lot.amber{border-color:#6b5114}
+.lot.amber[aria-checked=true]{border-color:var(--amber)}
+
+/* sheet */
+.scrim{position:absolute;inset:0;background:#02060acc;opacity:0;pointer-events:none;transition:.25s;z-index:5}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:78%;overflow:auto;padding:12px 18px 22px;background:var(--card);border-radius:28px 28px 0 0;border-top:1px solid #35516b;transform:translateY(105%);transition:.3s cubic-bezier(.2,.8,.2,1);z-index:6;display:flex;flex-direction:column;gap:12px}
+.screen.sh .scrim{opacity:1;pointer-events:auto}.screen.sh .sheet{transform:none}
+.grab{width:44px;height:5px;border-radius:3px;background:#3b556e;align-self:center}
+.empty{padding:26px 16px;text-align:center;border:1px dashed var(--line);border-radius:18px;color:var(--ice-dim);font-size:16px;line-height:1.4}
+.empty b{display:block;font:400 26px var(--serif);color:var(--ice);margin-bottom:6px}
+.table{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.cell{padding:8px 10px;border-radius:10px;background:#0a1623}
+.cell span{display:block;font-size:12px;color:var(--ice-dim);font-weight:600}
+.cell b{font:500 18px var(--ui);font-variant-numeric:tabular-nums}
+.diff{font:600 24px var(--ui);font-variant-numeric:tabular-nums}
+.diff.z{color:var(--mint)}.diff.nz{color:var(--red)}
+.steps{display:flex;flex-direction:column;gap:10px}
+.stp{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+.stp i{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font:700 13px var(--ui);font-style:normal}
+.stp.ok i{background:var(--mint);border-color:var(--mint);color:#04241a}
+</style>
+</head>
+<body>
+<div id="fit">
+<div class="board" id="board">
+  <div class="head">
+    <div>
+      <div class="wordmark">Pizza 4P's <span class="sub" style="font-weight:400">wordmark placeholder</span></div>
+      <h1 style="margin-top:20px">Cold <em>Room</em></h1>
+      <p>Every issue is a journey you can watch. Stock is never edited, only appended: requested, staged, at the door, confirmed.</p>
+    </div>
+    <div class="legend">
+      <div><i style="background:var(--amber)"></i>Amber: expiry window, check before you pick</div>
+      <div><i style="background:var(--red)"></i>Red: locked or declined, cannot proceed</div>
+      <div><i style="background:var(--mint)"></i>Mint: confirmed, ledger row written</div>
+      <small>Store IND-DEL-01, Delhi. All times and thresholds are samples. Quantities in kg and pieces only.</small>
+      <button id="reset">Reset all phones</button>
+    </div>
+  </div>
+  <div class="row" id="row"><div class="start"></div></div>
+</div>
+</div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const f=(n,u)=>u==='pcs'?String(Math.round(n)):(Math.round(n*10)/10).toFixed(1);
+const r1=n=>Math.round(n*10)/10;
+const sgn=(n,u)=>(n<0?'−':'+')+f(Math.abs(n),u);
+const ICON={chev:'<svg viewBox="0 0 16 16"><path d="M3 6l5 5 5-5"/></svg>',lock:'<svg viewBox="0 0 16 16"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5 7V5a3 3 0 016 0v2"/></svg>',wait:'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg>'};
+
+/* shared state */
+const N={off:false,queue:1,msg:''};
+let LIT=1;
+const ITEMS=[
+ {name:'Mozzarella block',u:'kg',q:42.5,st:''},
+ {name:'Fresh basil',u:'kg',q:3.2,st:'reorder'},
+ {name:'Burrata',u:'pcs',q:18,st:'amber'},
+ {name:'Chicken breast',u:'kg',q:26.0,st:''},
+ {name:'Pizza dough ball',u:'pcs',q:140,st:''},
+ {name:'Salmon fillet',u:'kg',q:9.4,st:'red'}];
+const ISS={Mozzarella:5,Burrata:6,Salmon:3};
+
+/* board */
+const SCREENS=[
+ ['Home and stock','Warehouse Keeper, Cold Room','Stock read'],
+ ['New request','Section Requester, Kitchen','Requested'],
+ ['Pick queue','Warehouse Keeper','Staged'],
+ ['Door confirm','Kitchen Runner','Confirmed'],
+ ['Daily balance','Custodian','Signed']];
+const row=$('#row');
+SCREENS.forEach((s,i)=>{
+  row.insertAdjacentHTML('beforeend',`<div class="slot" id="slot${i}"><div class="phone"><div class="screen" id="p${i+1}"><div class="top"></div><div class="seg"></div><div class="bnr"></div><div class="body"></div><div class="dock"></div><div class="scrim"></div><div class="sheet"></div></div></div><div class="cap"><b>${s[0]}</b><span>${s[1]}</span></div><div class="nlabel">${s[2]}</div><div class="node"></div></div>`);
+});
+function light(n){LIT=Math.max(LIT,n);SCREENS.forEach((_,i)=>$('#slot'+i).classList.toggle('lit',i<LIT))}
+
+/* shared pieces */
+const phones={};
+function mk(id,def){
+  const el=$('#'+id),P={el,s:def(),def};
+  P.set=(h,sel)=>{$(sel,el).innerHTML=h};
+  P.sheet=h=>{$('.sheet',el).innerHTML='<div class="grab"></div>'+h;el.classList.add('sh')};
+  P.close=()=>el.classList.remove('sh');
+  el.addEventListener('click',e=>{
+    if(e.target.classList.contains('scrim'))return P.close();
+    const b=e.target.closest('[data-a]');if(!b||b.disabled)return;
+    const a=b.dataset.a;
+    if(a==='retry')return retry();
+    if(a==='close')return P.close();
+    P.act(a,b.dataset,b);
+  });
+  phones[id]=P;return P;
+}
+function seg(items,cur){return items.map(([k,l,dis])=>`<button role="tab" aria-selected="${k===cur}" data-a="tab" data-k="${k}" ${dis?'disabled':''}>${l}</button>`).join('')}
+function bannerHTML(){
+  if(!N.off&&!N.queue&&!N.msg)return '';
+  let t;
+  if(N.off)t=`<span><b>No signal.</b> ${N.queue} action${N.queue===1?'':'s'} queued on this phone. ${esc(N.msg)}</span>`;
+  else if(N.queue)t=`<span><b>${N.queue} action${N.queue===1?'':'s'} waiting.</b> Signal is back. Send when ready.</span>`;
+  else t=`<span>${esc(N.msg)}</span>`;
+  return `<div class="banner ${N.off?'off':''}">${t}${N.queue||N.off?'<button data-a="retry">Retry</button>':''}</div>`;
+}
+function retry(){
+  if(N.off){N.msg='Still offline, nothing sent.'}
+  else if(N.queue){N.queue=0;N.msg='Sent. Queue is empty.';const r=P2.s.reqs.find(r=>r.st==='Queued');if(r){r.st='Requested';r.c=1}}
+  all();
+}
+function all(){Object.values(phones).forEach(p=>p.render())}
+function queueIf(){if(N.off){N.queue++;N.msg='';return true}return false}
+function rail(c,kind,labels){
+  labels=labels||['Requested','Staged','At door','Confirmed'];
+  const cls=kind==='done'?'done':kind==='bad'?'bad':'';
+  return `<div class="rail ${cls}" role="img" aria-label="Progress: ${c} of 4, ${labels[Math.max(c-1,0)]}">${labels.map((l,i)=>`<div class="stop ${i<c?'on':''} ${i===c-1?'cur':''} ${i===c&&kind!=='bad'&&c>0?'next':''}">${l}</div>`).join('')}</div>`;
+}
+function stepper(p,k,v,u,min,max,step){return `<div class="stepper"><button data-a="dec" data-k="${k}" aria-label="Decrease" ${v<=min?'disabled':''}>−</button><output class="num">${f(v,u)}<span class="sub" style="margin-left:3px">${u}</span></output><button data-a="inc" data-k="${k}" aria-label="Increase" ${v>=max?'disabled':''}>+</button></div>`}
+
+/* 1 HOME */
+const P1=mk('p1',()=>({wh:'cold',flt:'',tab:'stock'}));
+P1.render=()=>{
+  const s=P1.s;
+  P1.set(`<button class="chipbtn" data-a="stores" aria-label="Store switcher">IND-DEL-01 ${ICON.chev}</button><div class="role">Warehouse Keeper<br>${s.wh==='cold'?'WH-DEL01-COLD':'WH-DEL01-DRY'}</div>`,'.top');
+  P1.set(seg([['cold','Cold Room'],['dry','Dry Store']],s.wh).replace(/data-a="tab"/g,'data-a="wh"'),'.seg');
+  P1.set(bannerHTML(),'.bnr');
+  const win=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="h">Window open</div><div class="sub num">Closes 11:30 (sample)</div></div><button class="chipbtn" data-a="sig" style="font-size:14px">${N.off?'Signal back':'Drop signal'}</button></div>`;
+  const T=(k,n,l,u)=>`<button class="tile" data-a="tile" data-k="${k}" aria-pressed="${s.flt===k}"><strong class="num">${n}</strong><span>${l}${u?` <span class="u">${u}</span>`:''}</span></button>`;
+  const tiles=`<div class="tiles">${T('pick',4,'Pick queue','1 urgent')}${T('await',1,'Awaiting runner')}${T('expiry',2,'Expiry watch')}${T('reorder',3,'Reorder')}</div>`;
+  let list;
+  if(s.wh==='dry')list=`<div class="empty"><b>Dry Store has no sample rows</b>This board shows the Cold Room. Switch back to see its book stock.</div>`;
+  else{
+    let it=ITEMS;
+    if(s.flt==='expiry')it=ITEMS.filter(i=>i.st==='amber'||i.st==='red');
+    if(s.flt==='reorder')it=ITEMS.filter(i=>i.st==='reorder');
+    list=it.map((i,x)=>{
+      const c=i.st==='amber'?['amber','Expires in 4 days']:i.st==='red'?['red','Expired lot locked']:i.st==='reorder'?['','Reorder']:['mint','In stock'];
+      return `<button class="stock ${i.st==='amber'||i.st==='red'?i.st:''}" data-a="item" data-k="${ITEMS.indexOf(i)}"><div class="n"><span class="chip big ${c[0]}" style="margin-bottom:8px">${c[1]}</span><b>${i.name}</b></div><div class="q">${f(i.q,i.u)}<small>${i.u}</small></div></button>`}).join('');
+    list+=s.flt&&s.flt!=='expiry'&&s.flt!=='reorder'?'':'';
+  }
+  const note=s.flt==='pick'||s.flt==='await'?`<div class="card sub">${s.flt==='pick'?'4 requests waiting. Open the Pick queue phone to work one.':'1 issue staged, waiting at the door for the runner.'}</div>`:'';
+  P1.set(`${win}${tiles}${note}<div class="lbl">Book stock, ${s.flt==='expiry'?'expiry watch':s.flt==='reorder'?'reorder':'all items'}</div>${list}`,'.body');
+  P1.set('','.dock');
+};
+P1.act=(a,d)=>{
+  const s=P1.s;
+  if(a==='wh'){s.wh=d.k;s.flt=''}
+  if(a==='tile'){s.flt=s.flt===d.k?'':d.k;if(d.k==='pick')$('#slot2').scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})}
+  if(a==='sig'){N.off=!N.off;N.msg=''}
+  if(a==='stores')return P1.sheet(`<div class="h">Store</div><div class="sub">You see only stores you are granted.</div><button class="stock" style="min-height:60px" data-a="close"><b style="flex:1;font-size:17px">IND-DEL-01, Delhi</b><span class="chip mint">Current</span></button>`);
+  if(a==='item'){
+    const i=ITEMS[d.k];
+    const led={'0':['RECEIPT +30.5 kg','ISSUE_CONFIRMED −7.5 kg'],'1':['RECEIPT +2.0 kg','ISSUE_CONFIRMED −2.8 kg'],'2':['RECEIPT +12 pcs','ISSUE_PENDING −6 pcs'],'3':['RECEIPT +10.0 kg','ISSUE_CONFIRMED −4.0 kg'],'4':['ISSUE_CONFIRMED −60 pcs','COUNT_ADJUST 0'],'5':['RECEIPT +7.0 kg','ISSUE_CONFIRMED −1.5 kg']}[d.k];
+    return P1.sheet(`<div class="h">${i.name}</div><div class="line"><span class="sub">Book stock, appended rows only</span><b class="num" style="font-size:22px">${f(i.q,i.u)} ${i.u}</b></div><div class="ledger mono">${led.map(l=>`<div><b>${l.split(' ')[0]}</b> ${l.split(' ').slice(1).join(' ')}</div>`).join('')}<div>Sample rows. Nothing here can be edited.</div></div><button class="btn ghost" data-a="close">Close</button>`);
+  }
+  P1.render();
+};
+
+/* 2 REQUEST */
+const P2=mk('p2',()=>({tab:'new',out:false,q:'',time:'11:00',reason:'',edit:null,
+  lines:[{n:'Mozzarella block',q:5,u:'kg'}],
+  reqs:[
+   {id:1,st:'Queued',c:0,t:'11:00',urg:false,l:[{n:'Chicken breast',q:6,u:'kg'}]},
+   {id:2,st:'Picking-locked',c:1,t:'11:30',urg:false,l:[{n:'Pizza dough ball',q:40,u:'pcs'},{n:'Fresh basil',q:1,u:'kg'}]},
+   {id:3,st:'Cancelled',c:1,t:'10:30',urg:false,l:[{n:'Burrata',q:6,u:'pcs'}]}]}));
+P2.render=()=>{
+  const s=P2.s;
+  P2.set(`<div><div class="h">Kitchen</div><div class="sub">Section Requester</div></div><div class="role">IND-DEL-01<br>Cold Room</div>`,'.top');
+  P2.set(seg([['new',s.edit?'Edit request':'New request'],['mine','My requests']],s.tab),'.seg');
+  P2.set(bannerHTML(),'.bnr');
+  if(s.tab==='new'){
+    const sugg=s.q?ITEMS.filter(i=>i.name.toLowerCase().includes(s.q.toLowerCase())):[];
+    const ok=s.lines.length&&(!s.out||s.reason.trim().length>2);
+    P2.set(`
+     <div class="mode" role="group" aria-label="Demo clock"><button data-a="clk" data-k="in" aria-pressed="${!s.out}">10:40<small>Inside window</small></button><button data-a="clk" data-k="out" aria-pressed="${s.out}">12:15<small>Outside window</small></button></div>
+     ${s.out?`<div class="card" style="border-color:#7a5a17;display:flex;gap:10px;align-items:center"><span class="chip solid big">URGENT</span><span class="sub" style="color:var(--ice)">Window closed at 11:30. A reason is needed. You are not blocked.</span></div>`:`<div class="sub" style="padding:0 2px">Window closes 11:30 (sample). Standard request.</div>`}
+     <input type="text" id="srch" placeholder="Search item" value="${esc(s.q)}" aria-label="Search item" autocomplete="off">
+     <div class="sugg" id="sugg">${suggHTML(sugg)}</div>
+     <div class="card" style="display:flex;flex-direction:column;gap:6px">
+      ${s.lines.length?s.lines.map((l,i)=>`<div style="padding:6px 0;${i?'border-top:1px solid var(--line)':''}"><div class="line"><b>${l.n}</b><button class="x" data-a="del" data-k="${i}" aria-label="Remove ${l.n}">×</button></div><div class="line">${stepper(0,i,l.q,l.u,0.5,200)}<div class="unit" role="group" aria-label="Unit"><button data-a="unit" data-k="${i}" data-u="kg" aria-pressed="${l.u==='kg'}">kg</button><button data-a="unit" data-k="${i}" data-u="pcs" aria-pressed="${l.u==='pcs'}">pcs</button></div></div></div>`).join(''):`<div class="empty" style="border:0;padding:10px"><b>No lines yet</b>Search an item above to add it.</div>`}
+     </div>
+     <div class="lbl">Needed by</div>
+     <div class="opt">${['11:00','11:30','12:30','13:00'].map(t=>`<button data-a="time" data-k="${t}" aria-pressed="${s.time===t}">${t}</button>`).join('')}</div>
+     ${s.out?`<div class="lbl">Reason for urgent request</div><textarea id="why" placeholder="Why is this needed outside the window?" aria-label="Reason">${esc(s.reason)}</textarea>`:''}
+    `,'.body');
+    P2.set(`<button class="btn" data-a="submit" ${ok?'':'disabled'}>${s.edit?'Save changes':s.out?'Submit as urgent':'Submit request'}${N.off?', queue on phone':''}</button>`,'.dock');
+  }else{
+    P2.set(s.reqs.length?[...s.reqs].reverse().map(r=>{
+      const can=r.st==='Queued'||r.st==='Requested';
+      const chip=r.st==='Queued'?`<span class="chip big">${ICON.wait}Queued on phone</span>`:r.st==='Picking-locked'?`<span class="chip big">${ICON.lock}Picking, locked</span>`:r.st==='Cancelled'?`<span class="chip big red">Cancelled</span>`:`<span class="chip big mint">Requested</span>`;
+      return `<div class="card" ${r.st==='Cancelled'?'style="opacity:.7"':''}><div class="line">${chip}${r.urg?'<span class="chip solid">URGENT</span>':''}</div>
+      <div style="margin:10px 0 2px;${r.st==='Cancelled'?'text-decoration:line-through;':''}">${r.l.map(l=>`<div class="line"><b>${l.n}</b><span class="num">${f(l.q,l.u)} ${l.u}</span></div>`).join('')}</div><div class="sub num">Needed by ${r.t}</div>
+      ${r.st==='Cancelled'?rail(1,'bad',['Requested','Staged','At door','Cancelled']):rail(r.c,'')}
+      ${r.st==='Queued'?`<div class="ledger mono"><div><b>QUEUED</b> not sent yet, tap Retry above</div></div>`:''}
+      ${can?`<div style="display:flex;gap:8px;margin-top:8px"><button class="btn ghost sm" data-a="edit" data-k="${r.id}" style="flex:1">Edit</button><button class="btn red sm" data-a="cancel" data-k="${r.id}" style="flex:1">Cancel</button></div>`:r.st==='Picking-locked'?`<div class="sub" style="margin-top:6px">Keeper started picking. Quantity is locked.</div>`:''}</div>`}).join(''):'<div class="empty"><b>No requests</b></div>','.body');
+    P2.set('','.dock');
+  }
+};
+function suggHTML(a){return a.map(i=>`<button data-a="add" data-k="${ITEMS.indexOf(i)}"><b>${i.name}</b><span class="sub">${i.u}</span></button>`).join('')}
+P2.el.addEventListener('input',e=>{
+  const s=P2.s;
+  if(e.target.id==='srch'){s.q=e.target.value;const a=s.q?ITEMS.filter(i=>i.name.toLowerCase().includes(s.q.toLowerCase())):[];$('#sugg',P2.el).innerHTML=suggHTML(a)}
+  if(e.target.id==='why'){s.reason=e.target.value;$('.dock .btn',P2.el).disabled=!(s.lines.length&&s.reason.trim().length>2)}
+});
+P2.act=(a,d)=>{
+  const s=P2.s,L=s.lines[d.k];
+  if(a==='tab')s.tab=d.k;
+  if(a==='clk')s.out=d.k==='out';
+  if(a==='time')s.time=d.k;
+  if(a==='add'){const i=ITEMS[d.k];if(!s.lines.some(l=>l.n===i.name))s.lines.push({n:i.name,q:i.u==='kg'?1:6,u:i.u});s.q=''}
+  if(a==='del')s.lines.splice(d.k,1);
+  if(a==='inc')L.q=r1(L.q+(L.u==='kg'?0.5:1));
+  if(a==='dec')L.q=r1(Math.max(L.u==='kg'?0.5:1,L.q-(L.u==='kg'?0.5:1)));
+  if(a==='unit'){L.u=d.u;L.q=d.u==='pcs'?Math.max(1,Math.round(L.q)):L.q}
+  if(a==='cancel'){const r=s.reqs.find(r=>r.id==d.k);if(r.st==='Queued'&&N.queue)N.queue--;r.st='Cancelled'}
+  if(a==='edit'){const r=s.reqs.find(r=>r.id==d.k);s.lines=r.l.map(l=>({n:l.n,q:l.q,u:l.u}));s.time=r.t;s.edit=r.id;s.tab='new'}
+  if(a==='submit'){
+    const q=queueIf();
+    const rec={id:s.edit||Date.now(),st:q?'Queued':'Requested',c:q?0:1,t:s.time,urg:s.out,l:s.lines.map(l=>({...l}))};
+    if(s.edit){const i=s.reqs.findIndex(r=>r.id===s.edit);s.reqs[i]=rec}else s.reqs.push(rec);
+    s.lines=[];s.reason='';s.edit=null;s.tab='mine';light(2);
+  }
+  all();
+};
+
+/* 3 PICK */
+const mkLots=()=>({
+ Mozzarella:[['M-1014','24 Oct','21 Nov',12,''],['M-1027','29 Oct','26 Nov',30.5,'']],
+ Burrata:[['B-0931','26 Oct','06 Nov',6,'amber'],['B-0940','30 Oct','13 Nov',12,'']],
+ Salmon:[['S-0822','27 Oct','01 Nov',2.4,'red'],['S-0829','31 Oct','09 Nov',7,'']]});
+const P3=mk('p3',()=>({tab:'pick',staged:false,L:[
+ {n:'Mozzarella block',k:'Mozzarella',u:'kg',req:5,lots:mkLots().Mozzarella,lot:0,mode:'full',q:5},
+ {n:'Burrata',k:'Burrata',u:'pcs',req:6,lots:mkLots().Burrata,lot:0,mode:'full',q:6},
+ {n:'Salmon fillet',k:'Salmon',u:'kg',req:3,lots:mkLots().Salmon,lot:1,mode:'full',q:3}]}));
+const ledRows=s=>s.L.map(l=>`<div><b>ISSUE_PENDING</b> ${sgn(-l.q,l.u)} ${l.u} <span style="color:#6f889c">${l.lots[l.lot][0]}</span></div>`).join('');
+P3.render=()=>{
+  const s=P3.s;
+  P3.set(`<div><div class="h">Pick queue</div><div class="sub">Request from Kitchen, 3 lines</div></div><span class="chip solid">URGENT</span>`,'.top');
+  P3.set(seg([['pick','Request'],['led',s.staged?'Ledger, appended':'Ledger preview']],s.tab),'.seg');
+  P3.set(bannerHTML(),'.bnr');
+  if(s.tab==='pick'){
+    P3.set(`<div class="card"><div class="line"><span class="chip big ${s.staged?'mint':''}">${s.staged?'Staged, awaiting runner':'Requested'}</span><span class="sub num">Needed by 11:00</span></div>${rail(s.staged?2:1,'')}<div class="sub">Requester can no longer edit: picking started.</div></div>`+
+    s.L.map((l,i)=>`<div class="card" style="display:flex;flex-direction:column;gap:8px"><div class="line"><b style="font-size:18px">${l.n}</b><span class="sub num">Asked ${f(l.req,l.u)} ${l.u}</span></div>
+      <div class="sub">Oldest first (FIFO)</div>
+      ${l.lots.map((o,j)=>`<button class="lot ${o[4]}" role="radio" aria-checked="${l.lot===j}" data-a="lot" data-k="${i}" data-j="${j}" ${o[4]==='red'||s.staged?'aria-disabled="true"':''}><span class="r"></span><span class="t"><b>${o[0]}</b>  ${f(o[3],l.u)} ${l.u}<br>In ${o[1]}, exp ${o[2]}</span>${o[4]==='red'?'<span class="chip red">EXPIRED LOCK</span>':o[4]==='amber'?'<span class="chip amber">Expiring</span>':''}</button>`).join('')}
+      <div class="mode"><button data-a="mode" data-k="${i}" data-m="full" aria-pressed="${l.mode==='full'}" ${s.staged?'disabled':''}>Full<small class="num">${f(l.req,l.u)} ${l.u}</small></button><button data-a="mode" data-k="${i}" data-m="part" aria-pressed="${l.mode==='part'}" ${s.staged?'disabled':''}>Partial<small>less than asked</small></button></div>
+      ${l.mode==='part'&&!s.staged?`<div class="line"><span class="sub">Stage quantity</span>${stepper(0,i,l.q,l.u,l.u==='kg'?0.5:1,Math.min(l.req,l.lots[l.lot][3]))}</div>`:''}</div>`).join(''),'.body');
+    P3.set(`<button class="btn ${s.staged?'ghost':''}" data-a="stage" ${s.staged?'disabled':''}>${s.staged?'Handed to runner':'Stage and hand to runner'}</button>`,'.dock');
+  }else{
+    P3.set(`<div class="card"><div class="h">${s.staged?'Appended':'Will append'}</div><div class="sub">Book stock drops at once. Runner confirms at the door.</div><div class="ledger mono">${ledRows(s)}</div></div><div class="sub" style="padding:0 4px">Nothing is edited. If the runner declines, a reversal row is appended.</div>`,'.body');
+    P3.set('','.dock');
+  }
+};
+P3.act=(a,d)=>{
+  const s=P3.s,l=s.L[d.k];
+  if(a==='tab')s.tab=d.k;
+  if(a==='lot'){if(!s.staged&&l.lots[d.j][4]!=='red'){l.lot=+d.j;l.q=Math.min(l.q,l.lots[l.lot][3])}}
+  if(a==='mode'){l.mode=d.m;if(d.m==='full')l.q=l.req;else l.q=Math.max(l.u==='kg'?0.5:1,l.q-(l.u==='kg'?1:2))}
+  if(a==='inc')l.q=r1(Math.min(l.req,l.lots[l.lot][3],l.q+(l.u==='kg'?0.5:1)));
+  if(a==='dec')l.q=r1(Math.max(l.u==='kg'?0.5:1,l.q-(l.u==='kg'?0.5:1)));
+  if(a==='stage')return P3.sheet(`<div class="h">Append to ledger</div><div class="sub">These rows will be added. They cannot be edited later.</div><div class="ledger mono">${ledRows(s)}</div><button class="btn" data-a="go">Append and hand over</button><button class="btn ghost" data-a="close">Back</button>`);
+  if(a==='go'){queueIf();s.staged=true;s.L.forEach(l=>ISS[l.k]=l.q);P4.s=P4.def();P4.s.iss={...ISS};P4.s.acc={...ISS};s.tab='led';P3.close();light(3);all();return}
+  all();
+};
+
+/* 4 DOOR */
+const P4=mk('p4',()=>({tab:'door',done:false,iss:{...ISS},acc:{Mozzarella:3,Burrata:6,Salmon:3}}));
+const NAMES={Mozzarella:['Mozzarella block','kg'],Burrata:['Burrata','pcs'],Salmon:['Salmon fillet','kg']};
+function doorRows(s){return Object.keys(NAMES).map(k=>{const u=NAMES[k][1],q=s.iss[k],a=s.acc[k];return a===0?`<div><b>ISSUE_REVERSAL</b> ${sgn(q,u)}${u==='kg'?'':' '+u}</div>`:`<div><b>ISSUE_PENDING_OFFSET</b> ${sgn(q,u)}</div><div><b>ISSUE_CONFIRMED</b> ${sgn(-a,u)}</div>${a<q?`<div>Shelf <b>${sgn(r1(q-a),u)}</b> ${u}</div>`:''}`}).join('')}
+P4.render=()=>{
+  const s=P4.s;
+  P4.set(`<div><div class="h">Door confirm</div><div class="sub">Kitchen Runner</div></div><div class="role">IND-DEL-01<br>from Cold Room</div>`,'.top');
+  P4.set(seg([['door','At the door'],['res','Result',!s.done]],s.tab),'.seg');
+  P4.set(bannerHTML(),'.bnr');
+  if(s.tab==='door'){
+    const ks=Object.keys(NAMES),dec=ks.every(k=>s.acc[k]===0);
+    P4.set(`<div class="card"><div class="line"><span class="chip big">At the door</span><span class="sub">Count what you received</span></div>${rail(3,'')}</div>`+
+    ks.map(k=>{const u=NAMES[k][1],q=s.iss[k],a=s.acc[k],back=r1(q-a);return `<div class="card" style="display:flex;flex-direction:column;gap:8px"><div class="line"><b style="font-size:18px">${NAMES[k][0]}</b><span class="sub num">Issued ${f(q,u)} ${u}</span></div>
+      <div class="line"><span class="sub">Received</span>${stepper(0,k,a,u,0,q)}</div>
+      ${a===0?'<span class="chip red big" style="align-self:flex-start">Declined, all returns to shelf</span>':back>0?`<span class="chip amber big" style="align-self:flex-start">${f(back,u)} ${u} back to shelf</span>`:'<span class="chip mint big" style="align-self:flex-start">Accepted in full</span>'}
+      <button class="btn red sm" data-a="decl" data-k="${k}" style="align-self:flex-start">Decline this line</button></div>`}).join('')+
+    `<button class="btn ghost" data-a="all">Accept all in full</button>`,'.body');
+    P4.set(`<button class="btn mint" data-a="ok">${dec?'Confirm decline':'Confirm at door'}</button>`,'.dock');
+  }else{
+    P4.set(`<div class="card"><div class="line"><span class="chip big mint">Confirmed</span><span class="sub">Rows appended</span></div>${rail(4,'done')}<div class="ledger mono">${doorRows(s)}</div></div><div class="sub" style="padding:0 4px">Book stock stays honest: the pending drop is offset, then only what you accepted is confirmed.</div>`,'.body');
+    P4.set('','.dock');
+  }
+};
+P4.act=(a,d)=>{
+  const s=P4.s,u=NAMES[d.k]&&NAMES[d.k][1];
+  if(a==='tab')s.tab=d.k;
+  if(a==='inc')s.acc[d.k]=r1(Math.min(s.iss[d.k],s.acc[d.k]+(u==='kg'?0.5:1)));
+  if(a==='dec')s.acc[d.k]=r1(Math.max(0,s.acc[d.k]-(u==='kg'?0.5:1)));
+  if(a==='decl')s.acc[d.k]=0;
+  if(a==='all')s.acc={...s.iss};
+  if(a==='ok'){queueIf();s.done=true;s.tab='res';light(4)}
+  all();
+};
+
+/* 5 BALANCE */
+const BI=[
+ {n:'Mozzarella block',u:'kg',o:50,r:0,i:7.5,c:42.5},
+ {n:'Fresh basil',u:'kg',o:4,r:2,i:2.8,c:3.0},
+ {n:'Pizza dough ball',u:'pcs',o:200,r:0,i:60,c:140}];
+const CAUSES=['Trim loss','Unlogged issue','Receiving error','Other'];
+const P5=mk('p5',()=>({tab:'count',signed:false,c:BI.map(b=>b.c),cause:null,alerted:false,rec:''}));
+const exp=b=>r1(b.o+b.r-b.i);
+const dif=(s,i)=>r1(s.c[i]-exp(BI[i]));
+function handled(s){return BI.every((b,i)=>dif(s,i)===0)||(s.cause&&s.alerted&&BI.every((b,i)=>dif(s,i)===0||i===1))}
+P5.render=()=>{
+  const s=P5.s,bad=BI.map((b,i)=>dif(s,i)!==0).some(Boolean),ok=!bad||(s.cause&&s.alerted);
+  P5.set(`<div><div class="h">Daily balance</div><div class="sub">Custodian, benchmark items</div></div><div class="role">IND-DEL-01<br>Cold Room</div>`,'.top');
+  P5.set(seg([['count','Count'],['sign','Sign-off']],s.tab),'.seg');
+  P5.set(bannerHTML(),'.bnr');
+  if(s.tab==='count'){
+    P5.set(BI.map((b,i)=>{const d=dif(s,i);return `<div class="card"><div class="line"><b style="font-size:18px">${b.n}</b><span class="diff num ${d===0?'z':'nz'}" id="d${i}">${d===0?'Diff 0':'Diff '+sgn(d,b.u)}</span></div>
+      <div class="table" style="margin:10px 0"><div class="cell"><span>Opening</span><b>${f(b.o,b.u)}</b></div><div class="cell"><span>Received</span><b>${f(b.r,b.u)}</b></div><div class="cell"><span>Issued</span><b>${f(b.i,b.u)}</b></div></div>
+      <div class="line"><div><div class="sub">Expected</div><b class="num" style="font-size:22px">${f(exp(b),b.u)} ${b.u}</b></div><div style="width:150px"><div class="sub">Counted ${b.u}</div><input type="number" inputmode="decimal" step="${b.u==='kg'?'0.1':'1'}" data-i="${i}" value="${f(s.c[i],b.u)}" aria-label="Counted ${b.n}"></div></div></div>`}).join('')+
+    (bad&&!s.signed?`<div class="card" style="border-color:#7d3434"><div class="h" style="color:var(--red)">Fresh basil is off by ${f(Math.abs(dif(s,1)),'kg')} kg</div><div class="steps" style="margin-top:12px">
+      <div class="stp ${dif(s,1)===0?'ok':''}"><i>1</i><div style="flex:1"><b>Recount</b><div class="line" style="margin-top:6px;gap:8px"><input type="number" inputmode="decimal" step="0.1" id="rec" placeholder="Second count, kg" value="${esc(s.rec)}" aria-label="Recount fresh basil"><button class="btn sm" data-a="rec">Apply</button></div></div></div>
+      <div class="stp ${s.cause?'ok':''}"><i>2</i><div style="flex:1"><b>Document the cause</b><div class="opt" style="margin-top:6px">${CAUSES.map(c=>`<button data-a="cause" data-k="${c}" aria-pressed="${s.cause===c}">${c}</button>`).join('')}</div></div></div>
+      <div class="stp ${s.alerted?'ok':''}"><i>3</i><div style="flex:1"><b>Alert Finance Lead and RM</b><button class="btn sm ${s.alerted?'ghost':''}" data-a="alert" style="margin-top:6px;width:100%" ${s.cause&&!s.alerted?'':'disabled'}>${s.alerted?'Alert sent':'Send alert'}</button></div></div></div></div>`:''),'.body');
+  }else{
+    const n=!bad?'All three benchmark items match.':!ok?'Fresh basil differs. Recount, record cause, alert.':'Difference documented and alerted.';
+    P5.set(s.signed?`<div class="card"><span class="chip big mint">Signed</span><div class="h" style="margin:12px 0 6px">Balance signed</div><div class="ledger mono"><div><b>DAILY_BALANCE_SIGNED</b> IND-DEL-01</div><div>Cold Room, 3 benchmark items</div></div></div>`:`<div class="card"><div class="h">Ready to sign?</div><div class="sub" style="margin-top:6px">${n}</div></div><div class="empty" style="display:${ok?'none':'block'}"><b>Sign-off locked</b>Handle the difference on the Count tab first.</div>`,'.body');
+  }
+  P5.set(s.tab==='sign'&&!s.signed?`<button class="btn mint" data-a="sign" ${ok?'':'disabled'}>Sign daily balance</button>`:s.tab==='count'&&!s.signed?`<button class="btn ${ok?'mint':''}" data-a="${ok?'tosign':'x'}" ${ok?'':'disabled'}>${ok?'Go to sign-off':'Sign-off locked, diff not handled'}</button>`:'','.dock');
+};
+P5.el.addEventListener('input',e=>{
+  const s=P5.s,t=e.target;
+  if(t.dataset.i!==undefined){
+    const i=+t.dataset.i,b=BI[i];s.c[i]=parseFloat(t.value)||0;const d=dif(s,i);
+    const el=$('#d'+i,P5.el);el.textContent=d===0?'Diff 0':'Diff '+sgn(d,b.u);el.className='diff num '+(d===0?'z':'nz');
+    clearTimeout(P5.t);P5.t=setTimeout(()=>{if(document.activeElement!==t)return;P5.render();const n=$(`[data-i="${i}"]`,P5.el);n.focus()},700);
+  }
+  if(t.id==='rec')s.rec=t.value;
+});
+P5.act=(a,d)=>{
+  const s=P5.s;
+  if(a==='tab')s.tab=d.k;
+  if(a==='tosign')s.tab='sign';
+  if(a==='rec'){const v=parseFloat(s.rec);if(!isNaN(v)){s.c[1]=v;if(dif(s,1)===0){s.cause=null;s.alerted=false}}}
+  if(a==='cause')s.cause=d.k;
+  if(a==='alert')s.alerted=true;
+  if(a==='sign'){queueIf();s.signed=true;light(5)}
+  all();
+};
+
+/* boot */
+all();light(1);
+$('#reset').onclick=()=>location.reload();
+function fit(){const b=$('#board'),w=Math.min(1,Math.max(.77,innerWidth/b.offsetWidth));$('#fit').style.zoom=w}
+fit();addEventListener('resize',fit);
+</script>
+</body>
+</html>
