@@ -1,0 +1,28 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Noto+Serif+Display:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+:root {
+  /* Palette */
+  --navy: #242E52;
+  --blue: #02499D;
+  --cream: #F4F2EF;
+  --sand: #EAE6DC;
+  --rule: #DDD6C5;
+  --paper: #FFFFFF;
+  --terra: #A9581A;
+  --forest: #28473D;
+  --err: #B32E16;
+  --amber: #7A4B00;
+  --amber-bg: #FBEFD0;
+  --ink-2: #4B5470;
+  --ink-3: #5F6785;
+  --ph: #756F62;
+  --ok-bg: #E3EDE7;
+  --err-bg: #F8E3DE;
+  --info-bg: #E2E9F5;
+
+  /* Typography */
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --disp: "Archivo Narrow", "Be Vietnam Pro", Arial Narrow, sans-serif;
+  --body: "Be Vietnam Pro", system-ui, Segoe UI, sans-serif;
+  --serif: "Noto Serif Display", Georgia, serif;
+}
