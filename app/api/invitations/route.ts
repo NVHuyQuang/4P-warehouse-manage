@@ -118,19 +118,8 @@ export async function POST(request: Request | NextRequest) {
     const activationToken =
       invitation?.activation_token || invitation?.activationToken;
 
-    // Resolve application origin for activation link
-    let origin = 'http://localhost:3000';
-    try {
-      const parsedUrl = new URL(request.url);
-      origin = request.headers.get('origin') || parsedUrl.origin || process.env.NEXT_PUBLIC_APP_URL || origin;
-    } catch {
-      origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || origin;
-    }
-
-    // Pass origin down to environment if not configured
-    if (!process.env.NEXT_PUBLIC_APP_URL) {
-      process.env.NEXT_PUBLIC_APP_URL = origin;
-    }
+    // Resolve trusted application origin for activation link (SEC-02 mitigation)
+    const origin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
     // Dispatch activation email when token is available and not pending 2nd approval
     if (activationToken && status !== 'PENDING_SECOND_APPROVAL') {

@@ -972,10 +972,11 @@ export async function activateUserWithToken(token: string, password: string): Pr
     // Simulation fallback
   }
 
-  // Find user by invitation token in local state
-  const user = usersState.find((u) => u.token === token || u.status === 'pending');
+  // Find user by valid invitation token in local state (SEC-03 mitigation)
+  const user = usersState.find((u) => u.token === token);
   if (user) {
     user.status = 'active';
+    user.token = undefined;
     user.last_activity = formattedDate;
 
     securityLogsState.unshift({
@@ -996,5 +997,5 @@ export async function activateUserWithToken(token: string, password: string): Pr
     return { success: true, user_id: user.id, email: user.email };
   }
 
-  return { success: true, user_id: 'usr-activated', email: 'activated@example.test' };
+  throw new Error('Invalid or expired invitation token.');
 }
