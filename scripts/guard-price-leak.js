@@ -39,6 +39,7 @@ const FORBIDDEN_RULES = [
 
 const IGNORED_DIRS = new Set([
   '.git',
+  '.github',
   '.worktrees',
   'node_modules',
   '.next',

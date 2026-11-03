@@ -14,7 +14,7 @@ import {
   RequisitionRecord,
 } from '@/lib/data/requests';
 
-export interface CatalogItem {
+interface CatalogItem {
   code: string;
   name: string;
   uom: 'kg' | 'pcs';
@@ -23,7 +23,7 @@ export interface CatalogItem {
 }
 
 // 20 Master Catalog Items (Quantities & physical inventory attributes only)
-export const CATALOG_ITEMS: CatalogItem[] = [
+const CATALOG_ITEMS: CatalogItem[] = [
   { code: 'RM-MOZ-01', name: 'Mozzarella block', uom: 'kg', warehouse: 'COLD', category: 'Dairy' },
   { code: 'RM-BAS-01', name: 'Fresh basil', uom: 'kg', warehouse: 'COLD', category: 'Produce' },
   { code: 'RM-BUR-01', name: 'Burrata', uom: 'pcs', warehouse: 'COLD', category: 'Dairy' },
@@ -46,7 +46,7 @@ export const CATALOG_ITEMS: CatalogItem[] = [
   { code: 'ITM-DRY-004', name: 'Fresh Active Yeast', uom: 'kg', warehouse: 'DRY', category: 'Dry Store' },
 ];
 
-export interface DraftLine {
+interface DraftLine {
   itemCode: string;
   requestedQty: number;
 }

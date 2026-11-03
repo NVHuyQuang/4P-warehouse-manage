@@ -21,11 +21,11 @@ import {
   SmtpEmailAdapter,
   formatMimeMessage,
 } from '@/lib/email';
+import { POST } from '@/app/api/invitations/route';
 import {
-  POST,
   resetRateLimits,
   MAX_REQUESTS_PER_WINDOW,
-} from '@/app/api/invitations/route';
+} from '@/lib/email/invitations';
 import { supabase } from '@/lib/supabase/client';
 
 describe('S1 Email Adapter System', () => {
