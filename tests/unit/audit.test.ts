@@ -190,7 +190,7 @@ describe('S4 Audit Logging & Structured Logger Suite', () => {
       const sanitized = sanitizeLogData(error);
       expect(sanitized.name).toBe('Error');
       expect(sanitized.message).toContain('Bearer [REDACTED]');
-      expect(sanitized.secretKey).toBe('[REDACTED]');
+      expect((sanitized as unknown as Record<string, unknown>).secretKey).toBe('[REDACTED]');
     });
   });
 
@@ -400,7 +400,7 @@ describe('S4 Audit Logging & Structured Logger Suite', () => {
         'usr-test-01',
         SecurityEventType.LOGIN_SUCCESS,
         { ip: '10.0.1.5', deviceInfo: 'Desktop Firefox' },
-        mockClient as any
+        mockClient as never
       );
 
       expect(result.success).toBe(true);
@@ -439,7 +439,7 @@ describe('S4 Audit Logging & Structured Logger Suite', () => {
         'usr-test-02',
         SecurityEventType.ACCOUNT_LOCKED,
         options,
-        mockClient as any
+        mockClient as never
       );
 
       // Verify the application flow was NOT disrupted (no throw)
@@ -477,7 +477,7 @@ describe('S4 Audit Logging & Structured Logger Suite', () => {
         'usr-test-03',
         SecurityEventType.FAILED_ACTION,
         { deviceInfo: 'Mobile POS' },
-        mockClient as any
+        mockClient as never
       );
 
       // Verify application flow is never disrupted
@@ -515,7 +515,7 @@ describe('S4 Audit Logging & Structured Logger Suite', () => {
         'usr-admin-01',
         SecurityEventType.ROLE_ASSIGNED,
         options,
-        mockClient as any
+        mockClient as never
       );
 
       expect(result.success).toBe(true);

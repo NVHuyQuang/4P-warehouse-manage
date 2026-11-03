@@ -25,7 +25,7 @@ async function handleEscalateVariances(request: Request): Promise<NextResponse> 
   }
 
   const supabase = getCronSupabaseClient();
-  let rawRows: any[] = [];
+  let rawRows: Record<string, unknown>[] = [];
 
   try {
     // 1. Query unresolved variances from derived escalation view
@@ -55,18 +55,18 @@ async function handleEscalateVariances(request: Request): Promise<NextResponse> 
 
   // 3. Compile morning escalation digest for Controller (FC)
   const items: EscalatedVarianceItem[] = rawRows.map((row) => ({
-    balanceId: row.balance_id || row.balanceId || '',
-    storeId: row.store_id || row.storeId || '',
-    warehouseId: row.warehouse_id || row.warehouseId || '',
-    balanceDate: row.balance_date || row.balanceDate || '',
-    custodianUserId: row.custodian_user_id || row.custodianUserId || '',
-    status: row.status || 'VARIANCE_FLAGGED',
+    balanceId: String(row.balance_id || row.balanceId || ''),
+    storeId: String(row.store_id || row.storeId || ''),
+    warehouseId: String(row.warehouse_id || row.warehouseId || ''),
+    balanceDate: String(row.balance_date || row.balanceDate || ''),
+    custodianUserId: String(row.custodian_user_id || row.custodianUserId || ''),
+    status: String(row.status || 'VARIANCE_FLAGGED'),
     isUnexplained: Boolean(row.is_unexplained ?? row.isUnexplained),
     totalItemsCount: Number(row.total_items_count ?? row.totalItemsCount ?? 0),
     varianceItemsCount: Number(row.variance_items_count ?? row.varianceItemsCount ?? 0),
-    signedOffAt: row.signed_off_at ?? row.signedOffAt ?? null,
-    signoffNotes: row.signoff_notes ?? row.signoffNotes ?? null,
-    createdAt: row.created_at || row.createdAt || '',
+    signedOffAt: (row.signed_off_at ?? row.signedOffAt ?? null) as string | null,
+    signoffNotes: (row.signoff_notes ?? row.signoffNotes ?? null) as string | null,
+    createdAt: String(row.created_at || row.createdAt || ''),
   }));
 
   return NextResponse.json({

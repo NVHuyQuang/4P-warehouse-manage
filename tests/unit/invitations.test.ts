@@ -24,7 +24,6 @@ import {
 import {
   POST,
   resetRateLimits,
-  RATE_LIMIT_WINDOW_MS,
   MAX_REQUESTS_PER_WINDOW,
 } from '@/app/api/invitations/route';
 import { supabase } from '@/lib/supabase/client';
@@ -311,13 +310,13 @@ describe('S1 POST /api/invitations Server Route', () => {
       count: null,
       status: 200,
       statusText: 'OK',
-    } as any);
+    } as never);
 
     // Mock Supabase from('t_security_logs').insert
     const insertMock = vi.fn().mockResolvedValue({ data: null, error: null });
     const fromSpy = vi.spyOn(supabase, 'from').mockReturnValue({
       insert: insertMock,
-    } as any);
+    } as never);
 
     const req = new Request('http://localhost:3000/api/invitations', {
       method: 'POST',
@@ -380,11 +379,11 @@ describe('S1 POST /api/invitations Server Route', () => {
       count: null,
       status: 200,
       statusText: 'OK',
-    } as any);
+    } as never);
 
     vi.spyOn(supabase, 'from').mockReturnValue({
       insert: vi.fn().mockResolvedValue({ data: null, error: null }),
-    } as any);
+    } as never);
 
     const req = new Request('http://localhost:3000/api/invitations', {
       method: 'POST',
@@ -419,11 +418,11 @@ describe('S1 POST /api/invitations Server Route', () => {
       count: null,
       status: 200,
       statusText: 'OK',
-    } as any);
+    } as never);
 
     vi.spyOn(supabase, 'from').mockReturnValue({
       insert: vi.fn().mockResolvedValue({ data: null, error: null }),
-    } as any);
+    } as never);
 
     const req = new Request('http://localhost:3000/api/invitations', {
       method: 'POST',
@@ -456,7 +455,7 @@ describe('S1 POST /api/invitations Server Route', () => {
       count: null,
       status: 400,
       statusText: 'Bad Request',
-    } as any);
+    } as never);
 
     const req = new Request('http://localhost:3000/api/invitations', {
       method: 'POST',
@@ -493,11 +492,11 @@ describe('S1 POST /api/invitations Server Route', () => {
         count: null,
         status: 200,
         statusText: 'OK',
-      } as any);
+      } as never);
 
       vi.spyOn(supabase, 'from').mockReturnValue({
         insert: vi.fn().mockResolvedValue({ data: null, error: null }),
-      } as any);
+      } as never);
     });
 
     it('allows up to 5 requests per IP within 10 minutes and rejects 6th with 429', async () => {
@@ -601,11 +600,11 @@ describe('S1 POST /api/invitations Server Route', () => {
         count: null,
         status: 200,
         statusText: 'OK',
-      } as any);
+      } as never);
 
       vi.spyOn(supabase, 'from').mockReturnValue({
         insert: vi.fn().mockResolvedValue({ data: null, error: null }),
-      } as any);
+      } as never);
 
       const req = new Request('http://localhost:3000/api/invitations', {
         method: 'POST',
