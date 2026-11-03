@@ -2,7 +2,7 @@
 -- Tables: t_requests, t_request_items, t_stock_movements
 -- Views: v_stock_current, v_stock_lots_fifo
 -- RPCs: stage_issue, confirm_issue, decline_issue
--- Non-negotiable: Quantities only. Zero price, cost, valuation, tax, or vendor data.
+-- Non-negotiable: Quantities only. Zero financial or commercial data.
 -- Append-only: all ledger adjustments are strictly append-only.
 
 BEGIN;

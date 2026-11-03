@@ -2,7 +2,7 @@
 -- Pizza 4P's India Inventory Control Tool (Quantities Only)
 -- Flow H: Propose & Approve Store / Warehouse
 -- Global Inbox: Unified v_approval_inbox across all operational domains
--- Non-negotiable: Quantities only. Zero price, cost, valuation, tax, or vendor data anywhere.
+-- Non-negotiable: Quantities only. Zero financial or commercial data.
 -- Append-only principle: never mutate or delete t_stock_movements.
 
 -- 1. EXTENSIONS & STORAGE TYPE ENUM SUPPORT

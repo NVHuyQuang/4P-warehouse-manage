@@ -1,7 +1,7 @@
 -- Migration 0090: Physical Stock Count & Reconciliation
 -- Pizza 4P's India Inventory Control Tool (Quantities Only)
 -- Flow F: Periodic Stock Count (Weekly Cycle & Month-End Full), Recount, and FC Reconciliation
--- Non-negotiable: Quantities only. Zero price, cost, valuation, tax, or vendor data anywhere.
+-- Non-negotiable: Quantities only. Zero financial or commercial data.
 -- Append-only: Stock adjustments append COUNT_ADJUSTMENT rows to t_stock_movements; never mutate ledger.
 
 -- 1. PHYSICAL STOCK COUNTS HEADER TABLE (Flow F)

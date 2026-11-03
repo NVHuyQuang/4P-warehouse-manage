@@ -2,7 +2,7 @@
 -- Tables: t_stock_counts, t_stock_count_items, t_stock_adjustments
 -- RPCs: initiate_stock_count, submit_first_count, submit_recount, approve_stock_adjustment
 -- Flow F: Periodic Stock Count, Recount, and FC Reconciliation
--- Non-negotiable: Quantities only. Zero price, cost, valuation, tax, or vendor data anywhere.
+-- Non-negotiable: Quantities only. Zero financial or commercial data.
 
 BEGIN;
 SELECT plan(54);

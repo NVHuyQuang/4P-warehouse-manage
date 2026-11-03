@@ -1,7 +1,7 @@
 -- Migration 0060: Issue & Confirmation Domain (Flow C-2)
 -- Pizza 4P's India Inventory Control Tool
 -- Flow C-2: Stock Issue and Confirmation Lifecycle
--- Non-negotiable: Quantities only. Zero price, cost, valuation, tax, or vendor data anywhere.
+-- Non-negotiable: Quantities only. Zero financial or commercial data.
 -- Append-only principles: never update or delete t_stock_movements. All stock deductions and offsets are append-only.
 
 -- ============================================================================

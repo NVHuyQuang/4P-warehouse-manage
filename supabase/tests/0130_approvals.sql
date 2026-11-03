@@ -3,7 +3,7 @@
 -- Table: t_store_warehouse_approvals
 -- View: v_approval_inbox
 -- RPCs: propose_store_or_warehouse, decide_store_warehouse_proposal
--- Non-negotiable: Quantities only. Zero price, cost, valuation, tax, or vendor data anywhere.
+-- Non-negotiable: Quantities only. Zero financial or commercial data.
 -- Append-only principle: never mutate or delete t_stock_movements.
 
 BEGIN;

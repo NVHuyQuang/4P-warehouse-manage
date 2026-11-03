@@ -1,7 +1,7 @@
 -- Migration 0110: Waste and Supplier Returns (Domain D11)
 -- Pizza 4P's India Inventory Control Tool
 -- Flow G: Non-Standard Stock Outflows (Waste Disposal & Supplier Returns)
--- Non-negotiable: Quantities only. Zero price, cost, valuation, tax, or vendor data anywhere.
+-- Non-negotiable: Quantities only. Zero financial or commercial data.
 -- Append-only principles: Approved waste appends WASTE_DISPOSAL (-Q);
 -- approved supplier return appends SUPPLIER_RETURN (-Q); never update or delete t_stock_movements.
 

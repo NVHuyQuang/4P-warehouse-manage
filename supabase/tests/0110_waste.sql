@@ -1,7 +1,7 @@
 -- pgTAP Test Suite for Domain D11: Waste & Supplier Returns
 -- Tables: t_waste_threshold_config, t_waste_returns_log
 -- RPCs: log_waste_or_return, approve_waste_or_return
--- Non-negotiable: Quantities only. Zero price, cost, valuation, tax, or vendor data anywhere.
+-- Non-negotiable: Quantities only. Zero financial or commercial data.
 
 BEGIN;
 SELECT plan(54);

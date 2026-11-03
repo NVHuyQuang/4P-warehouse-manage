@@ -1,7 +1,7 @@
 -- pgTAP Test Suite for Domain D5: Requests Domain (Flow C-1 Section Stock Request)
 -- Tables: t_requests, t_request_items
 -- RPCs: create_section_request, update_section_request, cancel_section_request, begin_request_picking, is_store_issue_window_open
--- Non-negotiable: Quantities only. Zero price, cost, valuation, tax, or vendor data.
+-- Non-negotiable: Quantities only. Zero financial or commercial data.
 
 BEGIN;
 SELECT plan(62);

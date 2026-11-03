@@ -1,6 +1,6 @@
 -- Migration 0050: Requests Domain (Flow C-1 Section Stock Request)
 -- Pizza 4P's India Inventory Control Tool
--- Non-negotiable: Quantities only. Zero price, cost, valuation, tax, or vendor data anywhere.
+-- Non-negotiable: Quantities only. Zero financial or commercial data.
 -- Append-only principles: never update or delete t_stock_movements.
 
 -- ============================================================================
